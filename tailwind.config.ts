@@ -1,13 +1,14 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -18,6 +19,15 @@ const config = {
       },
     },
     extend: {
+      transitionDuration: () => {
+        const separation = 100;
+        const max = 5000;
+        return Object.fromEntries(
+          Array(Math.ceil(max / separation) + 1)
+            .fill(0)
+            .map((_, idx) => [separation * idx, `${separation * idx}ms`]),
+        );
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -67,14 +77,71 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in": {
+          from: {
+            opacity: "0",
+            transform: "translateY(1rem)",
+            filter: "blur(0.5rem)",
+          },
+          to: { opacity: "1", transform: "translateY(0)", filter: "blur(0)" },
+        },
+        shimmer: {
+          "0%, 90%, 100%": {
+            "background-position": "calc(-100% - var(--shimmer-width)) 0",
+          },
+          "30%, 60%": {
+            "background-position": "calc(100% + var(--shimmer-width)) 0",
+          },
+        },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
+        },
+        "marquee-vertical": {
+          from: { transform: "translateY(0)" },
+          to: { transform: "translateY(calc(-100% - var(--gap)))" },
+        },
+        float: {
+          "0%, 100%": { translate: "0 0" },
+          "50%": { translate: "0 -1rem" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.5s ease-out forwards",
+        shimmer: "shimmer 8s infinite",
+        marquee: "marquee var(--duration) linear infinite",
+        "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
+        float: "float 7s ease-in-out infinite",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-} satisfies Config
+  plugins: [
+    require("tailwindcss-animate"),
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    plugin(({ matchUtilities, theme }) => {
+      matchUtilities(
+        {
+          "animate-duration": (value: string) => ({
+            animationDuration: value,
+          }),
+        },
+        { values: theme("transitionDuration") },
+      );
+    }),
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    plugin(({ matchUtilities, theme }) => {
+      matchUtilities(
+        {
+          "animate-delay": (value: string) => ({
+            animationDelay: value,
+          }),
+        },
+        { values: theme("transitionDuration") },
+      );
+    }),
+  ],
+} satisfies Config;
 
-export default config
+export default config;

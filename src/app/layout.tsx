@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 
 import { TRPCReactProvider } from "@/trpc/react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -26,7 +27,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <TooltipProvider>{children}</TooltipProvider>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

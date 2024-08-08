@@ -1,0 +1,116 @@
+"use client";
+
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  useCarousel,
+} from "@/components/ui/carousel";
+
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
+import AutoplayPlugin from "embla-carousel-autoplay";
+import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { SquigglySeparator } from "./squiggly-separator";
+
+export function ProductImageCarousel() {
+  return (
+    <Carousel
+      opts={{
+        loop: true,
+        align: "center",
+      }}
+      plugins={[WheelGesturesPlugin(), AutoplayPlugin()]}
+    >
+      <CarouselPictures />
+    </Carousel>
+  );
+}
+
+function CarouselPictures() {
+  const { api } = useCarousel();
+  const [page, setPage] = useState(0);
+  const pages = useRef([
+    {
+      title: "Dashboard",
+      description:
+        "A dashboard to easily manage courses, assignments, and grades.",
+      image: "/images/dashboard.png",
+    },
+    {
+      title: "Courses",
+      description: "Easily view and find your course",
+      image: "/images/dashboard.png",
+    },
+    {
+      title: "Games",
+      description: "Play games with friends and classmates.",
+      image: "/images/dashboard.png",
+    },
+    {
+      title: "Messaging",
+      description: "Easily communicate with your teachers and classmates.",
+      image: "/images/dashboard.png",
+    },
+  ]);
+
+  useEffect(() => {
+    const onSelect = () => {
+      setPage(api?.selectedScrollSnap() ?? 0);
+    };
+
+    api
+      ?.on("select", onSelect)
+      ?.on("init", onSelect)
+      ?.on("reInit", onSelect)
+      .on("slidesChanged", onSelect);
+  }, [api]);
+
+  return (
+    <>
+      <CarouselContent className="rounded-lg">
+        {pages.current.map((page, idx) => (
+          <CarouselItem key={idx} className="w-[min(60vw,15ch)]">
+            <div className="flex w-full flex-col gap-2">
+              <Image
+                src={page.image}
+                width={400}
+                height={400}
+                alt={page.title}
+                className="aspect-video w-full rounded-lg border object-cover"
+              />
+              <SquigglySeparator waveColor="hsl(var(--muted))" waveWidth={20} />
+              <div>
+                <p className="text-sm font-bold">{page.title}</p>
+                <p className="text-xs">{page.description}</p>
+              </div>
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex gap-2">
+          <CarouselPrevious className="size-auto rounded-full p-2" />
+          <CarouselNext className="size-auto rounded-full p-2" />
+        </div>
+        <div className="flex gap-2">
+          {pages.current.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => api?.scrollTo(idx)}
+              className={cn(
+                "h-2 w-4 rounded-full bg-secondary transition-all",
+                {
+                  "w-8 bg-primary": idx == page,
+                },
+              )}
+            />
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
