@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 import AnimatedGridPattern from "@/components/magicui/animated-grid-pattern";
 import { LandingFooter, LandingNav } from "@/components/catalyst/landing-navs";

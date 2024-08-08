@@ -16,6 +16,7 @@
   "dependencies": {
     "@auth/drizzle-adapter": "^1.1.0",
     "@radix-ui/react-avatar": "^1.1.0",
+    "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-navigation-menu": "^1.2.0",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
@@ -27,6 +28,7 @@
     "@trpc/server": "^11.0.0-rc.446",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cmdk": "1.0.0",
     "drizzle-orm": "^0.30.10",
     "embla-carousel-autoplay": "^8.1.8",
     "embla-carousel-react": "^8.1.8",
