@@ -21,17 +21,19 @@ import { LandingFooter } from "@/components/catalyst/landing-navs";
 
 export default function Home() {
   return (
-    <main className="flex min-h-[calc(100vh-4.5rem-1px)] flex-col items-center [&>*]:w-[min(120ch,100%)]">
-      <Header />
-      <IntegrationSection />
-      <Notifications />
-      <AndMore />
-      <Reveal />
-      <Reviews />
-      <ProductImage />
-      <GetStarted />
+    <>
+      <main className="flex min-h-[calc(100vh-4.5rem-1px)] flex-col items-center [&>*]:w-[min(120ch,100%)]">
+        <Header />
+        <IntegrationSection />
+        <Notifications />
+        <AndMore />
+        <Reveal />
+        <Reviews />
+        <ProductImage />
+        <GetStarted />
+      </main>
       <LandingFooter />
-    </main>
+    </>
   );
 }
 
@@ -98,6 +100,7 @@ function IntegrationSection() {
   return (
     <>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
         className="rotate-180"
@@ -118,6 +121,7 @@ function IntegrationSection() {
         </div>
       </section>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
       />
@@ -212,6 +216,7 @@ function AndMore() {
   return (
     <>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
         className="rotate-180"
@@ -227,7 +232,10 @@ function AndMore() {
             </span>
           ))}
         </Marquee>
-        <SquigglySeparator waveColor="hsla(var(--muted) / 30%)" />
+        <SquigglySeparator
+          waveWidth={100}
+          waveColor="hsla(var(--muted) / 30%)"
+        />
         <VelocityScroll
           text="And so much more"
           default_velocity={2}
@@ -235,6 +243,7 @@ function AndMore() {
         />
       </section>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
       />
@@ -372,6 +381,7 @@ function Reviews() {
   return (
     <>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
         className="rotate-180"
@@ -435,6 +445,7 @@ function Reviews() {
         </div>
       </section>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
       />
@@ -463,6 +474,7 @@ function GetStarted() {
   return (
     <>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
         className="rotate-180"
@@ -478,6 +490,7 @@ function GetStarted() {
         </div>
       </section>
       <SquigglySeparator
+        waveWidth={100}
         waveColor="hsla(var(--muted) / 30%)"
         fillColor="hsla(var(--muted) / 30%)"
       />

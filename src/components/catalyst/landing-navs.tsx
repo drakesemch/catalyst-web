@@ -73,49 +73,55 @@ export function LandingNav() {
 
 export function LandingFooter() {
   return (
-    <footer className="-mt-3 flex flex-col items-center justify-between gap-2 overflow-auto p-8 md:flex-row">
-      <h1 className="h4 flex items-center gap-2">
-        <FlaskConical /> Catalyst
-        <Separator
-          orientation="vertical"
-          className="ml-4 hidden h-4 md:block"
-        />
-      </h1>
-      <ul className="flex flex-col gap-4 text-center md:flex-row">
-        <li>
-          <Button variant="link" href="/home">
-            Home
+    <footer className="-mt-3 flex items-center justify-center">
+      <div className="flex w-[min(120ch,100%)] flex-col items-center justify-between gap-2 overflow-auto p-8 md:flex-row">
+        <div className="flex items-center">
+          <Button variant="ghost" href="/home" className="h-auto">
+            <h1 className="h4 flex items-center gap-2">
+              <FlaskConical /> Catalyst
+            </h1>
           </Button>
-        </li>
-        <li>
-          <Button variant="link">About</Button>
-        </li>
-        <li>
-          <Button variant="link" href="/pricing">
-            Pricing
-          </Button>
-        </li>
-        <li>
-          <Button variant="link" href="/blog">
-            Blog
-          </Button>
-        </li>
-        <li>
-          <Button variant="link" href="/help">
-            Help
-          </Button>
-        </li>
-        <li>
-          <Button variant="link" href="/contact">
-            Contact
-          </Button>
-        </li>
-        <li>
-          <Button variant="link" href="/status">
-            Status
-          </Button>
-        </li>
-      </ul>
+          <Separator
+            orientation="vertical"
+            className="ml-4 hidden h-4 md:block"
+          />
+        </div>
+        <ul className="flex flex-col gap-4 text-center md:flex-row">
+          <li>
+            <Button variant="link" href="/home">
+              Home
+            </Button>
+          </li>
+          <li>
+            <Button variant="link">About</Button>
+          </li>
+          <li>
+            <Button variant="link" href="/pricing">
+              Pricing
+            </Button>
+          </li>
+          <li>
+            <Button variant="link" href="/blog">
+              Blog
+            </Button>
+          </li>
+          <li>
+            <Button variant="link" href="/help">
+              Help
+            </Button>
+          </li>
+          <li>
+            <Button variant="link" href="/contact">
+              Contact
+            </Button>
+          </li>
+          <li>
+            <Button variant="link" href="/status">
+              Status
+            </Button>
+          </li>
+        </ul>
+      </div>
     </footer>
   );
 }

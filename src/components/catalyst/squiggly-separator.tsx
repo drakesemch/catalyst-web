@@ -39,7 +39,7 @@ export function SquigglySeparator({
               fill: fillColor ?? "none",
               stroke: waveColor ?? "currentColor",
             }}
-            strokeWidth={waveWidth ?? 100}
+            strokeWidth={waveWidth ?? 50}
             strokeLinecap="butt"
             strokeLinejoin="round"
           />
