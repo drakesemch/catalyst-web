@@ -27,6 +27,9 @@ const plans = [
         name: "Canvas Client",
       },
       {
+        name: "Dark Mode",
+      },
+      {
         name: "Schedules",
       },
       {
@@ -132,8 +135,11 @@ export default function TimelinePage() {
               ) : (
                 <ShineBorder
                   key={plan.name}
-                  borderWidth={2}
-                  color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
+                  color={[
+                    "hsl(83.7 80.5% 44.3%)",
+                    "hsl(142.1 70.6% 45.3%)",
+                    "hsl(160.1 84.1% 39.4%)",
+                  ]}
                 >
                   <Plan plan={plan} period={period} idx={idx} />
                 </ShineBorder>
@@ -161,7 +167,9 @@ function Plan({
     <div
       className={cn(
         "h-full w-full rounded-lg border p-6 shadow-lg md:p-8",
-        idx == 0 ? "bg-background" : "bg-primary text-primary-foreground",
+        idx == 0
+          ? "bg-background"
+          : "bg-primary text-primary-foreground dark:bg-secondary dark:text-secondary-foreground",
       )}
     >
       <div className="space-y-4">
@@ -189,7 +197,13 @@ function Plan({
             <span className="opacity-50">/month</span>
           </div>
         </div>
-        <Button variant={idx == 0 ? "outline" : "secondary"} className="w-full">
+        <Button
+          variant={idx == 0 ? "outline" : "secondary"}
+          className={cn(
+            "w-full",
+            idx != 0 && "dark:bg-primary dark:text-primary-foreground",
+          )}
+        >
           Get Started
         </Button>
       </div>
