@@ -1,4 +1,4 @@
-import { Integrations } from "@/components/catalyst/integrations";
+import { Integrations } from "@/components/catalyst/landing/integrations";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 import Marquee from "@/components/magicui/marquee";
@@ -14,10 +14,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ArrowRight, Info, Star, UserRound } from "lucide-react";
 
-import { ProductImageCarousel } from "@/components/catalyst/product-images";
-import { MobilePreview } from "@/components/catalyst/app-preview";
+import { ProductImageCarousel } from "@/components/catalyst/landing/product-images";
+import { MobilePreview } from "@/components/catalyst/landing/app-preview";
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";
-import { LandingFooter } from "@/components/catalyst/landing-navs";
+import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
 
 export default function Home() {
   return (
@@ -89,7 +89,7 @@ function Header() {
           Learn More
         </Button>
       </div>
-      <div className="[&_*]:delay-3200 [&_*]:animate-delay-3200 animate-fade-in animate-delay-3200 relative top-[calc(50vh-10rem)] h-96 w-[min(120ch,100%)] opacity-0 md:h-0">
+      <div className="[&_*]:delay-3200 [&_*]:animate-delay-3200 animate-fade-in animate-delay-3200 relative top-[10rem] h-96 w-[min(120ch,100%)] opacity-0 md:top-[calc(50vh-10rem)] md:h-0">
         <MobilePreview />
       </div>
     </header>
@@ -226,7 +226,7 @@ function AndMore() {
           {items.map((item, index) => (
             <span
               key={index}
-              className="text-4xl font-bold text-muted-foreground/50"
+              className="text-4xl font-bold text-muted-foreground"
             >
               {item}
             </span>
@@ -239,7 +239,7 @@ function AndMore() {
         <VelocityScroll
           text="And so much more"
           default_velocity={2}
-          className="text-4xl font-bold text-muted-foreground/50"
+          className="text-4xl font-bold text-muted-foreground"
         />
       </section>
       <SquigglySeparator
@@ -481,7 +481,7 @@ function GetStarted() {
       />
       <section className="-my-3 flex min-h-[10rem] !w-full flex-row items-center justify-center gap-2 bg-muted/30 p-8">
         <div className="flex w-[min(100ch,100%)] flex-col items-center justify-between gap-4 sm:flex-row">
-          <h2 className="text-4xl font-bold text-muted-foreground/50">
+          <h2 className="text-4xl font-bold text-muted-foreground">
             Ready to start your Journey?
           </h2>
           <Button>

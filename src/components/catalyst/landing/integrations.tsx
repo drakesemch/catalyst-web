@@ -9,8 +9,8 @@ import {
   AppWindowMac,
 } from "lucide-react";
 import { forwardRef, useRef } from "react";
-import { AnimatedBeam } from "../magicui/animated-beam";
-import { Tooltip, TooltipTrigger, TooltipContent } from "../ui/tooltip";
+import { AnimatedBeam } from "../../magicui/animated-beam";
+import { Tooltip, TooltipTrigger, TooltipContent } from "../../ui/tooltip";
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -27,6 +27,7 @@ const Circle = forwardRef<
           )}
         >
           {children}
+          <div className="sr-only">{tooltip}</div>
         </div>
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>

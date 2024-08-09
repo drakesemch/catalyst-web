@@ -14,7 +14,7 @@ import AutoplayPlugin from "embla-carousel-autoplay";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { SquigglySeparator } from "./squiggly-separator";
+import { SquigglySeparator } from "../squiggly-separator";
 
 export function ProductImageCarousel() {
   return (
@@ -107,7 +107,9 @@ function CarouselPictures() {
                   "w-8 bg-primary": idx == page,
                 },
               )}
-            />
+            >
+              <span className="sr-only">{`Go to page ${idx + 1}`}</span>
+            </button>
           ))}
         </div>
       </div>

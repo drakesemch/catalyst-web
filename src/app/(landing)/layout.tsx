@@ -1,4 +1,5 @@
-import { LandingNav } from "@/components/catalyst/landing-navs";
+import { LandingNav } from "@/components/catalyst/landing/landing-navs";
+import { LandingCmdK } from "@/components/catalyst/landing/landing-cmd-k";
 
 export default function LandingLayout({
   children,
@@ -8,6 +9,7 @@ export default function LandingLayout({
   return (
     <>
       <LandingNav />
+      <LandingCmdK />
       {children}
     </>
   );

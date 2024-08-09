@@ -11,9 +11,10 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-} from "../ui/navigation-menu";
-import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
+} from "../../ui/navigation-menu";
+import { Separator } from "../../ui/separator";
+import { Button } from "../../ui/button";
+import { OpenCmdK } from "../cmd-k";
 
 export function LandingNav() {
   return (
@@ -76,10 +77,12 @@ export function LandingFooter() {
     <footer className="-mt-3 flex items-center justify-center">
       <div className="flex w-[min(120ch,100%)] flex-col items-center justify-between gap-2 overflow-auto p-8 md:flex-row">
         <div className="flex items-center">
-          <Button variant="ghost" href="/home" className="h-auto">
-            <h1 className="h4 flex items-center gap-2">
-              <FlaskConical /> Catalyst
-            </h1>
+          <Button
+            variant="ghost"
+            href="/home"
+            className="flex items-center gap-2"
+          >
+            <FlaskConical /> Catalyst
           </Button>
           <Separator
             orientation="vertical"
@@ -111,14 +114,7 @@ export function LandingFooter() {
             </Button>
           </li>
           <li>
-            <Button variant="link" href="/contact">
-              Contact
-            </Button>
-          </li>
-          <li>
-            <Button variant="link" href="/status">
-              Status
-            </Button>
+            <OpenCmdK variant="link">Cmd K</OpenCmdK>
           </li>
         </ul>
       </div>

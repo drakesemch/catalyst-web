@@ -1,4 +1,4 @@
-import { LandingFooter } from "@/components/catalyst/landing-navs";
+import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,13 +40,13 @@ export default function TimelinePage() {
       <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-16">
         <div className="flex w-[min(80ch,100%)] flex-col gap-6">
           <h1 className="h1">Timeline</h1>
-          <div className="relative flex flex-col gap-8">
+          <div className="relative isolate flex flex-col gap-8">
             <div className="absolute left-0.5 top-0 -z-10 h-full w-1 rounded-full bg-secondary" />
             {events.map((event, idx) => (
               <div key={idx} className="flex gap-4">
                 <div className="h-16 w-2 flex-shrink-0 rounded-full bg-secondary" />
                 <div className="flex flex-col gap-2">
-                  <p className="flex items-center gap-4 text-xs">
+                  <span className="flex items-center gap-4 text-xs">
                     <span className="text-muted-foreground">
                       {event.date.toDateString()}
                     </span>
@@ -70,7 +70,7 @@ export default function TimelinePage() {
                         </TooltipContent>
                       </Tooltip>
                     )}
-                  </p>
+                  </span>
                   <p className="text-xl font-bold">{event.title}</p>
                   <p className="text-md mt-2 text-muted-foreground">
                     {event.description}

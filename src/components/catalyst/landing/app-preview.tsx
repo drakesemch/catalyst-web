@@ -20,7 +20,7 @@ export function MobilePreview() {
     const interval = setInterval(() => {
       const now = new Date();
       setTime(
-        `${now.getHours() % 12}:${String(now.getMinutes()).padStart(2, "0")}`,
+        `${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, "0")}`,
       );
     }, 1000);
 
@@ -90,7 +90,7 @@ function pickColor(score: number) {
 }
 
 export function Score({ pct }: { pct?: number }) {
-  const score = useRef(pct ?? Math.round(Math.random() * 16) + 85);
+  const score = useRef(0);
   const chartData = useRef([
     { metric: "score", pct: score.current, fill: "var(--color-score)" },
   ]);
@@ -103,6 +103,12 @@ export function Score({ pct }: { pct?: number }) {
       color: pickColor(score.current),
     },
   } satisfies ChartConfig);
+
+  useEffect(() => {
+    score.current = pct ?? Math.round(Math.random() * 16) + 85;
+    chartData.current[0]!.pct = score.current;
+    chartConfig.current.score.color = pickColor(score.current);
+  }, [pct]);
 
   return (
     <ChartContainer config={chartConfig.current} className="aspect-square h-10">

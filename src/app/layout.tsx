@@ -7,6 +7,8 @@ import { ThemeProvider } from "next-themes";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CmdKProvider } from "@/components/catalyst/cmd-k";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -18,7 +20,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html
+      lang="en"
+      className={`${GeistSans.variable}`}
+      suppressHydrationWarning={true}
+    >
       <body>
         <TRPCReactProvider>
           <ThemeProvider
@@ -27,7 +33,14 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TooltipProvider>{children}</TooltipProvider>
+            <TooltipProvider>
+              <CmdKProvider>
+                <div vaul-drawer-wrapper="" className="bg-background">
+                  {children}
+                  <Toaster richColors />
+                </div>
+              </CmdKProvider>
+            </TooltipProvider>
           </ThemeProvider>
         </TRPCReactProvider>
       </body>

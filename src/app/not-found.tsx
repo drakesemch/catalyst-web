@@ -1,12 +1,17 @@
 import { cn } from "@/lib/utils";
 import AnimatedGridPattern from "@/components/magicui/animated-grid-pattern";
-import { LandingFooter, LandingNav } from "@/components/catalyst/landing-navs";
+import {
+  LandingFooter,
+  LandingNav,
+} from "@/components/catalyst/landing/landing-navs";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 import { Button } from "@/components/ui/button";
+import { LandingCmdK } from "@/components/catalyst/landing/landing-cmd-k";
 
 export default function ErrorPage() {
   return (
     <>
+      <LandingCmdK is404 />
       <LandingNav />
       <div className="relative flex min-h-[calc((100vh-4.5rem-1px)+2rem)] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-lg p-20">
         <h1 className="h1">

@@ -22,6 +22,7 @@ export function SquigglySeparator({
     >
       <defs>
         <pattern
+          suppressHydrationWarning={true}
           id={`wave-${randomId}`}
           patternUnits="userSpaceOnUse"
           width="420"
@@ -47,6 +48,7 @@ export function SquigglySeparator({
       </defs>
       <rect
         fill={`url(#wave-${randomId})`}
+        suppressHydrationWarning={true}
         x="0"
         y="0"
         width="1000000000"
