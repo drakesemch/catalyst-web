@@ -47,7 +47,7 @@ export function VelocityScroll({
     const smoothVelocity = useSpring(scrollVelocity, {
       damping: 50,
       stiffness: 400,
-    }) as MotionValue<number>;
+    });
 
     const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 5], {
       clamp: false,

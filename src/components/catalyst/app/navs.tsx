@@ -12,10 +12,6 @@ import {
   NavigationMenuList,
 } from "../../ui/navigation-menu";
 import { Separator } from "../../ui/separator";
-import { Button } from "../../ui/button";
-import { OpenCmdK } from "../cmd-k";
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export async function AppNav() {
   return (
