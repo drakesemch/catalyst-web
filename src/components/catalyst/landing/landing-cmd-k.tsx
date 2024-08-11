@@ -60,6 +60,20 @@ export function LandingCmdK({ is404 }: { is404?: boolean }) {
                     },
                   }
                 : null,
+              pathname.startsWith("/blog") && pathname != "/blog" && !is404
+                ? {
+                    id: "smart action blog",
+                    type: "item",
+                    label: (
+                      <>
+                        <Newspaper /> Go to Blog page
+                      </>
+                    ),
+                    onSelect: () => {
+                      router.push("/blog");
+                    },
+                  }
+                : null,
               is404
                 ? {
                     id: "smart action back",
@@ -208,6 +222,15 @@ export function LandingCmdK({ is404 }: { is404?: boolean }) {
                 id: "theme",
                 type: "list",
                 breadcrumb: "Theme",
+                keyWords: [
+                  "theme",
+                  "color",
+                  "dark",
+                  "light",
+                  "system",
+                  "change",
+                  "switch",
+                ],
                 label: (
                   <>
                     <Palette /> Change Theme

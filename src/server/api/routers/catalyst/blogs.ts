@@ -12,9 +12,6 @@ const getBlog = unstable_cache(
   async (pathname: string) => {
     const markdownFile = await fetch(pathname);
     const markdownContent = await markdownFile.text();
-    console.log("---------------");
-    console.log(markdownContent);
-    console.log("---------------");
     const matterResult = matter(markdownContent);
 
     // Use remark to convert markdown into HTML string
@@ -81,7 +78,6 @@ export const blogRouter = createTRPCRouter({
       };
     }),
   get: publicProcedure.input(z.string()).query(async ({ input }) => {
-    console.log("INPUT", input);
     const blog = await unstable_cache(
       async () =>
         list({

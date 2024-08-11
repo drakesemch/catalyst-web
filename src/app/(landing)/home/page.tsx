@@ -19,8 +19,10 @@ import { MobilePreview } from "@/components/catalyst/landing/app-preview";
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";
 import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
 import { OpenApp } from "@/components/catalyst/landing/open-app";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function Home() {
+export default async function Home() {
   return (
     <>
       <main className="flex min-h-[calc(100vh-4.5rem-1px)] flex-col items-center [&>*]:w-[min(120ch,100%)]">
@@ -38,7 +40,7 @@ export default function Home() {
   );
 }
 
-function Header() {
+async function Header() {
   return (
     <header className="flex min-h-[calc((100vh-4.5rem-1px)+16rem-4rem)] w-full flex-col items-start justify-center gap-2 px-8 md:min-h-[calc((100vh-4.5rem-1px)-4rem)]">
       <h1 className="h1 flex flex-wrap gap-3">
@@ -72,7 +74,11 @@ function Header() {
       <Separator className="w-40 animate-fade-in opacity-0 animate-delay-2400" />
       <div />
       <div className="flex flex-wrap gap-2">
-        <OpenApp className="animate-fade-in opacity-0 animate-delay-2600" />
+        <div className="animate-fade-in opacity-0 animate-delay-2600">
+          <Suspense fallback={<Skeleton className="h-10 w-[10ch]" />}>
+            <OpenApp />
+          </Suspense>
+        </div>
         <Button
           variant="outline"
           className="animate-fade-in opacity-0 animate-delay-2800"
@@ -470,7 +476,7 @@ function ProductImage() {
   );
 }
 
-function GetStarted() {
+async function GetStarted() {
   return (
     <>
       <SquigglySeparator
@@ -484,7 +490,9 @@ function GetStarted() {
           <h2 className="text-4xl font-bold text-muted-foreground">
             Ready to start your Journey?
           </h2>
-          <OpenApp />
+          <Suspense fallback={<Skeleton className="h-10 w-[10ch]" />}>
+            <OpenApp />
+          </Suspense>
         </div>
       </section>
       <SquigglySeparator

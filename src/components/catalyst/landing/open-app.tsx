@@ -8,7 +8,7 @@ export function OpenApp({ className }: { className?: string }) {
   const data = api.catalyst.auth.state.useSuspenseQuery();
 
   return (
-    <div suppressHydrationWarning>
+    <>
       {data ? (
         <Button href="/app" className={className}>
           <SquareArrowOutUpRight />
@@ -20,6 +20,6 @@ export function OpenApp({ className }: { className?: string }) {
           Sign In
         </Button>
       )}
-    </div>
+    </>
   );
 }

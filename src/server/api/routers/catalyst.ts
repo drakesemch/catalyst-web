@@ -5,9 +5,15 @@ import { blogRouter } from "./catalyst/blogs";
 export const catalystRouter = createTRPCRouter({
   auth: {
     state: publicProcedure.query(({ ctx }) => {
-      return {
-        isLoggedIn: !!ctx.session?.user,
-      };
+      try {
+        return {
+          isLoggedIn: !!ctx.session?.user,
+        };
+      } catch (error) {
+        return {
+          isLoggedIn: false,
+        };
+      }
     }),
   },
   blog: blogRouter,

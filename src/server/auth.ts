@@ -1,5 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import NextAuth, {
+import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,

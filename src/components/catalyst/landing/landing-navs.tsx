@@ -15,8 +15,10 @@ import { Separator } from "../../ui/separator";
 import { Button } from "../../ui/button";
 import { OpenCmdK } from "../cmd-k";
 import { OpenApp } from "./open-app";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function LandingNav() {
+export async function LandingNav() {
   return (
     <NavigationMenu
       viewport={{
@@ -62,7 +64,9 @@ export function LandingNav() {
         </NavigationMenuItem>
         <li className="flex-1" />
         <NavigationMenuItem>
-          <OpenApp />
+          <Suspense fallback={<Skeleton className="h-10 w-[10ch]" />}>
+            <OpenApp />
+          </Suspense>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
