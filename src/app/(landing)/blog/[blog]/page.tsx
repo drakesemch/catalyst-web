@@ -1,4 +1,4 @@
-import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
+import { LandingFooter } from "@/components/catalyst/landing/navs";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/server";

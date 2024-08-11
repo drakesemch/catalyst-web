@@ -1,5 +1,5 @@
-import { LandingNav } from "@/components/catalyst/landing/landing-navs";
-import { LandingCmdK } from "@/components/catalyst/landing/landing-cmd-k";
+import { LandingNav } from "@/components/catalyst/landing/navs";
+import { LandingCmdK } from "@/components/catalyst/landing/cmd-k";
 import { api } from "@/trpc/server";
 
 export const dynamic = "force-dynamic";

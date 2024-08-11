@@ -1,12 +1,9 @@
 import { cn } from "@/lib/utils";
 import AnimatedGridPattern from "@/components/magicui/animated-grid-pattern";
-import {
-  LandingFooter,
-  LandingNav,
-} from "@/components/catalyst/landing/landing-navs";
+import { LandingFooter, LandingNav } from "@/components/catalyst/landing/navs";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 import { Button } from "@/components/ui/button";
-import { LandingCmdK } from "@/components/catalyst/landing/landing-cmd-k";
+import { LandingCmdK } from "@/components/catalyst/landing/cmd-k";
 
 export default function ErrorPage() {
   return (

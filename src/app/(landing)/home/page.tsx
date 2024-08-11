@@ -17,7 +17,7 @@ import { ArrowDown, ArrowRight, Info, Star } from "lucide-react";
 import { ProductImageCarousel } from "@/components/catalyst/landing/product-images";
 import { MobilePreview } from "@/components/catalyst/landing/app-preview";
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";
-import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
+import { LandingFooter } from "@/components/catalyst/landing/navs";
 import { OpenApp } from "@/components/catalyst/landing/open-app";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";

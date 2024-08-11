@@ -1,6 +1,6 @@
 "use client";
 
-import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
+import { LandingFooter } from "@/components/catalyst/landing/navs";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 import ShineBorder from "@/components/magicui/shine-border";
 import { Button } from "@/components/ui/button";
