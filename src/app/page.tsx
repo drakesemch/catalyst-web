@@ -1,5 +1,10 @@
+import { api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
-  redirect("/home");
+  if (await api.catalyst.auth.state()) {
+    redirect("/app");
+  } else {
+    redirect("/home");
+  }
 }

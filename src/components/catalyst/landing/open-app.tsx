@@ -5,14 +5,14 @@ import { api } from "@/trpc/react";
 import { SquareArrowOutUpRight, UserRound } from "lucide-react";
 
 export function OpenApp({ className }: { className?: string }) {
-  const data =
+  const [isLoggedIn] =
     typeof window == "undefined"
-      ? false
+      ? [false]
       : api.catalyst.auth.state.useSuspenseQuery();
 
   return (
     <>
-      {data ? (
+      {isLoggedIn ? (
         <Button href="/app" className={className}>
           <SquareArrowOutUpRight />
           Open App
