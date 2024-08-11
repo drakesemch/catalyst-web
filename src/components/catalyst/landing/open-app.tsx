@@ -5,7 +5,10 @@ import { api } from "@/trpc/react";
 import { SquareArrowOutUpRight, UserRound } from "lucide-react";
 
 export function OpenApp({ className }: { className?: string }) {
-  const data = api.catalyst.auth.state.useSuspenseQuery();
+  const data =
+    typeof window == "undefined"
+      ? false
+      : api.catalyst.auth.state.useSuspenseQuery();
 
   return (
     <>
