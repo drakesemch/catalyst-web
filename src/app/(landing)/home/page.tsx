@@ -12,12 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowDown, ArrowRight, Info, Star, UserRound } from "lucide-react";
+import { ArrowDown, ArrowRight, Info, Star } from "lucide-react";
 
 import { ProductImageCarousel } from "@/components/catalyst/landing/product-images";
 import { MobilePreview } from "@/components/catalyst/landing/app-preview";
 import { VelocityScroll } from "@/components/magicui/scroll-based-velocity";
 import { LandingFooter } from "@/components/catalyst/landing/landing-navs";
+import { OpenApp } from "@/components/catalyst/landing/open-app";
 
 export default function Home() {
   return (
@@ -71,14 +72,7 @@ function Header() {
       <Separator className="w-40 animate-fade-in opacity-0 animate-delay-2400" />
       <div />
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant="secondary"
-          className="animate-fade-in opacity-0 animate-delay-2600"
-          href="/auth"
-        >
-          <UserRound />
-          Get Started
-        </Button>
+        <OpenApp className="animate-fade-in opacity-0 animate-delay-2600" />
         <Button
           variant="outline"
           className="animate-fade-in opacity-0 animate-delay-2800"
@@ -490,9 +484,7 @@ function GetStarted() {
           <h2 className="text-4xl font-bold text-muted-foreground">
             Ready to start your Journey?
           </h2>
-          <Button>
-            <UserRound /> Get Started
-          </Button>
+          <OpenApp />
         </div>
       </section>
       <SquigglySeparator

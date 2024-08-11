@@ -13,7 +13,7 @@ export default function ErrorPage() {
     <>
       <LandingCmdK is404 />
       <LandingNav />
-      <div className="relative flex min-h-[calc((100vh-4.5rem-1px)+2rem)] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-lg p-20">
+      <main className="relative flex min-h-[calc((100vh-4.5rem-1px)+2rem)] w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-lg p-20">
         <h1 className="h1">
           <span className="font-bold">404</span>
           <span className="text-muted-foreground"> - Page Not Found</span>
@@ -36,7 +36,7 @@ export default function ErrorPage() {
             "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
           )}
         />
-      </div>
+      </main>
       <SquigglySeparator waveColor="hsl(var(--muted))" className="-mt-3" />
       <LandingFooter />
     </>

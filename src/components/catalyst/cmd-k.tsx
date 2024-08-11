@@ -382,7 +382,7 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
                   case "item":
                     return (
                       <CommandItem
-                        key={`command-item-${item.id}`}
+                        key={`command-item-${item.id}-${j + Math.floor(Math.random() * 100) / 100}`}
                         value={item.id}
                         className='min-h-12 [&[data-selected="true"]_[data-key]]:!bg-primary [&[data-selected="true"]_[data-key]]:!text-primary-foreground'
                         onSelect={() => {

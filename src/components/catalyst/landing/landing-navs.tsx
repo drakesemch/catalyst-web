@@ -4,7 +4,6 @@ import {
   CircleDollarSign,
   Newspaper,
   HelpCircle,
-  UserRound,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -15,6 +14,7 @@ import {
 import { Separator } from "../../ui/separator";
 import { Button } from "../../ui/button";
 import { OpenCmdK } from "../cmd-k";
+import { OpenApp } from "./open-app";
 
 export function LandingNav() {
   return (
@@ -62,10 +62,7 @@ export function LandingNav() {
         </NavigationMenuItem>
         <li className="flex-1" />
         <NavigationMenuItem>
-          <NavigationMenuLink variant="default" href="/auth">
-            <UserRound />
-            Get Started
-          </NavigationMenuLink>
+          <OpenApp />
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>

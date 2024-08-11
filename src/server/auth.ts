@@ -1,5 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import {
+import NextAuth, {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
@@ -65,11 +65,17 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  pages: {
+    signIn: "/auth",
+    newUser: "/onboarding",
+    error: "/auth/error",
+    signOut: "/auth",
+  },
 };
 
 /**
  * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
  *
- * @see https://next-auth.js.org/configuration/nextjs
+ * @see https://next-auth.js.org/configuration/nextjsx
  */
 export const getServerAuthSession = () => getServerSession(authOptions);
