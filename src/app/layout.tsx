@@ -11,6 +11,8 @@ import { CmdKProvider } from "@/components/catalyst/cmd-k";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { Toaster } from "@/components/ui/sonner";
 import { env } from "process";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: {
@@ -32,6 +34,8 @@ export default function RootLayout({
       suppressHydrationWarning={true}
     >
       <body>
+        <Analytics />
+        <SpeedInsights />
         <TRPCReactProvider>
           <ThemeProvider
             attribute="class"
