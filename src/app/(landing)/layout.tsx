@@ -9,6 +9,7 @@ export default async function LandingLayout({
 }: {
   children: React.ReactNode;
 }) {
+  await api.catalyst.auth.state();
   void api.catalyst.auth.state.prefetch();
 
   return (
