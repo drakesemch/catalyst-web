@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../../trpc";
 import { unstable_cache } from "next/cache";
-import { list, head, type ListBlobResultBlob } from "@vercel/blob";
+import { list, type ListBlobResultBlob } from "@vercel/blob";
 
 import matter from "gray-matter";
 import { remark } from "remark";
@@ -10,10 +10,11 @@ import { env } from "process";
 
 const getBlog = unstable_cache(
   async (pathname: string) => {
-    const markdownFile = await fetch(
-      (await head(`blogs/${pathname}`, { token: env.BLOB_TOKEN })).downloadUrl,
-    );
+    const markdownFile = await fetch(pathname);
     const markdownContent = await markdownFile.text();
+    console.log("---------------");
+    console.log(markdownContent);
+    console.log("---------------");
     const matterResult = matter(markdownContent);
 
     // Use remark to convert markdown into HTML string
@@ -21,8 +22,17 @@ const getBlog = unstable_cache(
       .use(html)
       .process(matterResult.content);
 
+    const renderHTML = processedContent
+      .toString()
+      .replaceAll("<h1>", "<h1 class='h1'>")
+      .replaceAll("<h2>", "<h2 class='h2'>")
+      .replaceAll("<h3>", "<h3 class='h3'>")
+      .replaceAll("<h4>", "<h4 class='h4'>")
+      .replaceAll("<h5>", "<h5 class='h5'>")
+      .replaceAll("<h6>", "<h6 class='h6'>")
+      .replaceAll("<p>", "<p class='p'>");
     return {
-      html: processedContent.toString(),
+      html: renderHTML,
       metadata: matterResult.data,
     };
   },
@@ -34,14 +44,14 @@ export const blogRouter = createTRPCRouter({
     .input(
       z.object({
         limit: z.number().min(1).max(100).optional(),
-        cursor: z.number().optional(),
+        cursor: z.string().optional(),
       }),
     )
     .query(async ({ input }) => {
       const blogs = await unstable_cache(
         async () =>
           list({
-            cursor: String(input.cursor ?? 0),
+            cursor: input.cursor ?? undefined,
             limit: input.limit ?? 10,
             prefix: "blogs/",
             token: env.BLOB_TOKEN,
@@ -56,7 +66,9 @@ export const blogRouter = createTRPCRouter({
 
       await Promise.all(
         data.map(async (blog) => {
-          const { html, metadata } = await getBlog(blog.downloadUrl);
+          const { html, metadata } = await getBlog(
+            blog.downloadUrl.split("?")[0]!,
+          );
           blog.html = html;
           blog.metadata = metadata;
         }),
@@ -69,7 +81,30 @@ export const blogRouter = createTRPCRouter({
       };
     }),
   get: publicProcedure.input(z.string()).query(async ({ input }) => {
-    const blog = await getBlog(input);
-    return blog;
+    console.log("INPUT", input);
+    const blog = await unstable_cache(
+      async () =>
+        list({
+          limit: 1,
+          prefix: input,
+          token: env.BLOB_TOKEN,
+        }),
+      ["blogs", input],
+    )();
+    const data = blog.blobs as (ListBlobResultBlob & {
+      html: string;
+      metadata: Record<string, unknown>;
+    })[];
+
+    await Promise.all(
+      data.map(async (blog) => {
+        const { html, metadata } = await getBlog(
+          blog.downloadUrl.split("?")[0]!,
+        );
+        blog.html = html;
+        blog.metadata = metadata;
+      }),
+    );
+    return data[0];
   }),
 });

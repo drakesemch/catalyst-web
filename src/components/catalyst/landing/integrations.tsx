@@ -41,7 +41,8 @@ export function Integrations({ className }: { className?: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const driveRef = useRef<HTMLDivElement>(null);
-  const inboxRef = useRef<HTMLDivElement>(null);
+  const outlookRef = useRef<HTMLDivElement>(null);
+  const geminiRef = useRef<HTMLDivElement>(null);
   const catalystInpRef = useRef<HTMLDivElement>(null);
   const catalystRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -64,8 +65,11 @@ export function Integrations({ className }: { className?: string }) {
           <Circle ref={driveRef} tooltip="Google Drive">
             <GoogleDriveLogo />
           </Circle>
-          <Circle ref={inboxRef} tooltip="E-Mail">
+          <Circle ref={outlookRef} tooltip="Outlook">
             <OutlookIcon />
+          </Circle>
+          <Circle ref={geminiRef} tooltip="Gemini AI">
+            <GeminiLogo />
           </Circle>
           <Circle ref={catalystInpRef} tooltip="Extra Information">
             <MoreVertical />
@@ -92,7 +96,6 @@ export function Integrations({ className }: { className?: string }) {
           </Circle>
         </div>
       </div>
-
       <AnimatedBeam
         containerRef={containerRef}
         fromRef={canvasRef}
@@ -105,7 +108,12 @@ export function Integrations({ className }: { className?: string }) {
       />
       <AnimatedBeam
         containerRef={containerRef}
-        fromRef={inboxRef}
+        fromRef={outlookRef}
+        toRef={catalystRef}
+      />
+      <AnimatedBeam
+        containerRef={containerRef}
+        fromRef={geminiRef}
         toRef={catalystRef}
       />
       <AnimatedBeam
@@ -266,6 +274,37 @@ function OutlookIcon() {
         fill="#FFF"
         d="M21.216,18.311c-1.098-1.275-2.546-1.913-4.328-1.913c-1.892,0-3.408,0.669-4.554,2.003c-1.144,1.337-1.719,3.088-1.719,5.246c0,2.045,0.564,3.714,1.69,4.986c1.126,1.273,2.592,1.91,4.378,1.91c1.84,0,3.331-0.652,4.474-1.975c1.143-1.313,1.712-3.043,1.712-5.199C22.869,21.281,22.318,19.595,21.216,18.311z M19.049,26.735c-0.568,0.769-1.339,1.152-2.313,1.152c-0.939,0-1.699-0.394-2.285-1.187c-0.581-0.785-0.87-1.861-0.87-3.211c0-1.336,0.289-2.414,0.87-3.225c0.586-0.81,1.368-1.211,2.355-1.211c0.962,0,1.718,0.393,2.267,1.178c0.555,0.795,0.833,1.895,0.833,3.31C19.907,24.906,19.618,25.968,19.049,26.735z"
       />
+    </svg>
+  );
+}
+
+function GeminiLogo() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      viewBox="0 0 28 28"
+      fill="none"
+    >
+      <path
+        d="M14 28C14 26.0633 13.6267 24.2433 12.88 22.54C12.1567 20.8367 11.165 19.355 9.905 18.095C8.645 16.835 7.16333 15.8433 5.46 15.12C3.75667 14.3733 1.93667 14 0 14C1.93667 14 3.75667 13.6383 5.46 12.915C7.16333 12.1683 8.645 11.165 9.905 9.905C11.165 8.645 12.1567 7.16333 12.88 5.46C13.6267 3.75667 14 1.93667 14 0C14 1.93667 14.3617 3.75667 15.085 5.46C15.8317 7.16333 16.835 8.645 18.095 9.905C19.355 11.165 20.8367 12.1683 22.54 12.915C24.2433 13.6383 26.0633 14 28 14C26.0633 14 24.2433 14.3733 22.54 15.12C20.8367 15.8433 19.355 16.835 18.095 18.095C16.835 19.355 15.8317 20.8367 15.085 22.54C14.3617 24.2433 14 26.0633 14 28Z"
+        fill="url(#paint0_radial_16771_53212)"
+      />
+      <defs>
+        <radialGradient
+          id="paint0_radial_16771_53212"
+          cx="0"
+          cy="0"
+          r="1"
+          gradientUnits="userSpaceOnUse"
+          gradientTransform="translate(2.77876 11.3795) rotate(18.6832) scale(29.8025 238.737)"
+        >
+          <stop offset="0.0671246" stop-color="#9168C0" />
+          <stop offset="0.342551" stop-color="#5684D1" />
+          <stop offset="0.672076" stop-color="#1BA1E3" />
+        </radialGradient>
+      </defs>
     </svg>
   );
 }

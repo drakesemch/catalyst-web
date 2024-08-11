@@ -7,15 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Plus } from "lucide-react";
 import { useState } from "react";
 
-const PRO_BASE_PRICE = 5;
+const PRO_BASE_PRICE = 6;
 
 const plans = [
   {
     name: "Free",
-    description: "",
     price: {
       month: Number(0).toFixed(2),
       quarter: Number(0).toFixed(2),
@@ -45,31 +44,39 @@ const plans = [
   },
   {
     name: "Pro",
-    description: "",
     price: {
-      month: Number(PRO_BASE_PRICE).toFixed(2),
-      quarter: Number(PRO_BASE_PRICE * 3 * 0.8).toFixed(2),
-      semester: Number(PRO_BASE_PRICE * 6 * 0.6).toFixed(2),
-      year: Number(PRO_BASE_PRICE * 12 * 0.4).toFixed(2),
+      month: Math.ceil(Number(Number(PRO_BASE_PRICE).toFixed(2))).toFixed(2),
+      quarter: Math.ceil(
+        Number(Number(PRO_BASE_PRICE * 3 * 0.9).toFixed(2)),
+      ).toFixed(2),
+      semester: Math.ceil(
+        Number(Number(PRO_BASE_PRICE * 6 * 0.8).toFixed(2)),
+      ).toFixed(2),
+      year: Math.ceil(
+        Number(Number(PRO_BASE_PRICE * 12 * 0.6).toFixed(2)),
+      ).toFixed(2),
     },
     features: [
+      {
+        name: "Advanced AI Features",
+      },
+      {
+        name: "Pre-Released Features",
+      },
       {
         name: "Games",
       },
       {
-        name: "AI Helper",
+        name: "Advanced Tooling",
+      },
+      {
+        name: "Scheduled Messages",
+      },
+      {
+        name: "Scheduled Submissions",
       },
       {
         name: "Priority Support",
-      },
-      {
-        name: "Real-time Collaboration",
-      },
-      {
-        name: "Request Features",
-      },
-      {
-        name: "Support the project",
       },
     ],
   },
@@ -93,7 +100,7 @@ function convertToMonth(
 
 export default function TimelinePage() {
   const [period, setPeriod] =
-    useState<keyof (typeof plans)[0]["price"]>("month");
+    useState<keyof (typeof plans)[0]["price"]>("year");
 
   return (
     <>
@@ -113,8 +120,9 @@ export default function TimelinePage() {
                 pricing for our premium features, ensuring that Catalyst remains
                 affordable.
               </p>
+              <div />
               <Tabs
-                defaultValue="month"
+                defaultValue={period}
                 onValueChange={(period) =>
                   setPeriod(period as keyof (typeof plans)[0]["price"])
                 }
@@ -171,7 +179,6 @@ function Plan({
     >
       <div className="space-y-4">
         <h3 className="text-xl font-bold">{plan.name}</h3>
-        <p className="opacity-50">{plan.description}</p>
         <div className="flex flex-col gap-1">
           <div className="flex items-baseline justify-center space-x-2">
             <span className="text-4xl font-bold">
@@ -218,6 +225,12 @@ function Plan({
             <span>{feature.name}</span>
           </div>
         ))}
+        {idx != 0 && (
+          <div className="flex items-center gap-2">
+            <Plus />
+            And More
+          </div>
+        )}
       </div>
     </div>
   );

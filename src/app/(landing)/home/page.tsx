@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowRight, Info, Star, UserRound } from "lucide-react";
+import { ArrowDown, ArrowRight, Info, Star, UserRound } from "lucide-react";
 
 import { ProductImageCarousel } from "@/components/catalyst/landing/product-images";
 import { MobilePreview } from "@/components/catalyst/landing/app-preview";
@@ -40,25 +40,23 @@ export default function Home() {
 function Header() {
   return (
     <header className="flex min-h-[calc((100vh-4.5rem-1px)+16rem-4rem)] w-full flex-col items-start justify-center gap-2 px-8 md:min-h-[calc((100vh-4.5rem-1px)-4rem)]">
-      <h1 className="h1 flex flex-wrap">
-        <span className="animate-fade-in animate-delay-200 mr-2 opacity-0">
+      <h1 className="h1 flex flex-wrap gap-3">
+        <span className="animate-fade-in opacity-0 animate-delay-200">
           Welcome
         </span>
-        <span className="animate-fade-in animate-delay-700 mr-2 opacity-0">
-          to
-        </span>
-        <span className="animate-fade-in animate-delay-1000 opacity-0">
+        <span className="animate-fade-in opacity-0 animate-delay-700">to</span>
+        <span className="animate-fade-in opacity-0 animate-delay-1000">
           Catalyst
         </span>
       </h1>
-      <p className="animate-fade-in animate-delay-2000 text-md text-muted-foreground opacity-0">
+      <p className="text-md animate-fade-in text-muted-foreground opacity-0 animate-delay-2000">
         Expedite your learning experience!
       </p>
       <div />
       <Button
         variant="outline"
         size="sm"
-        className="animate-fade-in animate-delay-2200 opacity-0"
+        className="animate-fade-in opacity-0 animate-delay-2200"
         href="/timeline"
       >
         <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 !text-muted-foreground/70 transition ease-out hover:!text-foreground/70">
@@ -70,12 +68,12 @@ function Header() {
         </AnimatedShinyText>
       </Button>
       <div />
-      <Separator className="animate-fade-in animate-delay-2400 w-40 opacity-0" />
+      <Separator className="w-40 animate-fade-in opacity-0 animate-delay-2400" />
       <div />
       <div className="flex flex-wrap gap-2">
         <Button
           variant="secondary"
-          className="animate-fade-in animate-delay-2600 opacity-0"
+          className="animate-fade-in opacity-0 animate-delay-2600"
           href="/auth"
         >
           <UserRound />
@@ -83,13 +81,14 @@ function Header() {
         </Button>
         <Button
           variant="outline"
-          className="animate-fade-in animate-delay-2800 opacity-0"
+          className="animate-fade-in opacity-0 animate-delay-2800"
+          href="#integrations"
         >
           <Info />
           Learn More
         </Button>
       </div>
-      <div className="[&_*]:delay-3200 [&_*]:animate-delay-3200 animate-fade-in animate-delay-3200 relative top-[10rem] h-96 w-[min(120ch,100%)] opacity-0 md:top-[calc(50vh-10rem)] md:h-0">
+      <div className="[&_*]:delay-3200 relative top-[10rem] h-96 w-[min(120ch,100%)] animate-fade-in opacity-0 animate-delay-3200 md:top-[calc(50vh-10rem)] md:h-0 [&_*]:animate-delay-3200">
         <MobilePreview />
       </div>
     </header>
@@ -105,7 +104,10 @@ function IntegrationSection() {
         fillColor="hsla(var(--muted) / 30%)"
         className="rotate-180"
       />
-      <section className="-my-3 flex min-h-[40rem] !w-full flex-col items-center justify-center bg-muted/30 p-8">
+      <section
+        className="-my-3 flex min-h-[40rem] !w-full flex-col items-center justify-center bg-muted/30 p-8"
+        id="integrations"
+      >
         <div className="flex max-w-[100ch] flex-col items-center justify-center gap-8 md:flex-row">
           <Integrations />
           <Separator orientation="vertical" className="hidden h-36 md:block" />
@@ -171,8 +173,8 @@ function Notifications() {
             <p className="max-w-[80ch] text-muted-foreground">
               Catalyst sends you notifications to help you stay on track with
               your studies. With Catalyst, you can receive notifications about
-              upcoming assignments, exams, and events to help you stay organized
-              and on track.
+              upcoming assignments, exams, and events to help you stay
+              organized.
             </p>
           </div>
           <Separator orientation="vertical" className="hidden h-36 md:block" />
@@ -254,7 +256,11 @@ function AndMore() {
 function Reveal() {
   return (
     <section className="flex min-h-[calc(100vh-4.5rem-1px)] !w-full flex-col items-center justify-center p-8">
-      <div className="flex max-w-[100ch] flex-col items-center justify-center gap-8 md:flex-row">
+      <div className="flex max-w-[100ch] flex-col items-center justify-center gap-8">
+        <div className="sticky top-[calc(100%-4rem)] flex items-center gap-2 rounded-full bg-secondary/40 px-4 py-2 text-xs text-muted-foreground backdrop-blur-md">
+          <ArrowDown />
+          Keep Scrolling
+        </div>
         <TextReveal text="Catalyst is the replacement you've been looking for 👀." />
       </div>
     </section>
@@ -387,7 +393,7 @@ function Reviews() {
         className="rotate-180"
       />
       <section className="-my-3 flex min-h-[20rem] !w-full flex-col items-center justify-center gap-8 bg-muted/30 py-8">
-        <h2 className="h2 px-8">What our users are saying</h2>
+        <h2 className="h2 px-8">What our Users are Saying</h2>
         <p className="px-8 text-muted-foreground">
           These reviews are NOT from real users. They are generated for
           demonstration purposes only.
@@ -408,7 +414,7 @@ function Reviews() {
                         <Star key={index} className="text-amber-500" />
                       ))}
                       {new Array(5 - review.rating).fill(0).map((_, index) => (
-                        <Star key={index} className="text-muted" />
+                        <Star key={index} className="text-muted-foreground" />
                       ))}
                     </CardDescription>
                   </CardHeader>
@@ -434,7 +440,7 @@ function Reviews() {
                         <Star key={index} className="text-amber-500" />
                       ))}
                       {new Array(5 - review.rating).fill(0).map((_, index) => (
-                        <Star key={index} className="text-muted" />
+                        <Star key={index} className="text-muted-foreground" />
                       ))}
                     </CardDescription>
                   </CardHeader>
@@ -458,7 +464,7 @@ function ProductImage() {
     <section className="flex min-h-[20rem] !w-full flex-col items-center justify-center gap-8 p-8 lg:flex-row">
       <ProductImageCarousel />
       <div className="mb-8 flex max-w-[60ch] flex-col gap-2">
-        <h2 className="h2">Switch to something better</h2>
+        <h2 className="h2">Switch to Something Better</h2>
         <p>
           Catalyst is a modern platform that offers a wide range of features to
           help you succeed in your learning journey. With Catalyst, you can
