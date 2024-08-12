@@ -127,7 +127,7 @@ export default function TimelinePage() {
                   setPeriod(period as keyof (typeof plans)[0]["price"])
                 }
               >
-                <TabsList>
+                <TabsList className="flex-wrap">
                   <TabsTrigger value="month">Monthly</TabsTrigger>
                   <TabsTrigger value="quarter">Quarterly</TabsTrigger>
                   <TabsTrigger value="semester">Semesterly</TabsTrigger>
