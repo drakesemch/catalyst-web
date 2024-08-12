@@ -106,6 +106,10 @@ const TabsTrigger = React.forwardRef<
       attributes: true,
     });
 
+    document.addEventListener("resize", () => {
+      setSelectedElement(itemRef);
+    });
+
     return () => {
       observer?.disconnect();
     };

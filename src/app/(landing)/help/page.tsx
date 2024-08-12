@@ -14,7 +14,7 @@ import {
 export default function HelpPage() {
   return (
     <>
-      <main className="relative flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-16">
+      <main className="relative flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
         <div className="flex w-[min(80ch,100%)] flex-col items-center gap-6">
           <h1 className="h1 flex items-center gap-4">
             <HelpCircle className="text-5xl" /> Help Center

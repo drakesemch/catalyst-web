@@ -398,7 +398,7 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
                       >
                         {item.label}
                         {item.keyboard && (
-                          <CommandShortcut className="flex gap-2 text-xs">
+                          <CommandShortcut className="hidden gap-2 text-xs sm:flex">
                             {item.keyboard.ctrl && (
                               <Key>{isMac.current ? <Command /> : "Ctrl"}</Key>
                             )}

@@ -388,8 +388,8 @@ function Reviews() {
     <>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--muted) / .3)"
+        fillColor="hsla(var(--muted) / .3)"
         className="rotate-180"
       />
       <section className="-my-3 flex min-h-[20rem] !w-full flex-col items-center justify-center gap-8 bg-muted/30 py-8">
@@ -398,14 +398,41 @@ function Reviews() {
           These reviews are NOT from real users. They are generated for
           demonstration purposes only.
         </p>
-        <div className="flex w-full flex-col gap-2">
+        <div className="relative flex w-full flex-col items-center gap-2 md:hidden">
+          <Marquee
+            className="flex max-h-[20rem] max-w-full items-center overflow-hidden [--duration:100s] md:hidden"
+            vertical
+            reverse
+          >
+            {reviews.map((review, index) => (
+              <Card
+                key={index}
+                className="mx-auto flex w-[min(60ch,100%)] flex-col gap-2 p-4 text-xs md:text-base"
+              >
+                <CardHeader>
+                  <CardTitle>{review.name}</CardTitle>
+                  <CardDescription className="flex gap-2 pt-2">
+                    {new Array(review.rating).fill(0).map((_, index) => (
+                      <Star key={index} className="text-amber-500" />
+                    ))}
+                    {new Array(5 - review.rating).fill(0).map((_, index) => (
+                      <Star key={index} className="text-muted-foreground" />
+                    ))}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>{review.review}</CardContent>
+              </Card>
+            ))}
+          </Marquee>
+        </div>
+        <div className="hidden w-full flex-col gap-2 md:flex">
           <Marquee className="max-w-full overflow-hidden [--duration:100s]">
             {reviews
               .filter((_, i) => i <= 10)
               .map((review, index) => (
                 <Card
                   key={index}
-                  className="flex w-[30ch] flex-col gap-2 p-4 text-xs md:w-[60ch] md:text-base"
+                  className="flex w-[60ch] flex-col gap-2 p-4 text-xs md:text-base"
                 >
                   <CardHeader>
                     <CardTitle>{review.name}</CardTitle>
@@ -431,7 +458,7 @@ function Reviews() {
               .map((review, index) => (
                 <Card
                   key={index}
-                  className="flex w-[30ch] flex-col gap-2 p-4 text-xs md:w-[60ch] md:text-base"
+                  className="flex w-[60ch] flex-col gap-2 p-4 text-xs md:text-base"
                 >
                   <CardHeader>
                     <CardTitle>{review.name}</CardTitle>

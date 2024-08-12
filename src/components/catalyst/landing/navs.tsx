@@ -4,6 +4,8 @@ import {
   CircleDollarSign,
   Newspaper,
   HelpCircle,
+  Menu,
+  House,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -17,6 +19,13 @@ import { OpenCmdK } from "../cmd-k";
 import { OpenApp } from "./open-app";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 export async function LandingNav() {
   return (
@@ -26,34 +35,90 @@ export async function LandingNav() {
       }}
     >
       <NavigationMenuList>
+        <NavigationMenuItem className="block md:hidden">
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Menu />
+                <span className="sr-only">Menu</span>
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader className="px-8 py-4">
+                <DrawerTitle className="h3 flex items-center gap-2">
+                  <FlaskConical /> Catalyst
+                </DrawerTitle>
+              </DrawerHeader>
+              <div className="flex w-full flex-col gap-2 p-4 pt-0">
+                <Button
+                  variant="ghost"
+                  className="flex justify-start"
+                  href="/home"
+                >
+                  <House /> Home
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex justify-start"
+                  href="/about"
+                >
+                  <Info /> About
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex justify-start"
+                  href="/pricing"
+                >
+                  <CircleDollarSign /> Pricing
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex justify-start"
+                  href="/blog"
+                >
+                  <Newspaper /> Blog
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex justify-start"
+                  href="/help"
+                >
+                  <HelpCircle /> Help
+                </Button>
+                <Separator className="my-2" />
+                <OpenApp className="flex justify-start" />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink href="/home">
             <FlaskConical />
             Catalyst
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="hidden md:block">
           <Separator orientation="vertical" className="h-4" />
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="hidden md:block">
           <NavigationMenuLink href="/about">
             <Info />
             About
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="hidden md:block">
           <NavigationMenuLink href="/pricing">
             <CircleDollarSign />
             Pricing
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="hidden md:block">
           <NavigationMenuLink href="/blog">
             <Newspaper />
             Blog
           </NavigationMenuLink>
         </NavigationMenuItem>
-        <NavigationMenuItem>
+        <NavigationMenuItem className="hidden md:block">
           <NavigationMenuLink href="/help">
             <HelpCircle />
             Help

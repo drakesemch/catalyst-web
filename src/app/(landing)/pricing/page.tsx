@@ -104,7 +104,7 @@ export default function TimelinePage() {
 
   return (
     <>
-      <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-16">
+      <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
         <div className="flex w-[min(80ch,100%)] flex-col gap-2">
           <div className="mx-auto max-w-3xl text-center">
             <div className="space-y-2">

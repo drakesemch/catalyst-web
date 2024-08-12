@@ -71,10 +71,10 @@ function CarouselPictures() {
 
   return (
     <>
-      <CarouselContent className="rounded-lg">
+      <CarouselContent className="w-[min(calc(100vw-4rem),60ch)] rounded-lg lg:w-[min(calc(50vw-4rem),30rem)]">
         {pages.current.map((page, idx) => (
-          <CarouselItem key={idx} className="w-[min(60vw,15ch)]">
-            <div className="flex w-full flex-col gap-2">
+          <CarouselItem key={idx} className="h-full max-w-full">
+            <div className="flex max-w-full flex-col gap-2">
               <Image
                 src={page.image}
                 width={400}

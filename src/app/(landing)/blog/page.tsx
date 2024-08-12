@@ -20,7 +20,7 @@ export default async function Blogs() {
   const { data } = await api.catalyst.blog.list({});
   return (
     <>
-      <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-16">
+      <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
         <div className="flex w-[min(100ch,100%)] flex-col gap-6">
           <h1 className="h1">Blog</h1>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
