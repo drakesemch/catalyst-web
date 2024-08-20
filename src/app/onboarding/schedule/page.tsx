@@ -65,7 +65,6 @@ export default function ScheduleOnboardingPage() {
             </div>
             <Button
               size="sm"
-              href="/app"
               onClick={async () => {
                 finalize();
                 await new Promise((resolve) => {
