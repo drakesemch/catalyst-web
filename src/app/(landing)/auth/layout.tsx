@@ -6,6 +6,6 @@ export default async function AuthCheck({
 }: {
   children: React.ReactNode;
 }) {
-  if (await api.catalyst.auth.state()) redirect("/app");
+  if (await api.catalyst.user.authState()) redirect("/app");
   return children;
 }

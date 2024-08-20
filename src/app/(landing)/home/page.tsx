@@ -62,7 +62,7 @@ async function Header() {
         className="animate-fade-in opacity-0 animate-delay-2200"
         href="/timeline"
       >
-        <AnimatedShinyText className="inline-flex items-center justify-center px-4 py-1 !text-muted-foreground/70 transition ease-out hover:!text-foreground/70">
+        <AnimatedShinyText className="inline-flex items-center justify-center !text-muted-foreground/70 transition ease-out hover:!text-foreground/70">
           <div className="inline-flex gap-2">
             <span>🪲</span>
             <span>Timeline: In Development</span>

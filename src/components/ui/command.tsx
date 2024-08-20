@@ -57,7 +57,7 @@ const Command = React.forwardRef<
         {children}
         <div
           className={cn(
-            "absolute -z-10 rounded bg-secondary transition-[top]",
+            "absolute -z-10 rounded bg-secondary transition-[top_height]",
             selectedElement == null ? "opacity-0" : "opacity-100",
           )}
           style={{
@@ -244,7 +244,9 @@ const CommandItem = React.forwardRef<
   React.useEffect(() => {
     if (!itemRef) return;
     if (itemRef.getAttribute("data-selected") == "true") {
-      setSelectedElement(itemRef);
+      setTimeout(() => {
+        setSelectedElement(itemRef);
+      }, 1);
     }
     observer.observe(itemRef, {
       attributes: true,

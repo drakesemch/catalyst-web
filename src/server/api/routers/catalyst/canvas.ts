@@ -1,0 +1,345 @@
+import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+
+import { z } from "zod";
+import { env } from "@/env";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { unstable_cache } from "next/cache";
+import { type Course } from "../canvas";
+import { createClient } from "@vercel/kv";
+
+const courseClassificationDataset = [
+  { text: "input: BVW Counseling" },
+  { text: "output: Persistent" },
+  { text: "input: Health Wellness (online)-Haggerty-SU" },
+  { text: "output: Physical Education" },
+  { text: "input: BVW Library 2022-2023" },
+  { text: "output: Persistent" },
+  { text: "input: PRMS Counseling" },
+  { text: "output: Persistent" },
+  { text: "input: Sources of Strength" },
+  { text: "output: Activity" },
+  { text: "input: 1. Advanced Math O'Neal-Q4" },
+  { text: "output: Math" },
+  { text: "input: 6th Grade Band" },
+  { text: "output: Arts" },
+  { text: "input: 2021 Advanced Integrated Mathematics 7-O'Neal-Q3" },
+  { text: "output: Math" },
+  { text: "input: 2021 Summer Band" },
+  { text: "output: Activity" },
+  { text: "input: Advanced Integrated Mathematics 6-White-Q1" },
+  { text: "output: Math" },
+  { text: "input: Advanced Integrated Mathematics 6-White-Q2" },
+  { text: "output: Math" },
+  { text: "input: Advanced Integrated Mathematics 6-White-Q3" },
+  { text: "output: Math" },
+  { text: "input: Advanced Integrated Mathematics 6-White-Q4" },
+  { text: "output: Math" },
+  { text: "input: Advanced Integrated Mathematics 7-Mitchem-Q1" },
+  { text: "output: Math" },
+  { text: "input: Advisory -9th Grade-Hoyt-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Algebra 1 Qtr 1-Fleer-Q1" },
+  { text: "output: Math" },
+  { text: "input: Algebra 1 Qtr 2-Fleer-Q2" },
+  { text: "output: Math" },
+  { text: "input: Algebra 1 Qtr 3-Fleer-Q3" },
+  { text: "output: Math" },
+  { text: "input: Algebra 1 Qtr 4-Fleer-Q4" },
+  { text: "output: Math" },
+  { text: "input: Art 6 (Q2)" },
+  { text: "output: Arts" },
+  { text: "input: Band 6 Quarter 4-Gamble-Q4" },
+  { text: "output: Arts" },
+  { text: "input: Band 6-Gamble-Q1" },
+  { text: "output: Arts" },
+  { text: "input: Band 6-Q3" },
+  { text: "output: Arts" },
+  { text: "input: Band 7 Quarter 3-Gamble-Q3" },
+  { text: "output: Arts" },
+  { text: "input: Band 7 Quarter 4-Gamble-Q4" },
+  { text: "output: Arts" },
+  { text: "input: Band 8 Quarter 1-Gamble-Q1" },
+  { text: "output: Arts" },
+  { text: "input: Band 8 Quarter 2-Gamble-Q2" },
+  { text: "output: Arts" },
+  { text: "input: Band 8 Quarter 3-Gamble-Q3" },
+  { text: "output: Arts" },
+  { text: "input: Band 8 Quarter 4-Gamble-Q4" },
+  { text: "output: Arts" },
+  { text: "input: CHE 5th Grade Art" },
+  { text: "output: Arts" },
+  { text: "input: E.L.A. 7 Q3-Kennedy" },
+  { text: "output: English" },
+  { text: "input: ELA 7 Q2 Virtual" },
+  { text: "output: English" },
+  { text: "input: ELA Q4 Kennedy" },
+  { text: "output: English" },
+  { text: "input: Elementary Band Grade 5-Gamble-YR" },
+  { text: "output: Arts" },
+  { text: "input: Elementary Foreign Language Spanish Grade 4-Davidson-YR" },
+  { text: "output: Language" },
+  { text: "input: Elementary General Classroom Grade 4-Schwabauer-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Elementary General Classroom Grade 5-Auvigne-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Elementary Mathematics Grade 5-Auvigne-YR" },
+  { text: "output: Math" },
+  { text: "input: English Language Arts 6 Quarter 1-Mensendiek-Q1" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 6 Quarter 2-Mensendiek-Q2" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 6 Quarter 3-Mensendiek-Q3" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 6 Quarter 4-Mensendiek-Q4" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 8 Quarter 1-Secrest-Q1" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 8 Quarter 2-Secrest-Q2" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 8 Quarter 3-Secrest-Q3" },
+  { text: "output: English" },
+  { text: "input: English Language Arts 8 Quarter 4-Secrest-Q4" },
+  { text: "output: English" },
+  { text: "input: Flex Class-Fleer-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Flex Class-Kennedy-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Flex Class-Stanfield-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Hnrs Biology-Hall-S2" },
+  { text: "output: Science" },
+  { text: "input: Hnrs Biology-Skakal-S1" },
+  { text: "output: Science" },
+  { text: "input: Hnrs Geometry-Young-S1" },
+  { text: "output: Math" },
+  { text: "input: Hnrs Geometry-Young-S2" },
+  { text: "output: Math" },
+  { text: "input: Honors ELA 9 - Fall 2022" },
+  { text: "output: English" },
+  { text: "input: Virtual Physical Education 7-Maasen-Q2" },
+  { text: "output: Physical Education" },
+  { text: "input: Virtual Physical Education 7-Maasen-Q1" },
+  { text: "output: Physical Education" },
+  { text: "input: Spanish 3.0-Horstick-S1" },
+  { text: "output: Language" },
+  { text: "input: Intervention 7-Kennedy-YR" },
+  { text: "output: Persistent" },
+  { text: "input: Introduction to Engineering Design-Vodehnal-S1" },
+  { text: "output: Technology" },
+  { text: "input: Introduction to Engineering Design-Vodehnal-S2" },
+  { text: "output: Technology" },
+  { text: "input: Jag Hub 2022-23" },
+  { text: "output: Persistent" },
+  { text: "input: Physical Education 6-Long-Q1" },
+  { text: "output: Physical Education" },
+  { text: "input: Physical Education 6-Long-Q2" },
+  { text: "output: Physical Education" },
+  { text: "input: Physical Education 8-Rutherford-Q1" },
+  { text: "output: Physical Education" },
+  { text: "input: Physical Education 8-Rutherford-Q2" },
+  { text: "output: Physical Education" },
+  { text: "input: Physical Education-Lowe-S1" },
+  { text: "output: Physical Education" },
+  { text: "input: Physical Education-Lowe-S2" },
+  { text: "output: Physical Education" },
+  { text: "input: Pre-Engineering Robotics 7-Shatzer-Q4" },
+  { text: "output: Technology" },
+  { text: "input: Pre-Engineering & Robotics 7-Shatzer-Q3" },
+  { text: "output: Technology" },
+  { text: "input: Pre-engineering 6-Shatzer-Q4" },
+  { text: "output: Technology" },
+  { text: "input: Pre-engineering 8-Shatzer-Q3" },
+  { text: "output: Technology" },
+  { text: "input: Pre-engineering 8-Shatzer-Q4" },
+  { text: "output: Technology" },
+  { text: "input: Science - Jackson - Q3" },
+  { text: "output: Science" },
+  { text: "input: Science 6 Quarter 1-Stanfield-Q1" },
+  { text: "output: Science" },
+  { text: "input: Science 6 Quarter 2-Stanfield-Q2" },
+  { text: "output: Science" },
+  { text: "input: Science 6 Quarter 3-Stanfield-Q3" },
+  { text: "output: Science" },
+  { text: "input: Science 6 Quarter 4-Stanfield-Q4" },
+  { text: "output: Science" },
+  { text: "input: Science 7 Quarter 1-Durick-Q1" },
+  { text: "output: Science" },
+  { text: "input: Science 7 Quarter 2-Durick-Q2" },
+  { text: "output: Science" },
+  { text: "input: Science 7: Q3" },
+  { text: "output: Science" },
+  { text: "input: Science 7: Q4" },
+  { text: "output: Science" },
+  { text: "input: Science 8 Quarter 1-Jackson-Q1" },
+  { text: "output: Science" },
+  { text: "input: Science 8 Quarter 2-Jackson-Q2" },
+  { text: "output: Science" },
+  { text: "input: Science 8 Quarter 4-Jackson-Q4" },
+  { text: "output: Science" },
+  { text: "input: Social Studies 6 Quarter 1-Stanfield-Q1" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 6 Quarter 2-Stanfield-Q2" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 6 Quarter 3-Stanfield-Q3" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 6 Quarter 4-Stanfield-Q4" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 7 Q 3-Kennedy" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 7 Quarter 4-Kennedy-Q4" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 8 Quarter 1-Modelski-Q1" },
+  { text: "output: Social Studies" },
+  { text: "input: Social Studies 8 Quarter 3-Modelski-Q3" },
+  { text: "output: Social Studies" },
+  { text: "input: Spanish 1A-Payne-Q3" },
+  { text: "output: Language" },
+  { text: "input: Spanish 1A-Payne-Q4" },
+  { text: "output: Language" },
+  { text: "input: Spanish 1B-Landeras-S2" },
+  { text: "output: Language" },
+  { text: "input: Spanish 1B-Vater-S1" },
+  { text: "output: Language" },
+  { text: "input: Spanish 2-Kessens-S1" },
+  { text: "output: Language" },
+  { text: "input: Spanish 2-Kessens-S2" },
+  { text: "output: Language" },
+  { text: "input: Spanish 3.0-Horstick-S1" },
+  { text: "output: Language" },
+  { text: "input: Spanish 3.0-Horstick-S2" },
+  { text: "output: Language" },
+  { text: "input: Symphonic Band - 2023" },
+  { text: "output: Arts" },
+  { text: "input: Technology Explorations 6-Anderson-Q1" },
+  { text: "output: Technology" },
+  { text: "input: VEd Social Studies 7 - Q1" },
+  { text: "output: Social Studies" },
+  { text: "input: Ved Social Studies 7 Q2" },
+  { text: "output: Social Studies" },
+  { text: "input: Virtual Advanced Mathematics 7-Mitchem-Q2" },
+  { text: "output: Math" },
+  { text: "input: Virtual ELA - Q1" },
+  { text: "output: English" },
+  { text: "input: Virtual Physical Education 7-Maasen-Q1" },
+  { text: "output: Physical Education" },
+  { text: "input: Virtual Physical Education 7-Maasen-Q2" },
+  { text: "output: Physical Education" },
+  { text: "input: VirtualED - 7th Grade Band" },
+  { text: "output: Arts" },
+  { text: "input: VirtualED Band 7 - Q2" },
+  { text: "output: Arts" },
+  { text: "input: Theatre 6-Shute-Q3" },
+  { text: "output: Arts" },
+  { text: "input: Elementary Reading Grade 4-Schwabauer-YR" },
+  { text: "output: English" },
+  { text: "input: BVW Esports" },
+  { text: "output: Activity" },
+  { text: "input: AP English Language Composition-EL0310-Signer-6" },
+  { text: "output: English" },
+];
+
+export const canvasCatalystRouter = createTRPCRouter({
+  courses: publicProcedure
+    .input(
+      z
+        .object({
+          enrollment_state: z
+            .enum(["active", "invited_or_pending", "completed"])
+            .optional(),
+          limit: z.number().max(100).optional(),
+          cursor: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ ctx, input }) => {
+      const url = new URL("/api/v1/courses", ctx.user.canvas.url);
+      input?.enrollment_state
+        ? url.searchParams.set("enrollment_state", input.enrollment_state)
+        : null;
+      url.searchParams.set("page", String(input?.cursor ?? 1));
+      url.searchParams.set("per_page", String(input?.limit ?? 10));
+      const query = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${ctx.user.canvas.token}`,
+        },
+      });
+      const courses = ((await query.json()) as Course[]).map((course) => ({
+        ...course,
+        original_name: course.original_name ?? course.name,
+      }));
+      const nextCursor =
+        Number(input?.cursor ?? 0) + Number(input?.limit ?? 10);
+
+      const updatedCourses = await Promise.all(
+        courses.map(async (course) => {
+          const classification = (await unstable_cache(async () => {
+            const classificationRedis = createClient({
+              url: env.CLASSIFICATION_REST_API_URL,
+              token: env.CLASSIFICATION_REST_API_TOKEN,
+            });
+
+            const classification = await classificationRedis.get(
+              String(course.id),
+            );
+
+            if (classification) {
+              return classification;
+            }
+
+            const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+            const model = genAI.getGenerativeModel({
+              model: "gemini-1.5-flash",
+              systemInstruction: "return the output value",
+            });
+
+            const generationConfig = {
+              temperature: 1,
+              topP: 0.95,
+              topK: 64,
+              maxOutputTokens: 100,
+              stopSequences: ["input:", "\n"],
+              responseMimeType: "text/plain",
+            };
+
+            const input = [
+              ...courseClassificationDataset,
+              {
+                text: "input: " + course.original_name,
+              },
+              {
+                text: "output: ",
+              },
+            ];
+
+            const result = await model
+              .generateContent({
+                contents: [{ role: "user", parts: input }],
+                generationConfig,
+              })
+              .catch((err) => {
+                console.error(err);
+                return undefined;
+              });
+
+            const value = result?.response?.text() ?? "Not Available";
+
+            console.log("Input:", course.original_name, "Output:", value);
+
+            if (value != "Not Available") {
+              await classificationRedis.set(String(course.id), value);
+            }
+
+            return value;
+          }, ["courses", "classifications", String(course.id)])()) as string;
+
+          return {
+            ...course,
+            classification,
+          };
+        }),
+      );
+
+      return { data: updatedCourses, nextCursor };
+    }),
+});

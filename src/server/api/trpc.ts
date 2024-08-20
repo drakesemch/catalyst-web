@@ -13,6 +13,10 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
+import { schools, settings, users } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { env } from "@/env";
+import { createDecipheriv } from "crypto";
 
 /**
  * 1. CONTEXT
@@ -29,11 +33,67 @@ import { db } from "@/server/db";
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await getServerAuthSession();
 
-  return {
-    db,
-    session,
-    ...opts,
-  };
+  if (!session) {
+    return {
+      db,
+      session,
+      user: {
+        get: undefined,
+        settings: undefined,
+        canvas: {
+          url: undefined,
+          token: undefined,
+        },
+      },
+      ...opts,
+    };
+  } else {
+    const user = (
+      await db.select().from(users).where(eq(users.id, session.user.id))
+    ).at(0);
+    const userSettings = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.userId, session.user.id));
+
+    const schoolId =
+      userSettings.find((s) => s.key == "school_id")?.value ?? "";
+
+    const school = schoolId
+      ? (
+          await db
+            .select({ canvasURL: schools.canvasURL })
+            .from(schools)
+            .where(eq(schools.id, schoolId ?? ""))
+        ).at(0)
+      : undefined;
+
+    const encryptedToken =
+      userSettings.find((s) => s.key == "canvas_token")?.value ?? "";
+
+    const decipher = createDecipheriv(
+      "aes-256-cbc",
+      env.NEXTAUTH_SECRET.substring(0, 32),
+      env.NEXTAUTH_SECRET.substring(33, 33 + 16),
+    );
+    const token =
+      decipher.update(encryptedToken, "base64", "utf8") +
+      decipher.final("utf8");
+
+    return {
+      db,
+      session,
+      user: {
+        get: user,
+        settings: userSettings,
+        canvas: {
+          url: school?.canvasURL ?? "",
+          token,
+        },
+      },
+      ...opts,
+    };
+  }
 };
 
 /**
@@ -87,12 +147,6 @@ export const createTRPCRouter = t.router;
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
 
-  if (t._config.isDev) {
-    // artificial delay in dev
-    const waitMs = Math.floor(Math.random() * 400) + 100;
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-  }
-
   const result = await next();
 
   const end = Date.now();
@@ -120,7 +174,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
-  .use(({ ctx, next }) => {
+  .use(async ({ ctx, next }) => {
     if (!ctx.session || !ctx.session.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }

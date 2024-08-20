@@ -1,10 +1,4 @@
-import {
-  FlaskConical,
-  Info,
-  CircleDollarSign,
-  Newspaper,
-  HelpCircle,
-} from "lucide-react";
+import { FlaskConical, Album, UsersRound, Wrench, Inbox } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -32,26 +26,26 @@ export async function AppNav() {
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink href="/about">
-            <Info />
-            About
+            <Album />
+            Courses
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuLink href="/about">
+            <UsersRound />
+            Social
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <NavigationMenuLink href="/pricing">
-            <CircleDollarSign />
-            Pricing
+            <Wrench />
+            Tools
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink href="/blog">
-            <Newspaper />
-            Blog
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuLink href="/help">
-            <HelpCircle />
-            Help
+          <NavigationMenuLink href="/pricing">
+            <Inbox />
+            Inbox
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>

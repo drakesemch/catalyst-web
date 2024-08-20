@@ -5,15 +5,31 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
+const DrawerContext = React.createContext<true | null>(null);
+
 const Drawer = ({
   shouldScaleBackground = true,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root
-    shouldScaleBackground={shouldScaleBackground}
-    {...props}
-  />
-);
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+  // const context = React.useContext(DrawerContext);
+  // return context == null ? (
+  //   <DrawerPrimitive.Root
+  //     shouldScaleBackground={shouldScaleBackground}
+  //     {...props}
+  //   />
+  // ) : (
+  //   <DrawerPrimitive.NestedRoot
+  //     shouldScaleBackground={shouldScaleBackground}
+  //     {...props}
+  //   />
+  // );
+  return (
+    <DrawerPrimitive.NestedRoot
+      shouldScaleBackground={shouldScaleBackground}
+      {...props}
+    />
+  );
+};
 Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
@@ -43,13 +59,15 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed bottom-0 left-1/2 z-50 mt-24 flex h-auto w-[min(60ch,100%)] flex-col rounded-t-lg border bg-background [translate:-50%_0%]",
+        "fixed bottom-0 left-1/2 z-50 mt-24 flex h-auto max-h-[80vh] w-[min(60ch,100%)] flex-col rounded-t-lg border bg-background [translate:-50%_0%]",
         className,
       )}
       {...props}
     >
-      <div className="mx-auto my-4 h-1 w-32 rounded-full bg-muted" />
-      {children}
+      <DrawerContext.Provider value={true}>
+        <div className="mx-auto my-4 h-1 w-32 flex-shrink-0 rounded-full bg-muted" />
+        {children}
+      </DrawerContext.Provider>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));

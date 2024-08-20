@@ -8,7 +8,7 @@ export function OpenApp({ className }: { className?: string }) {
   const [isLoggedIn] =
     typeof window == "undefined"
       ? [false]
-      : api.catalyst.auth.state.useSuspenseQuery();
+      : api.catalyst.user.authState.useSuspenseQuery();
 
   return (
     <>
