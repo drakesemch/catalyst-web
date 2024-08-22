@@ -289,3 +289,32 @@ export const scheduleValues = createTable(
     ),
   }),
 );
+
+export const scheduleDates = createTable(
+  "schedule_date",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    schoolId: varchar("school_id", { length: 255 }).notNull(),
+    scheduleId: varchar("schedule_id", { length: 255 }).notNull(),
+    date: timestamp("date", {
+      mode: "date",
+    }).notNull(),
+    draftState: settingState("setting_state"),
+  },
+  (scheduleDate) => ({
+    schoolIdIdx: index("schedule_date_school_id_idx").on(scheduleDate.schoolId),
+  }),
+);
+
+export const scheduleDateToScheduleRelation = relations(
+  scheduleDates,
+  ({ one }) => ({
+    schedule: one(schedules, {
+      fields: [scheduleDates.scheduleId],
+      references: [schedules.id],
+    }),
+  }),
+);

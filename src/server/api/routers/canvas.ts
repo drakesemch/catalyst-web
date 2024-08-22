@@ -39,7 +39,7 @@ export interface Course {
   start_at: string;
   end_at: string;
   locale: string;
-  enrollments: null;
+  enrollments: Enrollment[] | null;
   total_students: number;
   calendar: CalendarLink | null;
   default_view: string;
@@ -76,7 +76,405 @@ export interface Course {
   template: boolean;
 }
 
+export interface Participant {
+  id: number;
+  display_name: string;
+  avatar_image_url: string;
+  html_url: string;
+}
+
+export interface Reply {
+  id: number;
+  user_id: number;
+  parent_id: number | null;
+  message: string;
+  replies?: Reply[];
+}
+
+export interface View {
+  id: number;
+  user_id: number;
+  parent_id: number | null;
+  message: string;
+  replies?: Reply[];
+}
+
+export interface Discussion {
+  unread_entries: number[];
+  entry_ratings: Record<number, number>;
+  forced_entries: number[];
+  participants: Participant[];
+  view: View[];
+}
+
+export interface FileAttachment {
+  "content-type": string;
+  url: string;
+  filename: string;
+  display_name: string;
+}
+
+export interface Page {
+  page_id: number;
+  url: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  hide_from_students: boolean;
+  editing_roles: string;
+  last_edited_by: null;
+  body: string;
+  published: boolean;
+  publish_at: string;
+  front_page: boolean;
+  locked_for_user: boolean;
+  lock_info: null;
+  lock_explanation: string;
+}
+
+export interface PageRevision {
+  revision_id: number;
+  updated_at: string;
+  latest: boolean;
+  edited_by: null;
+  url: string;
+  title: string;
+  body: string;
+}
+
+export interface DiscussionTopic {
+  id: number;
+  title: string;
+  message: string;
+  html_url: string;
+  posted_at: string | null;
+  last_reply_at: string | null;
+  require_initial_post: boolean;
+  user_can_see_posts: boolean;
+  discussion_subentry_count: number;
+  read_state: string;
+  unread_count: number;
+  subscribed: boolean;
+  subscription_hold: string | null;
+  assignment_id: number | null;
+  delayed_post_at: string | null;
+  published: boolean;
+  lock_at: string | null;
+  locked: boolean;
+  pinned: boolean;
+  locked_for_user: boolean;
+  lock_info: null;
+  lock_explanation: string | null;
+  user_name: string;
+  topic_children: number[];
+  group_topic_children: number[];
+  root_topic_id: number | null;
+  podcast_url: string;
+  discussion_type: string;
+  group_category_id: number | null;
+  attachments: FileAttachment[] | null;
+  permissions: Permissions;
+  allow_rating: boolean;
+  only_graders_can_rate: boolean;
+  sort_by_rating: boolean;
+}
+
+export interface Attachment {
+  "content-type": string;
+  url: string;
+  filename: string;
+  display_name: string;
+}
+
+export interface RecentReply {
+  id: number;
+  user_id: number;
+  user_name: string;
+  message: string;
+  created_at: string;
+}
+
+export interface DiscussionEntry {
+  id: number;
+  user_id: number;
+  user_name: string;
+  message: string;
+  read_state: string;
+  forced_read_state: boolean;
+  created_at: string;
+  attachment?: Attachment;
+  recent_replies?: RecentReply[];
+  has_more_replies?: boolean;
+}
+
+export interface UserDisplay {
+  id: number;
+  short_name: string;
+  avatar_image_url: string;
+  html_url: string;
+}
+
+export interface AnonymousUserDisplay {
+  anonymous_id: string;
+  avatar_image_url: string;
+  display_name: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  sortable_name: string;
+  last_name: string;
+  first_name: string;
+  short_name: string;
+  sis_user_id: string;
+  sis_import_id: number;
+  integration_id: string;
+  login_id: string;
+  avatar_url: string;
+  avatar_state: string;
+  enrollments: Enrollment[];
+  email: string;
+  locale: string;
+  last_login: string;
+  time_zone: string;
+  bio: string;
+  pronouns: string;
+}
+
+export interface Profile {
+  id: number;
+  name: string;
+  short_name: string;
+  sortable_name: string;
+  title: string;
+  bio: string;
+  pronunciation: string;
+  primary_email: string;
+  login_id: string;
+  sis_user_id: string;
+  lti_user_id: number;
+  avatar_url: string;
+  calendar: null;
+  time_zone: string;
+  locale: string;
+  k5_user: boolean;
+  use_classic_font_in_k5: boolean;
+}
+
+export interface Avatar {
+  type: string;
+  url: string;
+  token: string;
+  display_name: string;
+  id: number;
+  content_type: string;
+  filename: string;
+  size: number;
+}
+
+export interface PageView {
+  id: string;
+  app_name: string;
+  url: string;
+  context_type: string;
+  asset_type: string;
+  controller: string;
+  action: string;
+  contributed: boolean;
+  interaction_seconds: number;
+  created_at: string;
+  user_request: boolean;
+  render_time: number;
+  user_agent: string;
+  participated: boolean;
+  http_method: string;
+  remote_ip: string;
+  links: PageViewLinks;
+}
+
+export interface PageViewLinks {
+  user: number;
+  context: number;
+  asset: number;
+  real_user: number;
+  account: number;
+}
+
+export interface CourseNickname {
+  course_id: number;
+  name: string;
+  nickname: string;
+}
+
+export interface Grade {
+  html_url: string;
+  current_grade: string;
+  final_grade: string;
+  current_score: string;
+  final_score: string;
+  current_points: number;
+  unposted_current_grade: string;
+  unposted_final_grade: string;
+  unposted_current_score: string;
+  unposted_final_score: string;
+  unposted_current_points: number;
+}
+
+export interface Enrollment {
+  id: number;
+  course_id: number;
+  sis_course_id: string;
+  course_integration_id: string;
+  course_section_id: number;
+  section_integration_id: string;
+  sis_account_id: string;
+  sis_section_id: string;
+  sis_user_id: string;
+  enrollment_state: string;
+  limit_privileges_to_course_section: boolean;
+  sis_import_id: number;
+  root_account_id: number;
+  type: string;
+  user_id: number;
+  associated_user_id: number;
+  role: string;
+  role_id: number;
+  created_at: string;
+  updated_at: string;
+  start_at: string;
+  end_at: string;
+  last_activity_at: string;
+  last_attended_at: string;
+  total_activity_time: number;
+  html_url: string;
+  grades: Grade;
+  user: Profile;
+  override_grade: string;
+  override_score: number;
+  unposted_current_grade: string;
+  unposted_final_grade: string;
+  unposted_current_score: string;
+  unposted_final_score: string;
+  has_grading_periods: boolean;
+  computed_current_grade: number | null;
+  computed_current_score: number | null;
+  computed_current_letter_grade: number | string;
+  computed_final_grade: number | null;
+  computed_final_score: number | null;
+  totals_for_all_grading_periods_option: boolean;
+  current_grading_period_title: string;
+  current_grading_period_id: number;
+  current_period_override_grade: string;
+  current_period_override_score: number;
+  current_period_unposted_current_score: number;
+  current_period_unposted_final_score: number;
+  current_period_unposted_current_grade: string;
+  current_period_unposted_final_grade: string;
+}
+
+interface Module {
+  id: number;
+  workflow_state: string;
+  position: number;
+  name: string;
+  unlock_at: string;
+  require_sequential_progress: boolean;
+  prerequisite_module_ids: number[];
+  items_count: number;
+  items_url: string;
+  items: ModuleItem[] | null;
+  state: string;
+  completed_at: null;
+  publish_final_grade: null;
+  published: boolean;
+}
+
+interface CompletionRequirement {
+  type: string;
+  min_score: number;
+  completed: boolean;
+}
+
+interface ContentDetails {
+  points_possible: number;
+  due_at: string;
+  unlock_at: string;
+  lock_at: string;
+  locked_for_user: boolean;
+  lock_explanation: string;
+  lock_info: {
+    asset_string: string;
+    unlock_at: string;
+    lock_at: string;
+    context_module: object;
+  };
+}
+
+interface ModuleItem {
+  id: number;
+  module_id: number;
+  position: number;
+  title: string;
+  indent: number;
+  type: string;
+  content_id: number;
+  html_url: string;
+  url: string;
+  page_url: string;
+  external_url: string;
+  new_tab: boolean;
+  completion_requirement: CompletionRequirement;
+  content_details: ContentDetails;
+  published: boolean;
+}
+
+interface ModuleItemSequenceNode {
+  prev: null;
+  current: ModuleItem;
+  next: ModuleItem;
+  mastery_path: {
+    locked: boolean;
+    assignment_sets: [];
+    selected_set_id: null;
+    awaiting_choice: boolean;
+    still_processing: boolean;
+    modules_url: string;
+    choose_url: string;
+    modules_tab_disabled: boolean;
+  };
+}
+
+export interface ModuleItemSequence {
+  items: ModuleItemSequenceNode[];
+  modules: Module[];
+}
+
+export interface ModuleAssignmentOverride {
+  id: number;
+  context_module_id: number;
+  title: string;
+  students: null;
+  course_section: null;
+}
+
+export interface OverrideTarget {
+  id: number;
+  name: string;
+}
+
 export const canvasRouter = createTRPCRouter({
+  users: {
+    self: publicProcedure.query(async ({ ctx }) => {
+      const url = new URL("/api/v1/users/self", ctx.user.canvas.url);
+      const query = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${ctx.user.canvas.token}`,
+        },
+      });
+      return (await query.json()) as User;
+    }),
+  },
   courses: {
     list: publicProcedure
       .input(
@@ -110,5 +508,167 @@ export const canvasRouter = createTRPCRouter({
           nextCursor: Number(input?.cursor ?? 0) + Number(input?.limit ?? 10),
         };
       }),
+    get: {
+      frontPage: publicProcedure
+        .input(z.object({ courseId: z.number() }))
+        .query(async ({ input, ctx }) => {
+          const url = new URL(
+            `/api/v1/courses/${input.courseId}/front_page`,
+            ctx.user.canvas.url,
+          );
+          const query = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+            },
+          });
+          return (await query.json()) as Page;
+        }),
+      pages: {
+        get: publicProcedure
+          .input(z.object({ courseId: z.number(), pageId: z.string() }))
+          .query(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/pages/${input.pageId}`,
+              ctx.user.canvas.url,
+            );
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            return (await query.json()) as Page;
+          }),
+      },
+      modules: {
+        get: publicProcedure
+          .input(z.object({ courseId: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/modules`,
+              ctx.user.canvas.url,
+            );
+            url.searchParams.append("include[]", "items");
+            url.searchParams.append("include[]", "content_details");
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            return (await query.json()) as Module[];
+          }),
+      },
+      discussions: {
+        edit: publicProcedure
+          .input(
+            z.object({
+              courseId: z.number(),
+              discussionId: z.number(),
+              messageId: z.number(),
+              body: z.string(),
+            }),
+          )
+          .mutation(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/discussion_topics/${input.discussionId}/entries/${input.messageId}`,
+              ctx.user.canvas.url,
+            );
+            const query = await fetch(url, {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                message: input.body,
+              }),
+            });
+            return query.json();
+          }),
+        post: publicProcedure
+          .input(
+            z.object({
+              courseId: z.number(),
+              discussionId: z.number(),
+              body: z.string(),
+            }),
+          )
+          .mutation(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/discussion_topics/${input.discussionId}/entries`,
+              ctx.user.canvas.url,
+            );
+            const query = await fetch(url, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                message: input.body,
+              }),
+            });
+            return query.json();
+          }),
+        get: publicProcedure
+          .input(
+            z.object({
+              courseId: z.number(),
+              discussionId: z.number(),
+              limit: z.number().optional(),
+            }),
+          )
+          .query(async ({ input, ctx }) => {
+            const detailURL = new URL(
+              `/api/v1/courses/${input.courseId}/discussion_topics/${input.discussionId}`,
+              ctx.user.canvas.url,
+            );
+            const detailQuery = await fetch(detailURL, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+
+            const summariesURL = new URL(
+              `/api/v1/courses/${input.courseId}/discussion_topics/${input.discussionId}/view`,
+              ctx.user.canvas.url,
+            );
+
+            summariesURL.searchParams.set(
+              "per_page",
+              String(input.limit ?? 10),
+            );
+
+            const summariesQuery = await fetch(summariesURL, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+
+            const responsesURL = new URL(
+              `/api/v1/courses/${input.courseId}/discussion_topics/${input.discussionId}/entries`,
+              ctx.user.canvas.url,
+            );
+
+            responsesURL.searchParams.set(
+              "per_page",
+              String(input.limit ?? 10),
+            );
+
+            const responsesQuery = await fetch(responsesURL, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+
+            const response = {
+              ...(await detailQuery.json()),
+              ...(await summariesQuery.json()),
+              entries: (await responsesQuery.json()) as DiscussionEntry[],
+            } as DiscussionTopic & Discussion & { entries: DiscussionEntry[] };
+
+            return response;
+          }),
+      },
+    },
   },
 });

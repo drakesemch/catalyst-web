@@ -6,6 +6,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { unstable_cache } from "next/cache";
 import { type Course } from "../canvas";
 import { createClient } from "@vercel/kv";
+import {
+  periodTimes,
+  periods,
+  scheduleDates,
+  scheduleValues,
+  settings,
+} from "@/server/db/schema";
+import { and, eq } from "drizzle-orm";
 
 const courseClassificationDataset = [
   { text: "input: BVW Counseling" },
@@ -239,6 +247,12 @@ const courseClassificationDataset = [
 ];
 
 export const canvasCatalystRouter = createTRPCRouter({
+  details: publicProcedure.query(async ({ ctx }) => {
+    return {
+      url: ctx.user.canvas.url,
+      token: ctx.user.canvas.token,
+    };
+  }),
   courses: publicProcedure
     .input(
       z
@@ -247,6 +261,7 @@ export const canvasCatalystRouter = createTRPCRouter({
             .enum(["active", "invited_or_pending", "completed"])
             .optional(),
           limit: z.number().max(100).optional(),
+          include: z.array(z.enum(["total_scores"])).optional(),
           cursor: z.string().optional(),
         })
         .optional(),
@@ -258,6 +273,9 @@ export const canvasCatalystRouter = createTRPCRouter({
         : null;
       url.searchParams.set("page", String(input?.cursor ?? 1));
       url.searchParams.set("per_page", String(input?.limit ?? 10));
+      input?.include?.forEach((include) =>
+        url.searchParams.append("include[]", include),
+      );
       const query = await fetch(url, {
         headers: {
           Authorization: `Bearer ${ctx.user.canvas.token}`,
@@ -269,6 +287,50 @@ export const canvasCatalystRouter = createTRPCRouter({
       }));
       const nextCursor =
         Number(input?.cursor ?? 0) + Number(input?.limit ?? 10);
+
+      const periodValues = await ctx.db
+        .select()
+        .from(scheduleValues)
+        .where(eq(scheduleValues.userId, ctx.user.get?.id ?? ""));
+
+      const userSettings = await ctx.db
+        .select()
+        .from(settings)
+        .where(eq(settings.userId, ctx.user.get?.id ?? ""));
+
+      const schoolPeriods = await ctx.db
+        .select()
+        .from(periods)
+        .where(
+          eq(
+            periods.schoolId,
+            userSettings.find((val) => val.key == "school_id")?.value ?? "",
+          ),
+        );
+
+      const currentSchedule = await ctx.db
+        .select()
+        .from(scheduleDates)
+        .where(
+          and(
+            eq(
+              scheduleDates.schoolId,
+              userSettings.find((val) => val.key == "school_id")?.value ?? "",
+            ),
+            // eq(scheduleDates.date, new Date(new Date().toDateString())),
+          ),
+        );
+
+      const schedule = await ctx.db
+        .select()
+        .from(periodTimes)
+        .where(
+          eq(
+            periodTimes.scheduleId,
+            currentSchedule.find((val) => val.id == currentSchedule[0]?.id)
+              ?.scheduleId ?? "",
+          ),
+        );
 
       const updatedCourses = await Promise.all(
         courses.map(async (course) => {
@@ -324,8 +386,6 @@ export const canvasCatalystRouter = createTRPCRouter({
 
             const value = result?.response?.text() ?? "Not Available";
 
-            console.log("Input:", course.original_name, "Output:", value);
-
             if (value != "Not Available") {
               await classificationRedis.set(String(course.id), value);
             }
@@ -336,10 +396,29 @@ export const canvasCatalystRouter = createTRPCRouter({
           return {
             ...course,
             classification,
+            period: schoolPeriods.find(
+              (period) =>
+                period.periodId ==
+                periodValues.find((val) => Number(val.value) == course.id)
+                  ?.periodId,
+            ),
+            time: schedule.find(
+              (time) =>
+                time.optionId ==
+                periodValues.find((val) => Number(val.value) == course.id)
+                  ?.periodId,
+            ),
           };
         }),
       );
 
-      return { data: updatedCourses, nextCursor };
+      return {
+        data: updatedCourses.sort((a, b) =>
+          (a.period?.periodOrder ?? 100000) > (b.period?.periodOrder ?? 100000)
+            ? 1
+            : -1,
+        ),
+        nextCursor,
+      };
     }),
 });

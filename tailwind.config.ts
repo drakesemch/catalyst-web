@@ -29,44 +29,44 @@ const config = {
         );
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "hsl(var(--ui-border))",
+        input: "hsl(var(--ui-input))",
+        ring: "hsl(var(--ui-ring))",
+        background: "hsl(var(--ui-background))",
+        foreground: "hsl(var(--ui-foreground))",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "hsl(var(--ui-primary))",
+          foreground: "hsl(var(--ui-primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "hsl(var(--ui-secondary))",
+          foreground: "hsl(var(--ui-secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "hsl(var(--ui-destructive))",
+          foreground: "hsl(var(--ui-destructive-foreground))",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "hsl(var(--ui-muted))",
+          foreground: "hsl(var(--ui-muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "hsl(var(--ui-accent))",
+          foreground: "hsl(var(--ui-accent-foreground))",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "hsl(var(--ui-popover))",
+          foreground: "hsl(var(--ui-popover-foreground))",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "hsl(var(--ui-card))",
+          foreground: "hsl(var(--ui-card-foreground))",
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "var(--ui-radius)",
+        md: "calc(var(--ui-radius) - 2px)",
+        sm: "calc(var(--ui-radius) - 4px)",
       },
       keyframes: {
         "accordion-down": {
@@ -136,6 +136,7 @@ const config = {
   },
   plugins: [
     require("tailwindcss-animate"),
+    require("@tailwindcss/container-queries"),
     // eslint-disable-next-line @typescript-eslint/unbound-method
     plugin(({ matchUtilities, theme }) => {
       matchUtilities(
