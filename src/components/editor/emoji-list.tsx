@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
 import type { GetReferenceClientRect } from "tippy.js";
@@ -31,19 +32,19 @@ export const EmojiList = forwardRef(
       }
     };
 
-    const upHandler = () => {
+    const upHandler = useRef(() => {
       setSelectedIndex(
         (selectedIndex + props.items.length - 1) % props.items.length,
       );
-    };
+    });
 
-    const downHandler = () => {
+    const downHandler = useRef(() => {
       setSelectedIndex((selectedIndex + 1) % props.items.length);
-    };
+    });
 
-    const enterHandler = () => {
+    const enterHandler = useRef(() => {
       selectItem(selectedIndex);
-    };
+    });
 
     useEffect(() => setSelectedIndex(0), [props.items]);
 
@@ -51,17 +52,17 @@ export const EmojiList = forwardRef(
       return {
         onKeyDown: (x: { event: KeyboardEvent }) => {
           if (x.event.key === "ArrowUp") {
-            upHandler();
+            upHandler.current();
             return true;
           }
 
           if (x.event.key === "ArrowDown") {
-            downHandler();
+            downHandler.current();
             return true;
           }
 
           if (x.event.key === "Enter") {
-            enterHandler();
+            enterHandler.current();
             return true;
           }
 

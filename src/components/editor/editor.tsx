@@ -78,6 +78,7 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useMemo,
 } from "react";
 import { Toggle } from "../ui/toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";
@@ -212,7 +213,7 @@ function FontStyle() {
   );
 }
 
-const TextAndHighlightColorPicker = () => {
+function TextAndHighlightColorPicker() {
   const { editor } = useCurrentEditor();
 
   const colors = [
@@ -334,7 +335,7 @@ const TextAndHighlightColorPicker = () => {
       </Popover>
     </>
   );
-};
+}
 
 function KaTeX() {
   return (
@@ -435,148 +436,152 @@ function MenuBar({
 }) {
   const { editor } = useCurrentEditor();
 
-  const initialTools = [
-    [
-      {
-        custom: (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <DraftMenu>
-                <Button variant="outline" size="icon" className="px-3">
-                  <History className="h-4 w-4" />
-                </Button>
-              </DraftMenu>
-            </TooltipTrigger>
-            <TooltipContent className="flex items-center gap-2">
-              <History className="h-4 w-4" /> History
-            </TooltipContent>
-          </Tooltip>
-        ),
-      },
-      {
-        name: "Undo",
-        Icon: Undo,
-        action: () => undo(editor, drafts, setDrafts),
-        isPressed: () => false,
-      },
-      {
-        name: "Redo",
-        Icon: Redo,
-        action: () => redo(editor, drafts, setDrafts),
-        isPressed: () => false,
-      },
-    ],
-    [
-      {
-        name: "Clear Formatting",
-        Icon: RemoveFormatting,
-        action: () => editor?.chain().focus().unsetAllMarks().run(),
-        isPressed: () => false,
-      },
-    ],
-    [
-      {
-        custom: <TextAndHighlightColorPicker />,
-      },
-      {
-        custom: <FontStyle />,
-      },
-      {
-        name: "Outdent",
-        Icon: Outdent,
-        action: () => editor?.chain().focus().outdent().run(),
-        isPressed: () => false,
-      },
-      {
-        name: "Indent",
-        Icon: Indent,
-        action: () => editor?.chain().focus().indent().run(),
-        isPressed: () => false,
-      },
-    ],
-    [
-      {
-        name: "Bold",
-        Icon: Bold,
-        action: () => editor?.chain().focus().toggleBold().run(),
-        isPressed: () => editor?.isActive("bold"),
-      },
-      {
-        name: "Italic",
-        Icon: Italic,
-        action: () => editor?.chain().focus().toggleItalic().run(),
-        isPressed: () => editor?.isActive("italic"),
-      },
-      {
-        name: "Underline",
-        Icon: Underline,
-        action: () => editor?.chain().focus().toggleUnderline().run(),
-        isPressed: () => editor?.isActive("underline"),
-      },
-      {
-        name: "Strikethrough",
-        Icon: Strikethrough,
-        action: () => editor?.chain().focus().toggleStrike().run(),
-        isPressed: () => editor?.isActive("strike"),
-      },
-      {
-        name: "Superscript",
-        Icon: Superscript,
-        action: () => editor?.chain().focus().toggleSuperscript().run(),
-        isPressed: () => editor?.isActive("superscript"),
-      },
-      {
-        name: "Subscript",
-        Icon: Subscript,
-        action: () => editor?.chain().focus().toggleSubscript().run(),
-        isPressed: () => editor?.isActive("subscript"),
-      },
-    ],
-    [
-      {
-        name: "Bullet List",
-        Icon: List,
-        action: () => editor?.chain().focus().toggleBulletList().run(),
-        isPressed: () => editor?.isActive("bulletList"),
-      },
-      {
-        name: "Ordered List",
-        Icon: ListOrdered,
-        action: () => editor?.chain().focus().toggleOrderedList().run(),
-        isPressed: () => editor?.isActive("orderedList"),
-      },
-    ],
-    [
-      {
-        name: "Blockquote",
-        Icon: TextQuote,
-        action: () => editor?.chain().focus().toggleBlockquote().run(),
-        isPressed: () => editor?.isActive("blockquote"),
-      },
-      {
-        name: "Horizontal Rule",
-        Icon: Minus,
-        action: () => editor?.chain().focus().setHorizontalRule().run(),
-        isPressed: () => editor?.isActive("horizontalRule"),
-      },
-      {
-        name: "Break",
-        Icon: CornerDownLeft,
-        action: () => editor?.chain().focus().setHardBreak().run(),
-        isPressed: () => editor?.isActive("hardBreak"),
-      },
-    ],
-    [
-      {
-        custom: <Markdown />,
-      },
-      {
-        custom: <KaTeX />,
-      },
-    ],
-  ];
-
   const [editorState, setEditorState] = useState(0);
+
+  const initialTools = useMemo(
+    () => [
+      [
+        {
+          custom: (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DraftMenu>
+                  <Button variant="outline" size="icon" className="px-3">
+                    <History className="h-4 w-4" />
+                  </Button>
+                </DraftMenu>
+              </TooltipTrigger>
+              <TooltipContent className="flex items-center gap-2">
+                <History className="h-4 w-4" /> History
+              </TooltipContent>
+            </Tooltip>
+          ),
+        },
+        {
+          name: "Undo",
+          Icon: Undo,
+          action: () => undo(editor, drafts, setDrafts),
+          isPressed: () => false,
+        },
+        {
+          name: "Redo",
+          Icon: Redo,
+          action: () => redo(editor, drafts, setDrafts),
+          isPressed: () => false,
+        },
+      ],
+      [
+        {
+          name: "Clear Formatting",
+          Icon: RemoveFormatting,
+          action: () => editor?.chain().focus().unsetAllMarks().run(),
+          isPressed: () => false,
+        },
+      ],
+      [
+        {
+          custom: <TextAndHighlightColorPicker />,
+        },
+        {
+          custom: <FontStyle />,
+        },
+        {
+          name: "Outdent",
+          Icon: Outdent,
+          action: () => editor?.chain().focus().outdent().run(),
+          isPressed: () => false,
+        },
+        {
+          name: "Indent",
+          Icon: Indent,
+          action: () => editor?.chain().focus().indent().run(),
+          isPressed: () => false,
+        },
+      ],
+      [
+        {
+          name: "Bold",
+          Icon: Bold,
+          action: () => editor?.chain().focus().toggleBold().run(),
+          isPressed: () => editor?.isActive("bold"),
+        },
+        {
+          name: "Italic",
+          Icon: Italic,
+          action: () => editor?.chain().focus().toggleItalic().run(),
+          isPressed: () => editor?.isActive("italic"),
+        },
+        {
+          name: "Underline",
+          Icon: Underline,
+          action: () => editor?.chain().focus().toggleUnderline().run(),
+          isPressed: () => editor?.isActive("underline"),
+        },
+        {
+          name: "Strikethrough",
+          Icon: Strikethrough,
+          action: () => editor?.chain().focus().toggleStrike().run(),
+          isPressed: () => editor?.isActive("strike"),
+        },
+        {
+          name: "Superscript",
+          Icon: Superscript,
+          action: () => editor?.chain().focus().toggleSuperscript().run(),
+          isPressed: () => editor?.isActive("superscript"),
+        },
+        {
+          name: "Subscript",
+          Icon: Subscript,
+          action: () => editor?.chain().focus().toggleSubscript().run(),
+          isPressed: () => editor?.isActive("subscript"),
+        },
+      ],
+      [
+        {
+          name: "Bullet List",
+          Icon: List,
+          action: () => editor?.chain().focus().toggleBulletList().run(),
+          isPressed: () => editor?.isActive("bulletList"),
+        },
+        {
+          name: "Ordered List",
+          Icon: ListOrdered,
+          action: () => editor?.chain().focus().toggleOrderedList().run(),
+          isPressed: () => editor?.isActive("orderedList"),
+        },
+      ],
+      [
+        {
+          name: "Blockquote",
+          Icon: TextQuote,
+          action: () => editor?.chain().focus().toggleBlockquote().run(),
+          isPressed: () => editor?.isActive("blockquote"),
+        },
+        {
+          name: "Horizontal Rule",
+          Icon: Minus,
+          action: () => editor?.chain().focus().setHorizontalRule().run(),
+          isPressed: () => editor?.isActive("horizontalRule"),
+        },
+        {
+          name: "Break",
+          Icon: CornerDownLeft,
+          action: () => editor?.chain().focus().setHardBreak().run(),
+          isPressed: () => editor?.isActive("hardBreak"),
+        },
+      ],
+      [
+        {
+          custom: <Markdown />,
+        },
+        {
+          custom: <KaTeX />,
+        },
+      ],
+    ],
+    [DraftMenu, drafts, editor, setDrafts],
+  );
+
   const [tools, setTools] = useState(initialTools);
 
   useEffect(() => {
@@ -587,7 +592,7 @@ function MenuBar({
 
   useEffect(() => {
     setTools(initialTools);
-  }, [editorState]);
+  }, [editorState, initialTools]);
 
   return (
     <div className="mb-2 flex gap-1 overflow-auto">

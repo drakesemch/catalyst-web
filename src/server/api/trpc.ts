@@ -41,59 +41,56 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
         get: undefined,
         settings: undefined,
         canvas: {
-          url: undefined,
+          url: "https://canvas.instructure.com",
           token: undefined,
         },
       },
       ...opts,
     };
-  } else {
-    const user = (
-      await db.select().from(users).where(eq(users.id, session.user.id))
-    ).at(0);
-    const userSettings = await db
-      .select()
-      .from(settings)
-      .where(eq(settings.userId, session.user.id));
-
-    const schoolId =
-      userSettings.find((s) => s.key == "school_id")?.value ?? "";
-
-    const school = schoolId
-      ? (
-          await db
-            .select({ canvasURL: schools.canvasURL })
-            .from(schools)
-            .where(eq(schools.id, schoolId ?? ""))
-        ).at(0)
-      : undefined;
-
-    const encryptedToken =
-      userSettings.find((s) => s.key == "canvas_token")?.value ?? "";
-
-    const decipher = createDecipheriv(
-      "aes-256-cbc",
-      env.NEXTAUTH_SECRET.substring(0, 32),
-      env.NEXTAUTH_SECRET.substring(33, 33 + 16),
-    );
-    const token =
-      decipher.update(encryptedToken, "base64", "utf8") +
-      decipher.final("utf8");
-
-    return {
-      db,
-      session,
-      user: {
-        get: user,
-        settings: userSettings,
-        canvas: {
-          url: school?.canvasURL ?? "",
-          token,
-        },
-      },
-      ...opts,
-    };
   }
+  const user = (
+    await db.select().from(users).where(eq(users.id, session.user.id))
+  ).at(0);
+  const userSettings = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.userId, session.user.id));
+
+  const schoolId = userSettings.find((s) => s.key == "school_id")?.value ?? "";
+
+  const school = schoolId
+    ? (
+        await db
+          .select({ canvasURL: schools.canvasURL })
+          .from(schools)
+          .where(eq(schools.id, schoolId ?? ""))
+      ).at(0)
+    : undefined;
+
+  const encryptedToken =
+    userSettings.find((s) => s.key == "canvas_token")?.value ?? "";
+
+  const decipher = createDecipheriv(
+    "aes-256-cbc",
+    env.NEXTAUTH_SECRET.substring(0, 32),
+    env.NEXTAUTH_SECRET.substring(33, 33 + 16),
+  );
+  const token =
+    decipher.update(encryptedToken, "base64", "utf8") + decipher.final("utf8");
+
+  return {
+    db,
+    session,
+    user: {
+      get: user,
+      settings: userSettings,
+      canvas: {
+        url: school?.canvasURL ?? "https://canvas.instructure.com",
+        token,
+      },
+    },
+    ...opts,
+  };
 };
 
 /**
@@ -181,7 +178,7 @@ export const protectedProcedure = t.procedure
     return next({
       ctx: {
         // infers the `session` as non-nullable
-        session: { ...ctx.session, user: ctx.session.user },
+        session: { ...ctx },
       },
     });
   });

@@ -1,0 +1,281 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { api } from "@/trpc/react";
+import {
+  isBefore,
+  format,
+  differenceInSeconds,
+  isAfter,
+  formatDistanceStrict,
+} from "date-fns";
+import { Progress } from "@/components/ui/progress";
+import { CircleAlert, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PercentageChart } from "./percentage-chart";
+
+export function Courses() {
+  const [{ data: courses }] =
+    api.catalyst.user.canvas.courses.list.useSuspenseQuery({
+      enrollment_state: "active",
+      include: ["total_scores"],
+    });
+
+  const [courseSearch, setCourseSearch] = useState("");
+
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const setNewDate = setInterval(() => {
+      setNow(new Date());
+    });
+    return () => clearInterval(setNewDate);
+  }, []);
+
+  return (
+    <div className="flex max-h-96 flex-col gap-2 overflow-auto p-2">
+      <div className="flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
+        <Search />
+        <input
+          type="search"
+          placeholder="Search courses..."
+          className="flex-1 bg-background outline-none"
+          value={courseSearch}
+          onChange={(e) => setCourseSearch(e.target.value)}
+        />
+      </div>
+      {courses.filter((course) => {
+        if (courseSearch == "") return true;
+        return (
+          (course.period?.periodName
+            ?.toLowerCase()
+            .includes(courseSearch.toLowerCase()) ??
+            false) ||
+          course.classification
+            .toLowerCase()
+            .includes(courseSearch.toLowerCase()) ||
+          course.original_name
+            .toLowerCase()
+            .includes(courseSearch.toLowerCase())
+        );
+      }).length == 0 && (
+        <div className="flex w-full items-center justify-center p-2 text-muted-foreground">
+          No courses found.
+        </div>
+      )}
+      {courses
+        .filter((course) => {
+          if (courseSearch == "") return true;
+          return (
+            (course.period?.periodName
+              ?.toLowerCase()
+              .includes(courseSearch.toLowerCase()) ??
+              false) ||
+            course.classification
+              .toLowerCase()
+              .includes(courseSearch.toLowerCase()) ||
+            course.original_name
+              .toLowerCase()
+              .includes(courseSearch.toLowerCase())
+          );
+        })
+        .map((course) => {
+          const diffPct = isBefore(
+            new Date(),
+            new Date(format(now, "yyyy-MM-dd ") + course.time?.start + " UTC"),
+          )
+            ? 0
+            : differenceInSeconds(
+                new Date(),
+                new Date(
+                  format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
+                ),
+              ) /
+              differenceInSeconds(
+                new Date(
+                  format(now, "yyyy-MM-dd ") + course.time?.end + " UTC",
+                ),
+                new Date(
+                  format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
+                ),
+              );
+          const isCurrent =
+            isAfter(
+              now,
+              new Date(
+                new Date(
+                  format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
+                ),
+              ),
+            ) &&
+            isBefore(
+              now,
+              new Date(
+                new Date(
+                  format(now, "yyyy-MM-dd ") + course.time?.end + " UTC",
+                ),
+              ),
+            );
+          return (
+            <div
+              key={course.id}
+              className={cn(
+                "flex w-full flex-col rounded border",
+                isCurrent && "bg-secondary",
+              )}
+            >
+              <div className="flex items-stretch">
+                <Button
+                  variant={isCurrent ? "secondary" : "ghost"}
+                  className={cn(
+                    "h-auto flex-1 overflow-hidden rounded-none",
+                    isCurrent
+                      ? "hover:bg-background/30"
+                      : "hover:bg-secondary/70",
+                  )}
+                  href={`/app/courses/${course.id}`}
+                >
+                  <div className="flex flex-1 flex-col items-start justify-center gap-1 overflow-hidden">
+                    <span className="font-bold">
+                      {course.period?.periodName != undefined
+                        ? `${course.period?.periodName}: `
+                        : undefined}
+                      {course.classification}
+                    </span>
+                    <span className="max-w-full truncate text-xs text-muted-foreground">
+                      {course.original_name}
+                    </span>
+                  </div>
+                </Button>
+                <Button
+                  variant={isCurrent ? "secondary" : "ghost"}
+                  className={cn(
+                    "aspect-square h-auto flex-shrink-0 rounded-none border-l",
+                    isCurrent
+                      ? "border-l-background hover:bg-background/30"
+                      : "hover:bg-secondary/70",
+                  )}
+                  href={`/app/courses/${course.id}/grades`}
+                >
+                  <PercentageChart
+                    pct={
+                      course.enrollments?.at(0)?.computed_current_score ?? -1
+                    }
+                    className="pointer-events-none"
+                  />
+                </Button>
+              </div>
+              {course.data.missingAssignments > 0 && (
+                <div
+                  className={cn(
+                    "flex items-center justify-start gap-2 border-t px-4 py-2 text-xs text-red-500",
+                    isCurrent && "border-t-background",
+                  )}
+                >
+                  <CircleAlert />
+                  <span>
+                    {course.data.missingAssignments} missing assignment
+                    {course.data.missingAssignments != 1 && "s"}
+                  </span>
+                </div>
+              )}
+              {course.time && (
+                <div
+                  className={cn(
+                    "flex flex-col border-t",
+                    isCurrent && "border-t-background",
+                  )}
+                >
+                  <div className="flex items-center gap-4 px-4 py-2 text-xs">
+                    {isCurrent && (
+                      <div className="-mr-2 size-2 rounded-full bg-green-500" />
+                    )}
+                    <span>
+                      {format(
+                        new Date(
+                          format(now, "yyyy-MM-dd ") +
+                            course.time.start +
+                            " UTC",
+                        ),
+                        "hh:mm a",
+                      )}
+                    </span>
+                    <Progress
+                      className={cn("flex-1", isCurrent && "bg-background")}
+                      value={
+                        isBefore(
+                          now,
+                          new Date(
+                            new Date(
+                              format(now, "yyyy-MM-dd ") +
+                                course.time.start +
+                                " UTC",
+                            ),
+                          ),
+                        )
+                          ? 0
+                          : Math.min(100, Math.max(0, diffPct * 100))
+                      }
+                    />
+                    <span>
+                      {format(
+                        new Date(
+                          format(now, "yyyy-MM-dd ") + course.time.end + " UTC",
+                        ),
+                        "hh:mm a",
+                      )}
+                    </span>
+                  </div>
+                  <div className="-mt-2 flex items-center justify-between gap-4 px-4 py-2 text-xs text-muted-foreground">
+                    <span>
+                      {isBefore(
+                        new Date(),
+                        new Date(
+                          format(now, "yyyy-MM-dd ") +
+                            course.time.start +
+                            " UTC",
+                        ),
+                      )
+                        ? "Starts "
+                        : "Started "}
+                      {formatDistanceStrict(
+                        new Date(
+                          format(now, "yyyy-MM-dd ") +
+                            course.time.start +
+                            " UTC",
+                        ),
+                        new Date(),
+                        {
+                          addSuffix: true,
+                        },
+                      )}
+                    </span>
+                    <span>
+                      {isBefore(
+                        new Date(),
+                        new Date(
+                          format(now, "yyyy-MM-dd ") + course.time.end + " UTC",
+                        ),
+                      )
+                        ? "Ends "
+                        : "Ended "}
+                      {formatDistanceStrict(
+                        new Date(
+                          format(now, "yyyy-MM-dd ") + course.time.end + " UTC",
+                        ),
+                        new Date(),
+                        {
+                          addSuffix: true,
+                        },
+                      )}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+    </div>
+  );
+}

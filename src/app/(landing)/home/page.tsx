@@ -100,8 +100,8 @@ function IntegrationSection() {
     <>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
         className="rotate-180"
       />
       <section
@@ -124,8 +124,8 @@ function IntegrationSection() {
       </section>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
       />
     </>
   );
@@ -219,8 +219,8 @@ function AndMore() {
     <>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
         className="rotate-180"
       />
       <section className="-my-3 flex !w-full flex-col items-center justify-center gap-2 bg-muted/30 py-4">
@@ -236,7 +236,7 @@ function AndMore() {
         </Marquee>
         <SquigglySeparator
           waveWidth={100}
-          waveColor="hsla(var(--muted) / 30%)"
+          waveColor="hsla(var(--ui-muted) / 30%)"
         />
         <VelocityScroll
           text="And so much more"
@@ -246,8 +246,8 @@ function AndMore() {
       </section>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
       />
     </>
   );
@@ -388,8 +388,8 @@ function Reviews() {
     <>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / .3)"
-        fillColor="hsla(var(--muted) / .3)"
+        waveColor="hsla(var(--ui-muted) / .3)"
+        fillColor="hsla(var(--ui-muted) / .3)"
         className="rotate-180"
       />
       <section className="-my-3 flex min-h-[20rem] !w-full flex-col items-center justify-center gap-8 bg-muted/30 py-8">
@@ -479,8 +479,8 @@ function Reviews() {
       </section>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
       />
     </>
   );
@@ -508,8 +508,8 @@ async function GetStarted() {
     <>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
         className="rotate-180"
       />
       <section className="-my-3 flex min-h-[10rem] !w-full flex-row items-center justify-center gap-2 bg-muted/30 p-8">
@@ -524,8 +524,8 @@ async function GetStarted() {
       </section>
       <SquigglySeparator
         waveWidth={100}
-        waveColor="hsla(var(--muted) / 30%)"
-        fillColor="hsla(var(--muted) / 30%)"
+        waveColor="hsla(var(--ui-muted) / 30%)"
+        fillColor="hsla(var(--ui-muted) / 30%)"
       />
     </>
   );

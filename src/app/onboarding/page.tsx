@@ -414,7 +414,6 @@ function AddSchool() {
   }, [periods, mutate]);
 
   useEffect(() => {
-    console.log(schedules);
     if (schedules.length == 0) return;
     mutate({
       schedules,

@@ -33,21 +33,12 @@ const Tabs = React.forwardRef<
       <TabsPrimitive.Root
         ref={ref}
         className={cn(
-          "relative isolate inline-flex flex-col overflow-hidden rounded-md bg-secondary text-secondary-foreground",
+          "relative isolate inline-flex w-full flex-col overflow-hidden rounded-md text-secondary-foreground",
           className,
         )}
         {...props}
       >
         {children}
-        <div
-          className={"absolute -z-10 rounded bg-background transition-all"}
-          style={{
-            top: selectedElement?.offsetTop,
-            left: selectedElement?.offsetLeft,
-            width: selectedElement?.offsetWidth,
-            height: selectedElement?.offsetHeight,
-          }}
-        />
       </TabsPrimitive.Root>
     </TabsContext.Provider>
   );
@@ -57,16 +48,30 @@ Tabs.displayName = TabsPrimitive.Root.displayName;
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md p-1 text-muted-foreground",
-      className,
-    )}
-    {...props}
-  />
-));
+>(({ className, children, ...props }, ref) => {
+  const [[selectedElement]] = React.useContext(TabsContext);
+  return (
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        "-z-10 mx-auto inline-flex h-10 w-max items-center justify-center rounded-md bg-secondary p-1 text-muted-foreground",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <div
+        className={"absolute -z-10 rounded bg-background transition-all"}
+        style={{
+          top: selectedElement?.offsetTop,
+          left: selectedElement?.offsetLeft,
+          width: selectedElement?.offsetWidth,
+          height: selectedElement?.offsetHeight,
+        }}
+      />
+    </TabsPrimitive.List>
+  );
+});
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 const TabsTrigger = React.forwardRef<
@@ -126,7 +131,7 @@ const TabsTrigger = React.forwardRef<
               })()
         }
         className={cn(
-          "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           className,
         )}
       >

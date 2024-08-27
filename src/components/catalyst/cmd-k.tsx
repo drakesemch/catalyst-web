@@ -319,7 +319,7 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
               </BreadcrumbLink>
             </BreadcrumbItem>
             {pages.map((page, i) => (
-              <>
+              <React.Fragment key={`page-${page}-${i}`}>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem key={`bread-${page}`}>
                   <BreadcrumbLink
@@ -344,7 +344,7 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
                     })()}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-              </>
+              </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
@@ -364,12 +364,9 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
       <CommandList ref={commandContainer}>
         <CommandEmpty>No results found.</CommandEmpty>
         {currentMenu.map((group, i) => (
-          <>
+          <React.Fragment key={`command-group-${String(group.heading)}`}>
             {i > 0 && <CommandSeparator className="mx-0" />}
-            <CommandGroup
-              key={`command-group-${String(group.heading)}`}
-              heading={group.heading}
-            >
+            <CommandGroup heading={group.heading}>
               {group.items.map((item, j) => {
                 switch (item?.type) {
                   case "separator":
@@ -442,7 +439,7 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
                 }
               })}
             </CommandGroup>
-          </>
+          </React.Fragment>
         ))}
       </CommandList>
     </CommandDialog>

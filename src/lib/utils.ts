@@ -12,13 +12,19 @@ export function prettyBody(str?: string) {
     new RegExp("(?:<script.*?><\\/script>)", "g"),
     "",
   );
-  str = str?.replace(
-    new RegExp("https://.*\\.instructure.com/api/v1", "g"),
-    typeof window != "undefined"
-      ? window.location.host
-      : env.NODE_ENV == "development"
-        ? "http://localhost:3000/app"
-        : "https://catalyst.blue-flame.tech/app",
-  );
+  str = replaceCanvasURL(str);
   return str ?? "";
+}
+
+export function replaceCanvasURL(str?: string) {
+  const baseURL = `${
+    typeof window != "undefined"
+      ? `${window.location.protocol}//${window.location.host}`
+      : env.NODE_ENV == "development"
+        ? "http://localhost:3000"
+        : "https://catalyst.blue-flame.tech"
+  }/app/`;
+  return str
+    ?.replace(new RegExp("https://.*\\.instructure.com/api/v1/", "g"), baseURL)
+    ?.replace(new RegExp("https://.*\\.instructure.com/", "g"), baseURL);
 }

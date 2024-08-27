@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 export interface Term {
   id: number;
@@ -373,7 +373,7 @@ export interface Enrollment {
   current_period_unposted_final_grade: string;
 }
 
-interface Module {
+export interface Module {
   id: number;
   workflow_state: string;
   position: number;
@@ -390,13 +390,13 @@ interface Module {
   published: boolean;
 }
 
-interface CompletionRequirement {
+export interface CompletionRequirement {
   type: string;
   min_score: number;
   completed: boolean;
 }
 
-interface ContentDetails {
+export interface ContentDetails {
   points_possible: number;
   due_at: string;
   unlock_at: string;
@@ -411,7 +411,7 @@ interface ContentDetails {
   };
 }
 
-interface ModuleItem {
+export interface ModuleItem {
   id: number;
   module_id: number;
   position: number;
@@ -425,11 +425,11 @@ interface ModuleItem {
   external_url: string;
   new_tab: boolean;
   completion_requirement: CompletionRequirement;
-  content_details: ContentDetails;
+  content_details: ContentDetails | (ContentDetails & Assignment);
   published: boolean;
 }
 
-interface ModuleItemSequenceNode {
+export interface ModuleItemSequenceNode {
   prev: null;
   current: ModuleItem;
   next: ModuleItem;
@@ -463,9 +463,237 @@ export interface OverrideTarget {
   name: string;
 }
 
+export interface ExternalToolTagAttributes {
+  url: string;
+  new_tab: boolean;
+  resource_link_id: string;
+}
+
+export interface LockInfo {
+  asset_string: string;
+  unlock_at?: string;
+  lock_at?: string;
+  context_module?: string;
+  manually_locked: boolean;
+}
+
+export interface RubricRating {
+  points: number;
+  id: string;
+  description: string;
+  long_description: string;
+}
+
+export interface RubricCriteria {
+  points: number;
+  id: string;
+  learning_outcome_id?: string;
+  vendor_guid?: string;
+  description: string;
+  long_description: string;
+  criterion_use_range: boolean;
+  ratings: RubricRating[] | null;
+  ignore_for_scoring: boolean;
+}
+
+export interface AssignmentDate {
+  id?: number;
+  base?: boolean;
+  title: string;
+  due_at: string;
+  unlock_at?: string;
+  lock_at?: string;
+}
+
+export interface TurnitinSettings {
+  originality_report_visibility:
+    | "immediate"
+    | "after_grading"
+    | "after_due_date"
+    | "never";
+  s_paper_check: boolean;
+  internet_check: boolean;
+  journal_check: boolean;
+  exclude_biblio: boolean;
+  exclude_quoted: boolean;
+  exclude_small_matches_type: "percent" | "words" | null;
+  exclude_small_matches_value: number | null;
+}
+
+export interface NeedsGradingCount {
+  section_id: string;
+  needs_grading_count: number;
+}
+
+export interface ScoreStatistic {
+  min: number;
+  max: number;
+  mean: number;
+  upper_q: number;
+  median: number;
+  lower_q: number;
+}
+
+export interface Assignment {
+  id: number;
+  name: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  due_at: string | null;
+  lock_at: string | null;
+  unlock_at: string | null;
+  has_overrides: boolean;
+  all_dates: AssignmentDate[] | null;
+  course_id: number;
+  html_url: string;
+  submissions_download_url: string;
+  assignment_group_id: number;
+  due_date_required: boolean;
+  allowed_extensions: string[];
+  max_name_length: number;
+  turnitin_enabled?: boolean;
+  vericite_enabled?: boolean;
+  turnitin_settings?: TurnitinSettings | null;
+  grade_group_students_individually: boolean;
+  external_tool_tag_attributes?: ExternalToolTagAttributes | null;
+  peer_reviews: boolean;
+  automatic_peer_reviews: boolean;
+  peer_review_count?: number;
+  peer_reviews_assign_at?: string;
+  intra_group_peer_reviews: boolean;
+  group_category_id?: number;
+  needs_grading_count: number;
+  needs_grading_count_by_section?: NeedsGradingCount[];
+  position: number;
+  post_to_sis?: boolean;
+  integration_id?: string;
+  integration_data?: Record<string, null>;
+  points_possible: number;
+  submission_types: string[];
+  has_submitted_submissions: boolean;
+  grading_type:
+    | "pass_fail"
+    | "percent"
+    | "letter_grade"
+    | "gpa_scale"
+    | "points";
+  grading_standard_id?: number | null;
+  published: boolean;
+  unpublishable: boolean;
+  only_visible_to_overrides: boolean;
+  locked_for_user: boolean;
+  lock_info?: LockInfo | null;
+  lock_explanation?: string | null;
+  quiz_id?: number;
+  anonymous_submissions?: boolean;
+  discussion_topic?: string | null;
+  freeze_on_copy?: boolean;
+  frozen?: boolean;
+  frozen_attributes?: string[];
+  submission?: Submission;
+  use_rubric_for_grading?: boolean;
+  rubric_settings?: Record<string, null>;
+  rubric?: RubricCriteria[] | null;
+  assignment_visibility?: number[];
+  overrides?: AssignmentOverride[] | null;
+  omit_from_final_grade?: boolean;
+  hide_in_gradebook?: boolean;
+  moderated_grading: boolean;
+  grader_count: number;
+  final_grader_id: number;
+  grader_comments_visible_to_graders: boolean;
+  graders_anonymous_to_graders: boolean;
+  grader_names_visible_to_final_grader: boolean;
+  anonymous_grading: boolean;
+  allowed_attempts: number;
+  post_manually: boolean;
+  score_statistics?: ScoreStatistic | null;
+  can_submit?: boolean;
+  ab_guid?: string[];
+  annotatable_attachment_id?: number | null;
+  anonymize_students?: boolean;
+  require_lockdown_browser?: boolean;
+  important_dates?: boolean;
+  muted?: boolean; // Deprecated
+  anonymous_peer_reviews: boolean;
+  anonymous_instructor_annotations: boolean;
+  graded_submissions_exist: boolean;
+  is_quiz_assignment: boolean;
+  in_closed_grading_period: boolean;
+  can_duplicate: boolean;
+  original_course_id?: number;
+  original_assignment_id?: number;
+  original_lti_resource_link_id?: number;
+  original_assignment_name?: string;
+  original_quiz_id?: number;
+  workflow_state: string;
+}
+
+export interface AssignmentOverride {
+  id: number;
+  assignment_id?: number;
+  quiz_id?: number;
+  context_module_id?: number;
+  discussion_topic_id?: number;
+}
+
+export interface MediaComment {
+  "content-type": string;
+  display_name: string;
+  media_id: string;
+  media_type: string;
+  url: string;
+}
+
+export interface SubmissionComment {
+  id: number;
+  author_id: number;
+  author_name: string;
+  author: string;
+  comment: string;
+  created_at: string;
+  edited_at: string;
+  media_comment: MediaComment | null;
+}
+
+export interface Submission {
+  assignment_id: number;
+  assignment: Assignment | null;
+  course: Course | null;
+  attempt: number;
+  body: string;
+  grade: string;
+  grade_matches_current_submission: boolean;
+  html_url: string;
+  preview_url: string;
+  score: number;
+  submission_comments: SubmissionComment[] | null;
+  submission_type: string;
+  submitted_at: string;
+  url: string | null;
+  user_id: number;
+  grader_id: number;
+  graded_at: string;
+  user: User | null;
+  late: boolean;
+  assignment_visible: boolean;
+  excused: boolean;
+  missing: boolean;
+  late_policy_status: string;
+  points_deducted: number;
+  seconds_late: number;
+  workflow_state: string;
+  extra_attempts: number;
+  anonymous_id: string;
+  posted_at: string;
+  read_status: string;
+  redo_request: boolean;
+}
+
 export const canvasRouter = createTRPCRouter({
   users: {
-    self: publicProcedure.query(async ({ ctx }) => {
+    self: protectedProcedure.query(async ({ ctx }) => {
       const url = new URL("/api/v1/users/self", ctx.user.canvas.url);
       const query = await fetch(url, {
         headers: {
@@ -476,7 +704,7 @@ export const canvasRouter = createTRPCRouter({
     }),
   },
   courses: {
-    list: publicProcedure
+    list: protectedProcedure
       .input(
         z
           .object({
@@ -501,7 +729,7 @@ export const canvasRouter = createTRPCRouter({
           },
         });
         return {
-          data: ((await query.json()) as Course[]).map((course) => ({
+          data: ((await query.json()) as Course[])?.map?.((course) => ({
             ...course,
             original_name: course.original_name ?? course.name,
           })),
@@ -509,7 +737,21 @@ export const canvasRouter = createTRPCRouter({
         };
       }),
     get: {
-      frontPage: publicProcedure
+      details: protectedProcedure
+        .input(z.object({ courseId: z.number() }))
+        .query(async ({ input, ctx }) => {
+          const url = new URL(
+            `/api/v1/courses/${input.courseId}`,
+            ctx.user.canvas.url,
+          );
+          const query = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+            },
+          });
+          return (await query.json()) as Course;
+        }),
+      frontPage: protectedProcedure
         .input(z.object({ courseId: z.number() }))
         .query(async ({ input, ctx }) => {
           const url = new URL(
@@ -524,7 +766,7 @@ export const canvasRouter = createTRPCRouter({
           return (await query.json()) as Page;
         }),
       pages: {
-        get: publicProcedure
+        get: protectedProcedure
           .input(z.object({ courseId: z.number(), pageId: z.string() }))
           .query(async ({ input, ctx }) => {
             const url = new URL(
@@ -539,8 +781,41 @@ export const canvasRouter = createTRPCRouter({
             return (await query.json()) as Page;
           }),
       },
+      assignments: {
+        get: protectedProcedure
+          .input(z.object({ courseId: z.number(), assignmentId: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/assignments/${input.assignmentId}`,
+              ctx.user.canvas.url,
+            );
+            url.searchParams.append("include[]", "submission");
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            return (await query.json()) as Assignment;
+          }),
+        list: protectedProcedure
+          .input(z.object({ courseId: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/assignments`,
+              ctx.user.canvas.url,
+            );
+            url.searchParams.append("include[]", "submission");
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            if (!query.ok) return [];
+            return (await query.json()) as Assignment[];
+          }),
+      },
       modules: {
-        get: publicProcedure
+        get: protectedProcedure
           .input(z.object({ courseId: z.number() }))
           .query(async ({ input, ctx }) => {
             const url = new URL(
@@ -554,11 +829,50 @@ export const canvasRouter = createTRPCRouter({
                 Authorization: `Bearer ${ctx.user.canvas.token}`,
               },
             });
-            return (await query.json()) as Module[];
+            if (!query.ok) return [];
+            let json = ((await query.json()) ?? []) as Module[];
+            json = (await Promise.all(
+              json.map(async (module) => ({
+                ...module,
+                items: await Promise.all(
+                  module.items?.map(async (item) => {
+                    if (
+                      item.type == "Assignment" ||
+                      item.type == "Discussion"
+                    ) {
+                      const assignmentURL = new URL(
+                        `/api/v1/courses/${input.courseId}/assignments/${item.content_id}`,
+                        ctx.user.canvas.url,
+                      );
+                      assignmentURL.searchParams.append(
+                        "include[]",
+                        "submission",
+                      );
+                      const assignmentQuery = await fetch(assignmentURL, {
+                        headers: {
+                          Authorization: `Bearer ${ctx.user.canvas.token}`,
+                        },
+                      });
+                      const assignmentData =
+                        (await assignmentQuery.json()) as Assignment;
+                      return {
+                        ...item,
+                        content_details: {
+                          ...item.content_details,
+                          ...assignmentData,
+                        },
+                      };
+                    }
+                    return item;
+                  }) ?? [],
+                ),
+              })),
+            )) as Module[];
+            return json;
           }),
       },
       discussions: {
-        edit: publicProcedure
+        edit: protectedProcedure
           .input(
             z.object({
               courseId: z.number(),
@@ -584,7 +898,7 @@ export const canvasRouter = createTRPCRouter({
             });
             return query.json();
           }),
-        post: publicProcedure
+        post: protectedProcedure
           .input(
             z.object({
               courseId: z.number(),
@@ -609,7 +923,7 @@ export const canvasRouter = createTRPCRouter({
             });
             return query.json();
           }),
-        get: publicProcedure
+        get: protectedProcedure
           .input(
             z.object({
               courseId: z.number(),

@@ -1,4 +1,8 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 
 import { blogRouter } from "./catalyst/blogs";
 import { z } from "zod";
@@ -26,7 +30,7 @@ export const catalystRouter = createTRPCRouter({
     canvas: canvasCatalystRouter,
     schedule: {
       values: {
-        get: publicProcedure.query(async ({ ctx }) => {
+        get: protectedProcedure.query(async ({ ctx }) => {
           const user = ctx.user.get;
           if (!user)
             throw new TRPCError({
@@ -38,7 +42,7 @@ export const catalystRouter = createTRPCRouter({
             .from(scheduleValues)
             .where(eq(scheduleValues.userId, user.id));
         }),
-        add: publicProcedure
+        add: protectedProcedure
           .input(
             z.object({
               periodId: z.string(),
@@ -85,10 +89,10 @@ export const catalystRouter = createTRPCRouter({
       },
     },
     settings: {
-      get: publicProcedure.query(({ ctx }) => {
+      get: protectedProcedure.query(({ ctx }) => {
         return ctx.user.settings;
       }),
-      finalize: publicProcedure.mutation(async ({ ctx }) => {
+      finalize: protectedProcedure.mutation(async ({ ctx }) => {
         const user = ctx.user.get;
         if (!user)
           throw new TRPCError({
@@ -102,7 +106,7 @@ export const catalystRouter = createTRPCRouter({
             and(eq(settings.userId, user.id), eq(settings.draftState, "draft")),
           );
       }),
-      draft: publicProcedure
+      draft: protectedProcedure
         .input(
           z.object({
             fName: z.string().optional(),
@@ -143,12 +147,8 @@ export const catalystRouter = createTRPCRouter({
               message: "User not found",
             });
 
-          console.log("keys", keys);
-
           for (const [key, val] of keys) {
             if (val == undefined) continue;
-
-            console.log("t");
             if (
               (
                 await ctx.db
@@ -175,7 +175,7 @@ export const catalystRouter = createTRPCRouter({
             }
           }
         }),
-      save: publicProcedure.mutation(async ({ ctx }) => {
+      save: protectedProcedure.mutation(async ({ ctx }) => {
         const user = ctx.user.get;
         if (!user)
           throw new TRPCError({
@@ -190,12 +190,12 @@ export const catalystRouter = createTRPCRouter({
           );
       }),
     },
-    get: publicProcedure.query(({ ctx }) => {
+    get: protectedProcedure.query(({ ctx }) => {
       return ctx.user.get;
     }),
   },
   school: {
-    list: publicProcedure.query(async ({ ctx }) => {
+    list: protectedProcedure.query(async ({ ctx }) => {
       const user = ctx.user.get;
       if (!user)
         throw new TRPCError({
@@ -227,7 +227,7 @@ export const catalystRouter = createTRPCRouter({
     }),
     get: {
       draft: {
-        details: publicProcedure
+        details: protectedProcedure
           .input(z.object({ id: z.string() }).optional())
           .query(async ({ input, ctx }) => {
             const user = ctx.user.get;
@@ -279,7 +279,7 @@ export const catalystRouter = createTRPCRouter({
 
             return school;
           }),
-        periods: publicProcedure
+        periods: protectedProcedure
           .input(z.object({ id: z.string() }).optional())
           .query(async ({ input, ctx }) => {
             const user = ctx.user.get;
@@ -386,7 +386,7 @@ export const catalystRouter = createTRPCRouter({
 
             return finalPeriods;
           }),
-        schedules: publicProcedure.query(async ({ ctx }) => {
+        schedules: protectedProcedure.query(async ({ ctx }) => {
           const user = ctx.user.get;
           if (!user)
             throw new TRPCError({
@@ -471,7 +471,7 @@ export const catalystRouter = createTRPCRouter({
         }),
       },
     },
-    save: publicProcedure.mutation(async ({ ctx }) => {
+    save: protectedProcedure.mutation(async ({ ctx }) => {
       const user = ctx.user.get;
       if (!user)
         throw new TRPCError({
@@ -514,7 +514,7 @@ export const catalystRouter = createTRPCRouter({
         .set({ draftState: "saved" })
         .where(eq(schedules.schoolId, school.id));
     }),
-    draft: publicProcedure
+    draft: protectedProcedure
       .input(
         z.object({
           id: z.string().optional(),

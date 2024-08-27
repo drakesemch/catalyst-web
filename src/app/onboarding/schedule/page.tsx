@@ -13,15 +13,16 @@ export default function ScheduleOnboardingPage() {
     id: settings?.find((s) => s.key == "school_id")?.value ?? "",
   });
   const [values] = api.catalyst.user.schedule.values.get.useSuspenseQuery();
-  const [{ pages }] = api.catalyst.user.canvas.courses.useSuspenseInfiniteQuery(
-    {
-      limit: 100,
-      enrollment_state: "active",
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-    },
-  );
+  const [{ pages }] =
+    api.catalyst.user.canvas.courses.list.useSuspenseInfiniteQuery(
+      {
+        limit: 100,
+        enrollment_state: "active",
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
 
   const { mutate, isPending } =
     api.catalyst.user.schedule.values.add.useMutation();

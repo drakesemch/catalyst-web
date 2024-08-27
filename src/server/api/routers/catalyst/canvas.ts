@@ -1,10 +1,10 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 import { z } from "zod";
 import { env } from "@/env";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { unstable_cache } from "next/cache";
-import { type Course } from "../canvas";
+import type { Submission, Course } from "../canvas";
 import { createClient } from "@vercel/kv";
 import {
   periodTimes,
@@ -13,7 +13,7 @@ import {
   scheduleValues,
   settings,
 } from "@/server/db/schema";
-import { and, eq } from "drizzle-orm";
+import { type InferSelectModel, and, eq } from "drizzle-orm";
 
 const courseClassificationDataset = [
   { text: "input: BVW Counseling" },
@@ -247,178 +247,391 @@ const courseClassificationDataset = [
 ];
 
 export const canvasCatalystRouter = createTRPCRouter({
-  details: publicProcedure.query(async ({ ctx }) => {
+  details: protectedProcedure.query(async ({ ctx }) => {
     return {
       url: ctx.user.canvas.url,
       token: ctx.user.canvas.token,
     };
   }),
-  courses: publicProcedure
-    .input(
-      z
-        .object({
-          enrollment_state: z
-            .enum(["active", "invited_or_pending", "completed"])
-            .optional(),
-          limit: z.number().max(100).optional(),
-          include: z.array(z.enum(["total_scores"])).optional(),
-          cursor: z.string().optional(),
-        })
-        .optional(),
-    )
-    .query(async ({ ctx, input }) => {
-      const url = new URL("/api/v1/courses", ctx.user.canvas.url);
-      input?.enrollment_state
-        ? url.searchParams.set("enrollment_state", input.enrollment_state)
-        : null;
-      url.searchParams.set("page", String(input?.cursor ?? 1));
-      url.searchParams.set("per_page", String(input?.limit ?? 10));
-      input?.include?.forEach((include) =>
-        url.searchParams.append("include[]", include),
-      );
-      const query = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${ctx.user.canvas.token}`,
-        },
-      });
-      const courses = ((await query.json()) as Course[]).map((course) => ({
-        ...course,
-        original_name: course.original_name ?? course.name,
-      }));
-      const nextCursor =
-        Number(input?.cursor ?? 0) + Number(input?.limit ?? 10);
-
-      const periodValues = await ctx.db
-        .select()
-        .from(scheduleValues)
-        .where(eq(scheduleValues.userId, ctx.user.get?.id ?? ""));
-
-      const userSettings = await ctx.db
-        .select()
-        .from(settings)
-        .where(eq(settings.userId, ctx.user.get?.id ?? ""));
-
-      const schoolPeriods = await ctx.db
-        .select()
-        .from(periods)
-        .where(
-          eq(
-            periods.schoolId,
-            userSettings.find((val) => val.key == "school_id")?.value ?? "",
-          ),
+  courses: {
+    get: protectedProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const url = new URL(
+          `/api/v1/courses/${input.courseId}`,
+          ctx.user.canvas.url,
         );
+        const query = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        if (!query.ok) return null;
+        const course = (await query.json()) as Course;
+        const classification = (await unstable_cache(async () => {
+          const classificationRedis = createClient({
+            url: env.CLASSIFICATION_REST_API_URL,
+            token: env.CLASSIFICATION_REST_API_TOKEN,
+          });
 
-      const currentSchedule = await ctx.db
-        .select()
-        .from(scheduleDates)
-        .where(
-          and(
+          const classification = await classificationRedis.get(
+            String(course.id),
+          );
+
+          if (classification) {
+            return classification;
+          }
+
+          const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+          const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            systemInstruction: "return the output value",
+          });
+
+          const generationConfig = {
+            temperature: 1,
+            topP: 0.95,
+            topK: 64,
+            maxOutputTokens: 100,
+            stopSequences: ["input:", "\n"],
+            responseMimeType: "text/plain",
+          };
+
+          const input = [
+            ...courseClassificationDataset,
+            {
+              text: "input: " + course.original_name,
+            },
+            {
+              text: "output: ",
+            },
+          ];
+
+          const result = await model
+            .generateContent({
+              contents: [{ role: "user", parts: input }],
+              generationConfig,
+            })
+            .catch((err) => {
+              console.error(err);
+              return undefined;
+            });
+
+          const value = result?.response?.text() ?? "Not Available";
+
+          if (value != "Not Available") {
+            await classificationRedis.set(String(course.id), value);
+          }
+
+          return value;
+        }, ["courses", "classifications", String(course.id)])()) as string;
+        const periodValues = await ctx.db
+          .select()
+          .from(scheduleValues)
+          .where(eq(scheduleValues.userId, ctx.user.get?.id ?? ""));
+
+        const userSettings = await ctx.db
+          .select()
+          .from(settings)
+          .where(eq(settings.userId, ctx.user.get?.id ?? ""));
+
+        const schoolPeriods = await ctx.db
+          .select()
+          .from(periods)
+          .where(
             eq(
-              scheduleDates.schoolId,
+              periods.schoolId,
               userSettings.find((val) => val.key == "school_id")?.value ?? "",
             ),
-            // eq(scheduleDates.date, new Date(new Date().toDateString())),
-          ),
+          );
+
+        const currentSchedule = await ctx.db
+          .select()
+          .from(scheduleDates)
+          .where(
+            and(
+              eq(
+                scheduleDates.schoolId,
+                userSettings.find((val) => val.key == "school_id")?.value ?? "",
+              ),
+              eq(
+                scheduleDates.date,
+                new Date(new Date().toDateString() + " 00:00:00 UTC"),
+              ),
+            ),
+          );
+
+        const schedule = await ctx.db
+          .select()
+          .from(periodTimes)
+          .where(
+            eq(
+              periodTimes.scheduleId,
+              currentSchedule.find((val) => val.id == currentSchedule[0]?.id)
+                ?.scheduleId ?? "",
+            ),
+          );
+
+        const assignmentURL = new URL(
+          `/api/v1/courses/${course.id}/students/submissions`,
+          ctx.user.canvas.url,
         );
 
-      const schedule = await ctx.db
-        .select()
-        .from(periodTimes)
-        .where(
-          eq(
-            periodTimes.scheduleId,
-            currentSchedule.find((val) => val.id == currentSchedule[0]?.id)
-              ?.scheduleId ?? "",
+        assignmentURL.searchParams.set("per_page", "100");
+        assignmentURL.searchParams.append("include[]", "assignment");
+
+        const assignmentsQuery = await fetch(assignmentURL, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+
+        const submissionData = (await assignmentsQuery.json()) as Submission[];
+
+        const missingAssignments = submissionData.filter(
+          (assignment) =>
+            (!assignment.excused &&
+              assignment.score == 0 &&
+              assignment.assignment?.points_possible != 0) ||
+            assignment.missing,
+        ).length;
+
+        return {
+          ...course,
+          original_name: course.original_name ?? course.name,
+          classification,
+          data: {
+            missingAssignments,
+          },
+          period: schoolPeriods.find(
+            (period) =>
+              period.periodId ==
+              periodValues.find((val) => Number(val.value) == course.id)
+                ?.periodId,
           ),
+          time: schedule.find(
+            (time) =>
+              time.optionId ==
+              periodValues.find((val) => Number(val.value) == course.id)
+                ?.periodId,
+          ),
+        };
+      }),
+    list: protectedProcedure
+      .input(
+        z
+          .object({
+            enrollment_state: z
+              .enum(["active", "invited_or_pending", "completed"])
+              .optional(),
+            limit: z.number().max(100).optional(),
+            include: z.array(z.enum(["total_scores"])).optional(),
+            cursor: z.string().optional(),
+          })
+          .optional(),
+      )
+      .query(async ({ ctx, input }) => {
+        type Return = (Course & {
+          classification: string;
+          data: {
+            missingAssignments: number;
+          };
+          period: InferSelectModel<typeof periods>;
+          time: InferSelectModel<typeof periodTimes>;
+        })[];
+        const url = new URL("/api/v1/courses", ctx.user.canvas.url);
+        input?.enrollment_state
+          ? url.searchParams.set("enrollment_state", input.enrollment_state)
+          : null;
+        url.searchParams.set("page", String(input?.cursor ?? 1));
+        url.searchParams.set("per_page", String(input?.limit ?? 10));
+        input?.include?.forEach((include) =>
+          url.searchParams.append("include[]", include),
         );
+        const query = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        if (!query.ok)
+          return {
+            data: [] as Return,
+            nextCursor: 0,
+          };
+        const courses = (((await query.json()) as Course[]) ?? [])?.map(
+          (course) => ({
+            ...course,
+            original_name: course.original_name ?? course.name,
+          }),
+        );
+        const nextCursor =
+          Number(input?.cursor ?? 0) + Number(input?.limit ?? 10);
 
-      const updatedCourses = await Promise.all(
-        courses.map(async (course) => {
-          const classification = (await unstable_cache(async () => {
-            const classificationRedis = createClient({
-              url: env.CLASSIFICATION_REST_API_URL,
-              token: env.CLASSIFICATION_REST_API_TOKEN,
-            });
+        const periodValues = await ctx.db
+          .select()
+          .from(scheduleValues)
+          .where(eq(scheduleValues.userId, ctx.user.get?.id ?? ""));
 
-            const classification = await classificationRedis.get(
-              String(course.id),
-            );
+        const userSettings = await ctx.db
+          .select()
+          .from(settings)
+          .where(eq(settings.userId, ctx.user.get?.id ?? ""));
 
-            if (classification) {
-              return classification;
-            }
+        const schoolPeriods = await ctx.db
+          .select()
+          .from(periods)
+          .where(
+            eq(
+              periods.schoolId,
+              userSettings.find((val) => val.key == "school_id")?.value ?? "",
+            ),
+          );
 
-            const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+        const currentSchedule = await ctx.db
+          .select()
+          .from(scheduleDates)
+          .where(
+            and(
+              eq(
+                scheduleDates.schoolId,
+                userSettings.find((val) => val.key == "school_id")?.value ?? "",
+              ),
+              eq(
+                scheduleDates.date,
+                new Date(new Date().toDateString() + " 00:00:00 UTC"),
+              ),
+            ),
+          );
 
-            const model = genAI.getGenerativeModel({
-              model: "gemini-1.5-flash",
-              systemInstruction: "return the output value",
-            });
+        const schedule = await ctx.db
+          .select()
+          .from(periodTimes)
+          .where(
+            eq(
+              periodTimes.scheduleId,
+              currentSchedule.find((val) => val.id == currentSchedule[0]?.id)
+                ?.scheduleId ?? "",
+            ),
+          );
 
-            const generationConfig = {
-              temperature: 1,
-              topP: 0.95,
-              topK: 64,
-              maxOutputTokens: 100,
-              stopSequences: ["input:", "\n"],
-              responseMimeType: "text/plain",
-            };
-
-            const input = [
-              ...courseClassificationDataset,
-              {
-                text: "input: " + course.original_name,
-              },
-              {
-                text: "output: ",
-              },
-            ];
-
-            const result = await model
-              .generateContent({
-                contents: [{ role: "user", parts: input }],
-                generationConfig,
-              })
-              .catch((err) => {
-                console.error(err);
-                return undefined;
+        const updatedCourses = await Promise.all(
+          courses?.map(async (course) => {
+            const classification = (await unstable_cache(async () => {
+              const classificationRedis = createClient({
+                url: env.CLASSIFICATION_REST_API_URL,
+                token: env.CLASSIFICATION_REST_API_TOKEN,
               });
 
-            const value = result?.response?.text() ?? "Not Available";
+              const classification = await classificationRedis.get(
+                String(course.id),
+              );
 
-            if (value != "Not Available") {
-              await classificationRedis.set(String(course.id), value);
-            }
+              if (classification) {
+                return classification;
+              }
 
-            return value;
-          }, ["courses", "classifications", String(course.id)])()) as string;
+              const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
-          return {
-            ...course,
-            classification,
-            period: schoolPeriods.find(
-              (period) =>
-                period.periodId ==
-                periodValues.find((val) => Number(val.value) == course.id)
-                  ?.periodId,
-            ),
-            time: schedule.find(
-              (time) =>
-                time.optionId ==
-                periodValues.find((val) => Number(val.value) == course.id)
-                  ?.periodId,
-            ),
-          };
-        }),
-      );
+              const model = genAI.getGenerativeModel({
+                model: "gemini-1.5-flash",
+                systemInstruction: "return the output value",
+              });
 
-      return {
-        data: updatedCourses.sort((a, b) =>
-          (a.period?.periodOrder ?? 100000) > (b.period?.periodOrder ?? 100000)
-            ? 1
-            : -1,
-        ),
-        nextCursor,
-      };
-    }),
+              const generationConfig = {
+                temperature: 1,
+                topP: 0.95,
+                topK: 64,
+                maxOutputTokens: 100,
+                stopSequences: ["input:", "\n"],
+                responseMimeType: "text/plain",
+              };
+
+              const input = [
+                ...courseClassificationDataset,
+                {
+                  text: "input: " + course.original_name,
+                },
+                {
+                  text: "output: ",
+                },
+              ];
+
+              const result = await model
+                .generateContent({
+                  contents: [{ role: "user", parts: input }],
+                  generationConfig,
+                })
+                .catch((err) => {
+                  console.error(err);
+                  return undefined;
+                });
+
+              const value = result?.response?.text() ?? "Not Available";
+
+              if (value != "Not Available") {
+                await classificationRedis.set(String(course.id), value);
+              }
+
+              return value;
+            }, ["courses", "classifications", String(course.id)])()) as string;
+
+            const assignmentURL = new URL(
+              `/api/v1/courses/${course.id}/students/submissions`,
+              ctx.user.canvas.url,
+            );
+
+            assignmentURL.searchParams.set("per_page", "100");
+            assignmentURL.searchParams.append("include[]", "assignment");
+
+            const assignmentsQuery = await fetch(assignmentURL, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+
+            const submissionData =
+              (await assignmentsQuery.json()) as Submission[];
+
+            const missingAssignments = submissionData.filter(
+              (assignment) =>
+                (!assignment.excused &&
+                  assignment.score == 0 &&
+                  assignment.assignment?.points_possible != 0) ||
+                assignment.missing,
+            ).length;
+
+            return {
+              ...course,
+              classification,
+              data: {
+                missingAssignments,
+              },
+              period: schoolPeriods.find(
+                (period) =>
+                  period.periodId ==
+                  periodValues.find((val) => Number(val.value) == course.id)
+                    ?.periodId,
+              ),
+              time: schedule.find(
+                (time) =>
+                  time.optionId ==
+                  periodValues.find((val) => Number(val.value) == course.id)
+                    ?.periodId,
+              ),
+            };
+          }),
+        );
+
+        return {
+          data: updatedCourses.sort((a, b) =>
+            (a.period?.periodOrder ?? 100000) >
+            (b.period?.periodOrder ?? 100000)
+              ? 1
+              : -1,
+          ) as Return,
+          nextCursor,
+        };
+      }),
+  },
 });
