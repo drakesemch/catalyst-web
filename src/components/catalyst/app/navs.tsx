@@ -31,7 +31,12 @@ import Link from "next/link";
 import { HydrateClient, api } from "@/trpc/server";
 
 export async function AppNav() {
-  await api.catalyst.user.canvas.courses.list.prefetch().catch(console.error);
+  await api.catalyst.user.canvas.courses.list
+    .prefetch({
+      enrollment_state: "active",
+      include: ["total_scores"],
+    })
+    .catch(console.error);
 
   return (
     <HydrateClient>

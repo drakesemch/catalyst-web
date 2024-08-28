@@ -782,6 +782,59 @@ export const canvasRouter = createTRPCRouter({
           }),
       },
       assignments: {
+        submissions: {
+          list: protectedProcedure
+            .input(
+              z.object({
+                courseId: z.number(),
+                assignmentId: z.number(),
+              }),
+            )
+            .query(async ({ input, ctx }) => {
+              const url = new URL(
+                `/api/v1/courses/${input.courseId}/assignments/${input.assignmentId}/submissions/self`,
+                ctx.user.canvas.url,
+              );
+              url.searchParams.append("include[]", "submission_history");
+              url.searchParams.append("include[]", "submission_comments");
+              url.searchParams.append("include[]", "user");
+              const query = await fetch(url, {
+                headers: {
+                  Authorization: `Bearer ${ctx.user.canvas.token}`,
+                },
+              });
+              return (
+                (await query.json()) as { submission_history: Submission[] }
+              ).submission_history;
+            }),
+        },
+        submit: {
+          text: protectedProcedure
+            .input(
+              z.object({
+                courseId: z.number(),
+                assignmentId: z.number(),
+                body: z.string(),
+              }),
+            )
+            .mutation(async ({ input, ctx }) => {
+              const url = new URL(
+                `/api/v1/courses/${input.courseId}/assignments/${input.assignmentId}/submissions`,
+                ctx.user.canvas.url,
+              );
+              const data = new FormData();
+              data.append("submission[submission_type]", "online_text_entry");
+              data.append("submission[body]", input.body);
+              const query = await fetch(url, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${ctx.user.canvas.token}`,
+                },
+                body: data,
+              });
+              return query.json();
+            }),
+        },
         get: protectedProcedure
           .input(z.object({ courseId: z.number(), assignmentId: z.number() }))
           .query(async ({ input, ctx }) => {
@@ -795,7 +848,26 @@ export const canvasRouter = createTRPCRouter({
                 Authorization: `Bearer ${ctx.user.canvas.token}`,
               },
             });
-            return (await query.json()) as Assignment;
+            const response = (await query.json()) as Assignment;
+            if (response.submission_types.includes("external_tool")) {
+              const externalURL = new URL(
+                `/api/v1/courses/${input.courseId}/external_tools/sessionless_launch`,
+                ctx.user.canvas.url,
+              );
+              externalURL.searchParams.append(
+                "assignment_id",
+                String(input.assignmentId),
+              );
+              externalURL.searchParams.append("launch_type", "assessment");
+              const externalResponse = await fetch(externalURL, {
+                headers: {
+                  Authorization: `Bearer ${ctx.user.canvas.token}`,
+                },
+              });
+              response.external_tool_tag_attributes =
+                (await externalResponse.json()) as ExternalToolTagAttributes;
+            }
+            return response;
           }),
         list: protectedProcedure
           .input(z.object({ courseId: z.number() }))

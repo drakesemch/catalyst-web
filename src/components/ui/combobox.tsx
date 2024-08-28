@@ -19,7 +19,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "./drawer";
-import useMediaQuery from "@/lib/hooks";
+import { useMediaQuery } from "@/lib/hooks";
 
 export function Combobox({
   placeholders,

@@ -440,198 +440,218 @@ export const canvasCatalystRouter = createTRPCRouter({
           period: InferSelectModel<typeof periods>;
           time: InferSelectModel<typeof periodTimes>;
         })[];
-        const url = new URL("/api/v1/courses", ctx.user.canvas.url);
-        input?.enrollment_state
-          ? url.searchParams.set("enrollment_state", input.enrollment_state)
-          : null;
-        url.searchParams.set("page", String(input?.cursor ?? 1));
-        url.searchParams.set("per_page", String(input?.limit ?? 10));
-        input?.include?.forEach((include) =>
-          url.searchParams.append("include[]", include),
-        );
-        const query = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${ctx.user.canvas.token}`,
-          },
-        });
-        if (!query.ok)
-          return {
-            data: [] as Return,
-            nextCursor: 0,
-          };
-        const courses = (((await query.json()) as Course[]) ?? [])?.map(
-          (course) => ({
-            ...course,
-            original_name: course.original_name ?? course.name,
-          }),
-        );
-        const nextCursor =
-          Number(input?.cursor ?? 0) + Number(input?.limit ?? 10);
-
-        const periodValues = await ctx.db
-          .select()
-          .from(scheduleValues)
-          .where(eq(scheduleValues.userId, ctx.user.get?.id ?? ""));
-
-        const userSettings = await ctx.db
-          .select()
-          .from(settings)
-          .where(eq(settings.userId, ctx.user.get?.id ?? ""));
-
-        const schoolPeriods = await ctx.db
-          .select()
-          .from(periods)
-          .where(
-            eq(
-              periods.schoolId,
-              userSettings.find((val) => val.key == "school_id")?.value ?? "",
-            ),
-          );
-
-        const currentSchedule = await ctx.db
-          .select()
-          .from(scheduleDates)
-          .where(
-            and(
-              eq(
-                scheduleDates.schoolId,
-                userSettings.find((val) => val.key == "school_id")?.value ?? "",
-              ),
-              eq(
-                scheduleDates.date,
-                new Date(new Date().toDateString() + " 00:00:00 UTC"),
-              ),
-            ),
-          );
-
-        const schedule = await ctx.db
-          .select()
-          .from(periodTimes)
-          .where(
-            eq(
-              periodTimes.scheduleId,
-              currentSchedule.find((val) => val.id == currentSchedule[0]?.id)
-                ?.scheduleId ?? "",
-            ),
-          );
-
-        const updatedCourses = await Promise.all(
-          courses?.map(async (course) => {
-            const classification = (await unstable_cache(async () => {
-              const classificationRedis = createClient({
-                url: env.CLASSIFICATION_REST_API_URL,
-                token: env.CLASSIFICATION_REST_API_TOKEN,
-              });
-
-              const classification = await classificationRedis.get(
-                String(course.id),
-              );
-
-              if (classification) {
-                return classification;
-              }
-
-              const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-
-              const model = genAI.getGenerativeModel({
-                model: "gemini-1.5-flash",
-                systemInstruction: "return the output value",
-              });
-
-              const generationConfig = {
-                temperature: 1,
-                topP: 0.95,
-                topK: 64,
-                maxOutputTokens: 100,
-                stopSequences: ["input:", "\n"],
-                responseMimeType: "text/plain",
-              };
-
-              const input = [
-                ...courseClassificationDataset,
-                {
-                  text: "input: " + course.original_name,
-                },
-                {
-                  text: "output: ",
-                },
-              ];
-
-              const result = await model
-                .generateContent({
-                  contents: [{ role: "user", parts: input }],
-                  generationConfig,
-                })
-                .catch((err) => {
-                  console.error(err);
-                  return undefined;
-                });
-
-              const value = result?.response?.text() ?? "Not Available";
-
-              if (value != "Not Available") {
-                await classificationRedis.set(String(course.id), value);
-              }
-
-              return value;
-            }, ["courses", "classifications", String(course.id)])()) as string;
-
-            const assignmentURL = new URL(
-              `/api/v1/courses/${course.id}/students/submissions`,
-              ctx.user.canvas.url,
+        return unstable_cache(
+          async () => {
+            const url = new URL("/api/v1/courses", ctx.user.canvas.url);
+            input?.enrollment_state
+              ? url.searchParams.set("enrollment_state", input.enrollment_state)
+              : null;
+            url.searchParams.set("page", String(input?.cursor ?? 1));
+            url.searchParams.set("per_page", String(input?.limit ?? 10));
+            input?.include?.forEach((include) =>
+              url.searchParams.append("include[]", include),
             );
-
-            assignmentURL.searchParams.set("per_page", "100");
-            assignmentURL.searchParams.append("include[]", "assignment");
-
-            const assignmentsQuery = await fetch(assignmentURL, {
+            const query = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${ctx.user.canvas.token}`,
               },
             });
+            if (!query.ok)
+              return {
+                data: [] as Return,
+                nextCursor: 0,
+              };
+            const courses = (((await query.json()) as Course[]) ?? [])?.map(
+              (course) => ({
+                ...course,
+                original_name: course.original_name ?? course.name,
+              }),
+            );
+            const nextCursor =
+              Number(input?.cursor ?? 0) + Number(input?.limit ?? 10);
 
-            const submissionData =
-              (await assignmentsQuery.json()) as Submission[];
+            const periodValues = await ctx.db
+              .select()
+              .from(scheduleValues)
+              .where(eq(scheduleValues.userId, ctx.user.get?.id ?? ""));
 
-            const missingAssignments = submissionData.filter(
-              (assignment) =>
-                (!assignment.excused &&
-                  assignment.score == 0 &&
-                  assignment.assignment?.points_possible != 0) ||
-                assignment.missing,
-            ).length;
+            const userSettings = await ctx.db
+              .select()
+              .from(settings)
+              .where(eq(settings.userId, ctx.user.get?.id ?? ""));
+
+            const schoolPeriods = await ctx.db
+              .select()
+              .from(periods)
+              .where(
+                eq(
+                  periods.schoolId,
+                  userSettings.find((val) => val.key == "school_id")?.value ??
+                    "",
+                ),
+              );
+
+            const currentSchedule = await ctx.db
+              .select()
+              .from(scheduleDates)
+              .where(
+                and(
+                  eq(
+                    scheduleDates.schoolId,
+                    userSettings.find((val) => val.key == "school_id")?.value ??
+                      "",
+                  ),
+                  eq(
+                    scheduleDates.date,
+                    new Date(new Date().toDateString() + " 00:00:00 UTC"),
+                  ),
+                ),
+              );
+
+            const schedule = await ctx.db
+              .select()
+              .from(periodTimes)
+              .where(
+                eq(
+                  periodTimes.scheduleId,
+                  currentSchedule.find(
+                    (val) => val.id == currentSchedule[0]?.id,
+                  )?.scheduleId ?? "",
+                ),
+              );
+
+            const updatedCourses = await Promise.all(
+              courses?.map(async (course) => {
+                const classification = (await unstable_cache(async () => {
+                  const classificationRedis = createClient({
+                    url: env.CLASSIFICATION_REST_API_URL,
+                    token: env.CLASSIFICATION_REST_API_TOKEN,
+                  });
+
+                  const classification = await classificationRedis.get(
+                    String(course.id),
+                  );
+
+                  if (classification) {
+                    return classification;
+                  }
+
+                  const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+                  const model = genAI.getGenerativeModel({
+                    model: "gemini-1.5-flash",
+                    systemInstruction: "return the output value",
+                  });
+
+                  const generationConfig = {
+                    temperature: 1,
+                    topP: 0.95,
+                    topK: 64,
+                    maxOutputTokens: 100,
+                    stopSequences: ["input:", "\n"],
+                    responseMimeType: "text/plain",
+                  };
+
+                  const input = [
+                    ...courseClassificationDataset,
+                    {
+                      text: "input: " + course.original_name,
+                    },
+                    {
+                      text: "output: ",
+                    },
+                  ];
+
+                  const result = await model
+                    .generateContent({
+                      contents: [{ role: "user", parts: input }],
+                      generationConfig,
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                      return undefined;
+                    });
+
+                  const value = result?.response?.text() ?? "Not Available";
+
+                  if (value != "Not Available") {
+                    await classificationRedis.set(String(course.id), value);
+                  }
+
+                  return value;
+                }, [
+                  "courses",
+                  "classifications",
+                  String(course.id),
+                ])()) as string;
+
+                const assignmentURL = new URL(
+                  `/api/v1/courses/${course.id}/students/submissions`,
+                  ctx.user.canvas.url,
+                );
+
+                assignmentURL.searchParams.set("per_page", "100");
+                assignmentURL.searchParams.append("include[]", "assignment");
+
+                const assignmentsQuery = await fetch(assignmentURL, {
+                  headers: {
+                    Authorization: `Bearer ${ctx.user.canvas.token}`,
+                  },
+                });
+
+                const submissionData =
+                  (await assignmentsQuery.json()) as Submission[];
+
+                const missingAssignments = submissionData.filter(
+                  (assignment) =>
+                    (!assignment.excused &&
+                      assignment.score == 0 &&
+                      assignment.assignment?.points_possible != 0) ||
+                    assignment.missing,
+                ).length;
+
+                return {
+                  ...course,
+                  classification,
+                  data: {
+                    missingAssignments,
+                  },
+                  period: schoolPeriods.find(
+                    (period) =>
+                      period.periodId ==
+                      periodValues.find((val) => Number(val.value) == course.id)
+                        ?.periodId,
+                  ),
+                  time: schedule.find(
+                    (time) =>
+                      time.optionId ==
+                      periodValues.find((val) => Number(val.value) == course.id)
+                        ?.periodId,
+                  ),
+                };
+              }),
+            );
 
             return {
-              ...course,
-              classification,
-              data: {
-                missingAssignments,
-              },
-              period: schoolPeriods.find(
-                (period) =>
-                  period.periodId ==
-                  periodValues.find((val) => Number(val.value) == course.id)
-                    ?.periodId,
-              ),
-              time: schedule.find(
-                (time) =>
-                  time.optionId ==
-                  periodValues.find((val) => Number(val.value) == course.id)
-                    ?.periodId,
-              ),
+              data: updatedCourses.sort((a, b) =>
+                (a.period?.periodOrder ?? 100000) >
+                (b.period?.periodOrder ?? 100000)
+                  ? 1
+                  : -1,
+              ) as Return,
+              nextCursor,
             };
-          }),
-        );
-
-        return {
-          data: updatedCourses.sort((a, b) =>
-            (a.period?.periodOrder ?? 100000) >
-            (b.period?.periodOrder ?? 100000)
-              ? 1
-              : -1,
-          ) as Return,
-          nextCursor,
-        };
+          },
+          [
+            ctx.user.get?.id ?? "0",
+            input?.toString() ?? "{}",
+            new Date(new Date().toDateString() + " 00:00:00 UTC").toString(),
+            "courses",
+          ],
+          {
+            revalidate: 60,
+          },
+        )();
       }),
   },
 });

@@ -595,7 +595,7 @@ function MenuBar({
   }, [editorState, initialTools]);
 
   return (
-    <div className="mb-2 flex gap-1 overflow-auto">
+    <div className="sticky top-0 z-10 mb-2 flex gap-1 overflow-auto bg-background">
       {tools.map((toolGroup, idx) => (
         <Fragment key={`tool-group-${idx}`}>
           {idx != 0 && (
@@ -686,7 +686,7 @@ function MenuFooter({
   }, [editor, editorState]);
 
   return (
-    <div className="@[20ch]:mt-2 @[20ch]:flex-row mt-4 flex flex-col-reverse items-center justify-between gap-2">
+    <div className="@[20ch]:mt-2 @[20ch]:flex-row my-4 flex flex-col-reverse items-center justify-between gap-2 px-4">
       <div className="flex items-center gap-2">
         <DraftMenu>
           <Button
@@ -1257,7 +1257,7 @@ export function TextEditor({
           editable: () => !(readOnly || disabled),
           attributes: {
             class: cn(
-              "border text-left rounded-md p-4 outline-0 overflow-auto render-fancy render-white-content",
+              "border dark:border-0 text-left rounded-md p-4 outline-0 overflow-auto render-fancy render-white-content",
               disabled ? "opacity-50 bg-blue-500 pointer-events-none" : "",
               className,
             ),
