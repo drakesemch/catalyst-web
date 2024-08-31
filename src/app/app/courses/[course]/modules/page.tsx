@@ -2,12 +2,6 @@ import { HydrateClient, api } from "@/trpc/server";
 import ModulesPage from "./client";
 import { Suspense } from "react";
 import { Album, FileText, Plus, Search } from "lucide-react";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Button } from "@/components/ui/button";

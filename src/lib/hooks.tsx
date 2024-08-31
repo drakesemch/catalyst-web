@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CircleSlash, Upload, ArrowRight } from "lucide-react";
-import { useState, useEffect, useRef, useContext } from "react";
+import { CircleSlash, Upload } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import prettyBytes from "pretty-bytes";
 import { createPortal } from "react-dom";
 

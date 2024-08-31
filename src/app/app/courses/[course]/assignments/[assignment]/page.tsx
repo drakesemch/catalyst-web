@@ -5,12 +5,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  prettyBody,
-  prettyState,
-  renameSubmissionType,
-  submissionTypeWithIcon,
-} from "@/lib/utils";
+import { prettyBody, prettyState, submissionTypeWithIcon } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { format, formatDistanceStrict } from "date-fns";
 import {
@@ -27,7 +22,6 @@ import {
   SquareArrowOutUpRight,
   Timer,
   Undo,
-  Upload,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
@@ -46,7 +40,6 @@ import {
 } from "@/components/ui/input-otp";
 import { NewSubmission, Submissions } from "./submission";
 import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
-import { TextEditor } from "@/components/editor/editor";
 
 export default async function AssignmentPage({
   params: { course, assignment },

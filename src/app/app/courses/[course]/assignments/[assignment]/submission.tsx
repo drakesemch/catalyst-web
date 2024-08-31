@@ -18,9 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFileUpload } from "@/lib/hooks";
 import { submissionTypeWithIcon } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { btoa } from "buffer";
 import { format, formatDistanceStrict, isBefore } from "date-fns";
-import { ArrowRight, Check, FileText, Loader, Upload } from "lucide-react";
+import { ArrowRight, Check, FileText, Loader } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 const toBase64 = (file: File | Blob) =>

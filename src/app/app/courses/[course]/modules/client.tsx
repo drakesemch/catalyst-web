@@ -2,15 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
-import {
-  FileText,
-  HelpCircle,
-  Link2,
-  MessageCircle,
-  NotepadText,
-  Presentation,
-  Table,
-} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import {

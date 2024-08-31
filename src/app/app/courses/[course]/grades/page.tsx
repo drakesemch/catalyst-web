@@ -1,20 +1,9 @@
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { prettyBody, prettyState, submissionTypeWithIcon } from "@/lib/utils";
+import { prettyState, submissionTypeWithIcon } from "@/lib/utils";
 import { api } from "@/trpc/server";
-import { format } from "date-fns";
-import {
-  Album,
-  FileText,
-  Plus,
-  Calendar,
-  Percent,
-  Undo,
-  Pencil,
-  Slash,
-  Minus,
-} from "lucide-react";
+import { Album, Plus, Percent, Undo, Pencil, Slash, Minus } from "lucide-react";
 
 export default async function GradesPage({
   params: { course },

@@ -2,7 +2,7 @@ import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { prettyBody } from "@/lib/utils";
 import { api } from "@/trpc/server";
-import { Album, FileText, Info } from "lucide-react";
+import { Album, Info } from "lucide-react";
 
 export default async function CourseHomePage({
   params: { course },

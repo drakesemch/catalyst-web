@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { Assignment, ModuleItem } from "@/server/api/routers/canvas";
+import type { Assignment, ModuleItem } from "@/server/api/routers/canvas";
 import { type ClassValue, clsx } from "clsx";
 import {
   Check,
