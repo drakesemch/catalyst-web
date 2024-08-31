@@ -19,6 +19,7 @@ export default async function AppLayout({
       <AppNav />
       <AppCmdK />
       {children}
+      <div className="mt-20 md:mt-0" />
     </HydrateClient>
   );
 }

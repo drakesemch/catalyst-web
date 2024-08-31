@@ -22,7 +22,12 @@ import {
 import { format, formatDistanceToNowStrict } from "date-fns";
 import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
 import type { Assignment, ModuleItem } from "@/server/api/routers/canvas";
-import { replaceCanvasURL } from "@/lib/utils";
+import {
+  prettyState,
+  submissionTypeWithIcon,
+  replaceCanvasURL,
+  moduleType,
+} from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 export default function ModulesPage({
@@ -53,7 +58,7 @@ export default function ModulesPage({
   const [search] = useState("");
 
   return (
-    <main className="mx-auto flex max-w-[100ch] flex-1 flex-col gap-2 p-4">
+    <main className="flex max-w-[100ch] flex-1 flex-col gap-2 p-4">
       <div className="flex flex-col">
         <Accordion type="multiple">
           {modules
@@ -112,14 +117,23 @@ function ModuleButton({
   return (
     <Button
       href={replaceCanvasURL(
-        "html_url" in item.content_details
-          ? item.content_details.html_url
-          : "external_url" in item
-            ? (item.external_url ?? item.html_url)
-            : item.html_url,
+        String(
+          (() => {
+            if ("page_url" in item) {
+              return `pages/${item.page_url}`;
+            } else if ("external_url" in item) {
+              return item.external_url;
+            } else if ("html_url" in item.content_details) {
+              return item.content_details.html_url;
+            } else {
+              return item.html_url;
+            }
+          })(),
+        ),
       )}
       className="h-auto w-full justify-between"
       variant="outline"
+      target={"external_url" in item ? "_blank" : undefined}
       style={{
         marginLeft: `${"indent" in item ? item.indent : 0}rem`,
       }}
@@ -127,79 +141,7 @@ function ModuleButton({
       <div className="flex flex-col items-start gap-1">
         <span className="flex items-center gap-2 font-bold">
           {"title" in item ? item.title : item.name}
-          <Badge variant="secondary">
-            {(() => {
-              switch ("type" in item ? item.type : "Assignment") {
-                case "ExternalUrl":
-                  if ("external_url" in item) {
-                    if (
-                      item.external_url.startsWith(
-                        "https://docs.google.com/document",
-                      )
-                    ) {
-                      return (
-                        <>
-                          <FileText /> Google Docs
-                        </>
-                      );
-                    } else if (
-                      item.external_url.startsWith(
-                        "https://docs.google.com/presentation",
-                      )
-                    ) {
-                      return (
-                        <>
-                          <Presentation /> Google Slides
-                        </>
-                      );
-                    } else if (
-                      item.external_url.startsWith(
-                        "https://docs.google.com/spreadsheets",
-                      )
-                    ) {
-                      return (
-                        <>
-                          <Table /> Google Sheets
-                        </>
-                      );
-                    }
-                  }
-                  return (
-                    <>
-                      <Link2 /> External URL
-                    </>
-                  );
-                case "Page":
-                  return (
-                    <>
-                      <FileText /> Page
-                    </>
-                  );
-                case "Assignment":
-                  return (
-                    <>
-                      <NotepadText /> Assignment
-                    </>
-                  );
-                case "Discussion":
-                  return (
-                    <>
-                      <MessageCircle /> Discussion
-                    </>
-                  );
-                default:
-                  return "type" in item ? (
-                    <>
-                      <HelpCircle /> {item.type}
-                    </>
-                  ) : (
-                    <>
-                      <HelpCircle /> Unknown
-                    </>
-                  );
-              }
-            })()}
-          </Badge>
+          <Badge variant="secondary">{moduleType(item)}</Badge>
         </span>
         {item.content_details?.due_at && (
           <>
@@ -215,17 +157,37 @@ function ModuleButton({
               {format(item.content_details.due_at, "hh:mm a 'on' EEE, MMM dd")}
             </p>
             {item.content_details.points_possible && (
-              <p className="text-xs text-muted-foreground">
+              <div className="flex items-center gap-4">
                 {"submission" in item.content_details &&
-                item.content_details?.submission?.score ? (
-                  <>
-                    {Number(item.content_details?.submission?.score.toFixed(2))}
-                    /{item.content_details.points_possible} points
-                  </>
-                ) : (
-                  <>{item.content_details.points_possible} points possible</>
-                )}
-              </p>
+                  item.content_details?.submission?.workflow_state && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {prettyState(
+                        item.content_details?.submission?.workflow_state,
+                      )}
+                    </span>
+                  )}
+                {"submission_types" in item.content_details &&
+                  item.content_details?.submission_types && (
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      {item.content_details?.submission_types.map((type) =>
+                        submissionTypeWithIcon(type),
+                      )}
+                    </span>
+                  )}
+                <span className="text-xs text-muted-foreground">
+                  {"submission" in item.content_details &&
+                  item.content_details?.submission?.score ? (
+                    <>
+                      {Number(
+                        item.content_details?.submission?.score.toFixed(2),
+                      )}
+                      /{item.content_details.points_possible} points
+                    </>
+                  ) : (
+                    <>{item.content_details.points_possible} points possible</>
+                  )}
+                </span>
+              </div>
             )}
           </>
         )}

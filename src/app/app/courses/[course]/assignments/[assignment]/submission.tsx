@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  AttachmentPreview,
+  FilePreview,
+} from "@/components/catalyst/app/file-preview";
 import { TextEditor } from "@/components/editor/editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,11 +16,20 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFileUpload } from "@/lib/hooks";
-import { renameSubmissionTypeWithIcon } from "@/lib/utils";
+import { submissionTypeWithIcon } from "@/lib/utils";
 import { api } from "@/trpc/react";
+import { btoa } from "buffer";
 import { format, formatDistanceStrict, isBefore } from "date-fns";
 import { ArrowRight, Check, FileText, Loader, Upload } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+const toBase64 = (file: File | Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
 
 export function NewSubmission({
   course,
@@ -36,13 +49,18 @@ export function NewSubmission({
     isPending: pendingTextAssignment,
     isSuccess: successTextAssignment,
   } = api.canvas.courses.get.assignments.submit.text.useMutation();
+  const {
+    mutate: submitFilesToAssignment,
+    isPending: pendingFileAssignment,
+    isSuccess: successFileAssignment,
+  } = api.canvas.courses.get.assignments.submit.files.useMutation();
   const isPending = useMemo(
-    () => pendingTextAssignment,
-    [pendingTextAssignment],
+    () => pendingTextAssignment || pendingFileAssignment,
+    [pendingTextAssignment, pendingFileAssignment],
   );
   const isSuccess = useMemo(
-    () => successTextAssignment,
-    [successTextAssignment],
+    () => successTextAssignment || successFileAssignment,
+    [successTextAssignment, successFileAssignment],
   );
 
   const [files, FileUpload] = useFileUpload({
@@ -58,7 +76,7 @@ export function NewSubmission({
           <div className="flex-1 px-2 text-sm font-bold">Submission Types</div>
           {assignmentData.submission_types.map((submission) => (
             <TabsTrigger key={submission} value={submission}>
-              {renameSubmissionTypeWithIcon(submission)}
+              {submissionTypeWithIcon(submission)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -129,15 +147,75 @@ export function NewSubmission({
         <TabsContent value="online_upload" className="max-h-[min(60vh,40rem)]">
           <FileUpload />
           <div className="sticky bottom-0 flex w-full items-center justify-end bg-background p-4">
-            <Button>
-              Review Submission <ArrowRight />
-            </Button>
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button>
+                  Review Submission <ArrowRight />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>
+                    <FileText /> Submission Preview
+                  </DrawerTitle>
+                </DrawerHeader>
+                <div className="flex flex-col gap-2 overflow-auto p-4">
+                  {files.map((file) => (
+                    <div key={file.name} className="flex items-center gap-2">
+                      <FilePreview file={file} />
+                    </div>
+                  ))}
+                  <Button
+                    onClick={async () => {
+                      submitFilesToAssignment({
+                        courseId: Number(course),
+                        assignmentId: Number(assignment),
+                        files: await Promise.all(
+                          files.map(async (file) => ({
+                            name: file.name,
+                            data: await toBase64(
+                              await (
+                                await fetch(URL.createObjectURL(file))
+                              ).blob(),
+                            ),
+                          })),
+                        ),
+                      });
+                    }}
+                    disabled={isPending}
+                  >
+                    {(() => {
+                      if (isPending) {
+                        return (
+                          <>
+                            Submitting... <Loader className="animate-spin" />
+                          </>
+                        );
+                      } else if (isSuccess) {
+                        return (
+                          <>
+                            Submitted <Check />
+                          </>
+                        );
+                      } else {
+                        return (
+                          <>
+                            Submit <ArrowRight />
+                          </>
+                        );
+                      }
+                    })()}
+                  </Button>
+                </div>
+              </DrawerContent>
+            </Drawer>
           </div>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
+
 export function Submissions({
   course,
   assignment,
@@ -155,6 +233,33 @@ export function Submissions({
       courseId: Number(course),
       assignmentId: Number(assignment),
     });
+
+  const [attachments, setAttachments] = useState<File[][]>([]);
+
+  useEffect(() => {
+    (async () => {
+      if (!data) {
+        setAttachments([]);
+        return;
+      }
+      const toSave = await Promise.all(
+        data.map(async (submission) => {
+          return await Promise.all(
+            submission.attachments?.map(async (attachment) => {
+              return new File(
+                [await (await fetch(attachment.url)).blob()],
+                attachment.filename,
+                {
+                  type: attachment["content-type"],
+                },
+              );
+            }) ?? [],
+          );
+        }),
+      );
+      setAttachments(toSave);
+    })().catch(console.error);
+  }, [data]);
 
   if (isPending) {
     return (
@@ -174,7 +279,7 @@ export function Submissions({
 
   return (
     <div className="flex flex-col gap-2">
-      {data.map((submission) => (
+      {data.map((submission, idx) => (
         <div key={submission.attempt} className="flex flex-col gap-2 p-4">
           <div className="flex flex-col gap-1">
             <h3 className="h3">
@@ -209,6 +314,9 @@ export function Submissions({
               dangerouslySetInnerHTML={{ __html: submission.body }}
             />
           )}
+          {attachments[idx]?.map((file) => (
+            <AttachmentPreview key={file.name} attachment={file} />
+          ))}
         </div>
       ))}
     </div>

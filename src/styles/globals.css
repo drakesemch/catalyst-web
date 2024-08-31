@@ -112,7 +112,7 @@ body {
   }
 
   .table {
-    @apply w-full border-collapse [&_tbody_tr:nth-child(odd)]:bg-muted [&_td[align=center]]:text-center [&_td[align=right]]:text-right [&_td]:border [&_td]:px-4 [&_td]:py-2 [&_td]:text-left [&_th[align=center]]:text-center [&_th[align=right]]:text-right [&_th]:border [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold [&_tr]:m-0 [&_tr]:border-t [&_tr]:p-0;
+    @apply w-full border-collapse overflow-hidden rounded-lg [&_td[align=center]]:text-center [&_td[align=right]]:text-right [&_td]:border [&_td]:px-4 [&_td]:py-2 [&_td]:text-left [&_th[align=center]]:text-center [&_th[align=right]]:text-right [&_th]:border [&_th]:px-4 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold [&_tr]:m-0 [&_tr]:border-t [&_tr]:p-0 [&_tr_th]:bg-secondary;
   }
 }
 

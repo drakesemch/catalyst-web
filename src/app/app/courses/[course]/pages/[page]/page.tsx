@@ -15,6 +15,9 @@ export default async function CourseHomePage({
     courseId: Number(course),
     pageId: page,
   });
+  if (!pageDetail.created_at) {
+    return <>ERROR</>;
+  }
   return (
     <div className="mx-auto flex w-full flex-col justify-center gap-2 p-2 lg:flex-row">
       <aside className="relative h-[calc((100vh-4.5rem-1px)-2rem)] w-auto flex-shrink-0 rounded-lg border p-4 lg:sticky lg:top-[calc(4.5rem+0.5rem)] lg:h-[calc((100vh-4.5rem-1px)-1rem)] lg:w-[35ch]">
@@ -40,11 +43,17 @@ export default async function CourseHomePage({
             <h1 className="h1">{pageDetail.title}</h1>
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar /> Created{" "}
-              {format(pageDetail.created_at, "MMMM dd, yyyy 'at' h:mm a")}
+              {format(
+                new Date(pageDetail.created_at),
+                "MMMM dd, yyyy 'at' h:mm a",
+              )}
             </span>
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <Calendar /> Updated{" "}
-              {format(pageDetail.updated_at, "MMMM dd, yyyy 'at' h:mm a")}
+              {format(
+                new Date(pageDetail.updated_at),
+                "MMMM dd, yyyy 'at' h:mm a",
+              )}
             </span>
             <div className="mt-auto flex flex-col gap-2">
               <Button>

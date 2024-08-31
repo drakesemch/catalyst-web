@@ -40,7 +40,7 @@ export default async function CourseHomePage({
       </aside>
       <main
         dangerouslySetInnerHTML={{ __html: prettyBody(page.body) }}
-        className="render-fancy render-white-content mx-auto max-w-[100ch] flex-1 flex-shrink p-4"
+        className="render-fancy render-white-content max-w-[100ch] flex-1 flex-shrink p-4"
       />
     </div>
   );

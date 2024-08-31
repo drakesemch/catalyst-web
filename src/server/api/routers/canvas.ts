@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { del, put } from "@vercel/blob";
+import { env } from "@/env";
 
 export interface Term {
   id: number;
@@ -689,6 +691,19 @@ export interface Submission {
   posted_at: string;
   read_status: string;
   redo_request: boolean;
+  attachments?: FileAttachment[] | null;
+}
+
+export function constructFile(filename: string, data: string) {
+  const arr = data.split(",");
+  const mime = arr[0]!.match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[arr.length - 1] ?? "");
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
 }
 
 export const canvasRouter = createTRPCRouter({
@@ -722,7 +737,7 @@ export const canvasRouter = createTRPCRouter({
           ? url.searchParams.set("enrollment_state", input.enrollment_state)
           : null;
         url.searchParams.set("page", String(input?.cursor ?? 1));
-        url.searchParams.set("per_page", String(input?.limit ?? 10));
+        url.searchParams.set("per_page", String(input?.limit ?? 100));
         const query = await fetch(url, {
           headers: {
             Authorization: `Bearer ${ctx.user.canvas.token}`,
@@ -749,7 +764,25 @@ export const canvasRouter = createTRPCRouter({
               Authorization: `Bearer ${ctx.user.canvas.token}`,
             },
           });
-          return (await query.json()) as Course;
+          const data = (await query.json()) as Course;
+          return { ...data, original_name: data.original_name ?? data.name };
+        }),
+      grades: protectedProcedure
+        .input(z.object({ courseId: z.number() }))
+        .query(async ({ input, ctx }) => {
+          const url = new URL(
+            `/api/v1/courses/${input.courseId}/assignments`,
+            ctx.user.canvas.url,
+          );
+          url.searchParams.append("per_page", "1000");
+          url.searchParams.append("include[]", "submission");
+          const query = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+            },
+          });
+          if (!query.ok) return [];
+          return (await query.json()) as Assignment[];
         }),
       frontPage: protectedProcedure
         .input(z.object({ courseId: z.number() }))
@@ -803,12 +836,118 @@ export const canvasRouter = createTRPCRouter({
                   Authorization: `Bearer ${ctx.user.canvas.token}`,
                 },
               });
-              return (
-                (await query.json()) as { submission_history: Submission[] }
-              ).submission_history;
+              const data = (await query.json()) as {
+                submission_history: Submission[];
+              };
+              return data.submission_history;
             }),
         },
         submit: {
+          files: protectedProcedure
+            .input(
+              z.object({
+                courseId: z.number(),
+                assignmentId: z.number(),
+                files: z.array(
+                  z.object({
+                    name: z.string(),
+                    data: z.string(),
+                  }),
+                ),
+              }),
+            )
+            .mutation(async ({ input, ctx }) => {
+              const fileIds: number[] = [];
+              for (const fileInput of input.files) {
+                const data = new FormData();
+                const file = constructFile(fileInput.name, fileInput.data);
+                const blob = await put(`uploads/${file.name}`, file, {
+                  access: "public",
+                  token: env.BLOB_TOKEN,
+                });
+                data.append("url", blob.url);
+                data.append("name", file.name);
+                data.append("size", file.size.toString());
+                data.append("content_type", file.type);
+
+                const res = await fetch(
+                  new URL(
+                    `/api/v1/courses/${input.courseId}/assignments/${input.assignmentId}/submissions/self/files`,
+                    ctx.user.canvas.url,
+                  ),
+                  {
+                    method: "POST",
+                    headers: {
+                      Authorization: `Bearer ${ctx.user.canvas.token}`,
+                    },
+                    body: data,
+                  },
+                );
+                if (!res.ok) {
+                  console.error(
+                    "Error Uploading to Assignment",
+                    res.status,
+                    res.statusText,
+                    await res.json(),
+                  );
+                  return { success: false, response: null };
+                }
+                const response = (await res.json()) as
+                  | {
+                      upload_url: string;
+                      upload_params: Record<string, string>;
+                      id: undefined;
+                    }
+                  | { upload_url: undefined; id: number };
+                if (response?.upload_url) {
+                  const uploadData = new FormData();
+                  uploadData.append("target_url", blob.url);
+                  uploadData.append("filename", file.name);
+                  uploadData.append("content_type", file.type);
+                  const upload = await fetch(response.upload_url, {
+                    method: "POST",
+                    body: uploadData,
+                  });
+                  if (!upload.ok)
+                    return {
+                      success: false,
+                      response: "Error Uploading to New Assignment Endpoint",
+                    };
+                  const uploadResponse = (await upload.json()) as {
+                    id: number;
+                  };
+                  fileIds.push(uploadResponse?.id);
+                } else {
+                  fileIds.push(response?.id ?? 0);
+                }
+                await del(blob.url);
+              }
+              const submitURL = new URL(
+                `/api/v1/courses/${input.courseId}/assignments/${input.assignmentId}/submissions`,
+                ctx.user.canvas.url,
+              );
+              submitURL.searchParams.append(
+                "submission[submission_type]",
+                "online_upload",
+              );
+              fileIds.forEach((id) =>
+                submitURL.searchParams.append(
+                  "submission[file_ids][]",
+                  String(id),
+                ),
+              );
+              const response = await fetch(submitURL, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${ctx.user.canvas.token}`,
+                },
+              });
+
+              return {
+                success: response.ok,
+                response: (await response.json()) as Submission,
+              };
+            }),
           text: protectedProcedure
             .input(
               z.object({
@@ -876,6 +1015,7 @@ export const canvasRouter = createTRPCRouter({
               `/api/v1/courses/${input.courseId}/assignments`,
               ctx.user.canvas.url,
             );
+            url.searchParams.append("per_page", "1000");
             url.searchParams.append("include[]", "submission");
             const query = await fetch(url, {
               headers: {

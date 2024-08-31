@@ -18,6 +18,9 @@ export default async function ModulePreRender({
 }: {
   params: { course: string };
 }) {
+  const courseDetails = await api.catalyst.user.canvas.courses.get({
+    courseId: Number(course),
+  });
   await api.canvas.courses.get.modules.get
     .prefetch({
       courseId: Number(course),
@@ -53,6 +56,10 @@ export default async function ModulePreRender({
               className='flex max-h-full flex-col gap-2 [&[data-state="active"]>div]:h-full [&[data-state="active"]]:h-full'
             >
               <h1 className="h1">Modules</h1>
+              <h2 className="text-xs text-muted-foreground">
+                for {courseDetails?.classification ?? "Class"} (
+                {courseDetails?.original_name ?? "Class"})
+              </h2>
               <div className="m-1 flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
                 <Search />
                 <input
@@ -69,30 +76,10 @@ export default async function ModulePreRender({
             </TabsContent>
           </Tabs>
         </aside>
-        <Suspense fallback={<ModuleLoadingState />}>
+        <Suspense>
           <ModulesPage params={params} />
         </Suspense>
       </div>
     </HydrateClient>
-  );
-}
-
-function ModuleLoadingState() {
-  return (
-    <main className="mx-auto flex max-w-[100ch] flex-1 flex-col gap-2 p-4">
-      <div className="flex flex-col">
-        <Accordion type="multiple">
-          {Array(10)
-            .fill(0)
-            .map((_, idx) => (
-              <AccordionItem value={String(idx)} key={idx}>
-                <AccordionTrigger>
-                  <Skeleton className="h-[1em] w-[20ch]" />
-                </AccordionTrigger>
-              </AccordionItem>
-            ))}
-        </Accordion>
-      </div>
-    </main>
   );
 }

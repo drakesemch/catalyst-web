@@ -53,24 +53,173 @@ import { cn } from "@/lib/utils";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import {
+  AppWindowMac,
   ArrowDown,
   ArrowUp,
   Download,
+  Eye,
+  FileText,
   FileWarning,
+  FolderArchive,
   Gauge,
   Maximize,
   Minimize,
+  Music,
   Pause,
   Play,
   RotateCcw,
   Slash,
+  Trash,
+  Video,
   Volume2,
   VolumeX,
+  XIcon,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Slider } from "../../ui/slider";
 import { Skeleton } from "../../ui/skeleton";
 import { Input } from "../../ui/input";
+import {
+  DrawerTrigger,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+  Drawer,
+} from "@/components/ui/drawer";
+import prettyBytes from "pretty-bytes";
+
+export function AttachmentPreview({
+  attachment,
+  isRemovable = false,
+  onRemove = () => {
+    /**/
+  },
+}: {
+  attachment: File;
+  isRemovable?: boolean;
+  onRemove?: () => void;
+}) {
+  console.log(attachment);
+  return (
+    <div className="flex h-16 min-w-96 max-w-96 items-center gap-4 overflow-hidden rounded-xl border px-3">
+      {(() => {
+        if (attachment.type.startsWith("image/")) {
+          return (
+            <Image
+              src={URL.createObjectURL(attachment)}
+              width={32}
+              height={32}
+              alt={""}
+              className="grid size-8 flex-shrink-0 place-items-center rounded-sm outline outline-1 outline-offset-2 outline-border"
+            />
+          );
+        } else if (attachment.type.startsWith("audio/")) {
+          return (
+            <div className="grid size-8 flex-shrink-0 place-items-center rounded outline outline-1 outline-offset-2 outline-border">
+              <Music className="size-8" />
+            </div>
+          );
+        } else if (attachment.type.startsWith("video/")) {
+          return (
+            <div className="grid size-8 flex-shrink-0 place-items-center rounded outline outline-1 outline-offset-2 outline-border">
+              <Video className="size-8" />
+            </div>
+          );
+        } else if (
+          attachment.type == "application/pdf" ||
+          attachment.type ==
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+          attachment.type ==
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation" ||
+          attachment.type == "text/plain"
+        ) {
+          return (
+            <div className="grid size-8 flex-shrink-0 place-items-center rounded outline outline-1 outline-offset-2 outline-border">
+              <FileText className="size-8" />
+            </div>
+          );
+        } else if (attachment.type == "application/zip") {
+          return (
+            <div className="grid size-8 flex-shrink-0 place-items-center rounded outline outline-1 outline-offset-2 outline-border">
+              <FolderArchive className="size-8" />
+            </div>
+          );
+        } else if (
+          attachment.type.startsWith("application/") ||
+          attachment.name.endsWith(".dmg")
+        ) {
+          return (
+            <div className="grid size-8 flex-shrink-0 place-items-center rounded outline outline-1 outline-offset-2 outline-border">
+              <AppWindowMac className="size-8" />
+            </div>
+          );
+        } else {
+          return (
+            <div className="grid size-8 flex-shrink-0 place-items-center rounded-sm bg-secondary outline outline-1 outline-offset-2 outline-border"></div>
+          );
+        }
+      })()}
+      <div className="w-[calc(100%-2rem)] overflow-hidden">
+        <div className="truncate">{attachment.name}</div>
+        <div className="flex gap-2 overflow-hidden text-xs text-muted-foreground">
+          <div className="w-max text-nowrap">
+            {prettyBytes(attachment.size)}
+          </div>
+          <div className="truncate">{attachment.type}</div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="secondary"
+          size="icon"
+          href={URL.createObjectURL(attachment)}
+          download
+        >
+          <Download />
+        </Button>
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button size="icon">
+              <Eye />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader className="flex items-center justify-between">
+              <DrawerTitle>{attachment.name}</DrawerTitle>
+              <div className="flex gap-2">
+                <Button
+                  size="icon"
+                  href={URL.createObjectURL(attachment)}
+                  download
+                >
+                  <Download />
+                </Button>
+                {isRemovable && (
+                  <Button variant="destructive" size="icon" onClick={onRemove}>
+                    <Trash />
+                  </Button>
+                )}
+                <DrawerClose asChild>
+                  <Button variant="outline" size="icon">
+                    <XIcon />
+                  </Button>
+                </DrawerClose>
+              </div>
+            </DrawerHeader>
+            {attachment && <FilePreview file={attachment} />}
+            {!attachment && <>loading....</>}
+          </DrawerContent>
+        </Drawer>
+        {isRemovable && (
+          <Button variant="destructive" size="icon" onClick={onRemove}>
+            <Trash />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function FilePreview({ file }: { file: File }) {
   if (file.type == "application/pdf") {
@@ -461,7 +610,7 @@ export function PDF({ src }: { src: File }) {
 
   useEffect(() => {
     setIsLoading(true);
-    // pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
   }, []);
 
   useEffect(() => {
@@ -543,7 +692,7 @@ export function PDF({ src }: { src: File }) {
         onLoadSuccess={onLoad}
         onLoadError={onError}
         className={cn(
-          "mx-auto flex w-[clamp(50ch,100%,100ch)] flex-col !items-stretch !gap-4 text-black [&>div>*]:!h-auto [&>div>*]:!w-full [&>div]:!min-w-0 [&>div]:flex-shrink-0 [&>div]:overflow-hidden [&>div]:rounded-md [&>div]:border",
+          "mx-auto flex w-[clamp(50ch,100%,100ch)] flex-col !items-stretch !gap-4 text-black [&>div>*]:!h-auto [&>div>*]:!w-full [&>div]:!min-w-0 [&>div]:flex-shrink-0 [&>div]:overflow-hidden [&>div]:rounded-xl [&>div]:border",
           (isLoading || isError) && "hidden",
         )}
       >

@@ -5,7 +5,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { prettyBody, renameSubmissionType } from "@/lib/utils";
+import {
+  prettyBody,
+  prettyState,
+  renameSubmissionType,
+  submissionTypeWithIcon,
+} from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { format, formatDistanceStrict } from "date-fns";
 import {
@@ -97,6 +102,11 @@ export default async function AssignmentPage({
                 </div>
               </div>
               <span className="flex h-4 items-center gap-2">
+                {prettyState(
+                  assignmentDetails.submission?.workflow_state ?? "unsubmitted",
+                )}
+              </span>
+              <span className="flex h-4 items-center gap-2">
                 <CalendarIcon />
                 {assignmentDetails.due_at
                   ? format(
@@ -173,10 +183,9 @@ export default async function AssignmentPage({
                     })
                   : "Sometime in the future"}
               </span>
-              <span className="flex items-center gap-2">
-                <Upload />
-                {assignmentDetails.submission_types.map(renameSubmissionType)}
-              </span>
+              {assignmentDetails.submission_types.map((type) =>
+                submissionTypeWithIcon(type),
+              )}
             </div>
             <div className="mt-auto flex flex-col gap-2">
               <Drawer>
