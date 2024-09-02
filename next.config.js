@@ -7,6 +7,36 @@ await import("./src/env.js");
 import withVercelToolbar from "@vercel/toolbar/plugins/next";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  images: {
+    remotePatterns: [
+      {
+        // lh3.googleusercontent.com
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "*.instructure.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.jsdelivr.net",
+        port: "",
+        pathname: "/npm/**",
+      },
+      {
+        protocol: "https",
+        hostname: "github.githubassets.com",
+        port: "",
+        pathname: "/images/icons/emoji/**",
+      },
+    ],
+  },
+};
 
 export default withVercelToolbar()(config);

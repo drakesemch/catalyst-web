@@ -221,3 +221,29 @@ export function prettyState(state: string) {
       );
   }
 }
+
+export async function clientToBase64(file: File | Blob) {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+}
+
+export async function serverToBase64(file: File | Blob) {
+  return Buffer.from(await file.arrayBuffer()).toString("base64");
+}
+
+export function constructFile(data: string, filename: string, type?: string) {
+  console.log(data);
+  const arr = data.split(",");
+  const mime = type ?? arr[0]!.match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[arr.length - 1] ?? "");
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+}

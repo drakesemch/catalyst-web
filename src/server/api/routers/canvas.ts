@@ -2,6 +2,8 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { del, put } from "@vercel/blob";
 import { env } from "@/env";
+import { constructFile } from "@/lib/utils";
+import { Converter } from "showdown";
 
 export interface Term {
   id: number;
@@ -694,16 +696,65 @@ export interface Submission {
   attachments?: FileAttachment[] | null;
 }
 
-export function constructFile(filename: string, data: string) {
-  const arr = data.split(",");
-  const mime = arr[0]!.match(/:(.*?);/)?.[1];
-  const bstr = atob(arr[arr.length - 1] ?? "");
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new File([u8arr], filename, { type: mime });
+export interface Conversation {
+  id: number;
+  subject: string;
+  workflow_state: string;
+  last_message: string;
+  last_message_at: string;
+  start_at: string;
+  message_count: number;
+  subscribed: boolean;
+  private: boolean;
+  starred: boolean;
+  properties: null;
+  audience: null;
+  audience_contexts: null;
+  avatar_url: string;
+  participants: ConversationParticipant[] | null;
+  visible: boolean;
+  context_name: string;
+}
+
+export interface ConversationParticipant {
+  id: number;
+  name: string;
+  full_name: string;
+  avatar_url: string;
+}
+
+export interface ConversationDetailed {
+  id: number;
+  subject: string;
+  workflow_state: string;
+  last_message: string;
+  last_message_at: string;
+  message_count: number;
+  subscribed: boolean;
+  private: boolean;
+  starred: boolean;
+  properties: string[];
+  audience: number[];
+  context_name: string;
+  audience_contexts: {
+    courses: Record<string, number>;
+    groups: Record<string, number>;
+  };
+  avatar_url: string;
+  participants: ConversationParticipant[];
+  messages: Message[];
+  submissions: Submission[];
+}
+
+export interface Message {
+  id: number;
+  created_at: string;
+  body: string;
+  author_id: number;
+  generated: boolean;
+  media_comment: Comment | null;
+  forwarded_messages: Message[];
+  attachments: Attachment[];
 }
 
 export const canvasRouter = createTRPCRouter({
@@ -717,6 +768,70 @@ export const canvasRouter = createTRPCRouter({
       });
       return (await query.json()) as User;
     }),
+  },
+  inbox: {
+    list: protectedProcedure
+      .input(
+        z.object({
+          cursor: z.number().optional(),
+          limit: z.number().optional(),
+        }),
+      )
+      .query(async ({ input, ctx }) => {
+        const url = new URL("/api/v1/conversations", ctx.user.canvas.url);
+        url.searchParams.append("include[]", "participants");
+        url.searchParams.append("per_page", String(input?.limit ?? 10));
+        url.searchParams.append("page", String(input?.cursor ?? 1));
+        const query = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        return {
+          data: (await query.json()) as Conversation[],
+          nextCursor: Number((input.cursor ?? 0) + 1),
+        };
+      }),
+    get: protectedProcedure
+      .input(z.object({ conversationId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const url = new URL(
+          `/api/v1/conversations/${input.conversationId}`,
+          ctx.user.canvas.url,
+        );
+        url.searchParams.append("include_private", "true");
+        url.searchParams.append("include", "participants");
+        const query = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        return (await query.json()) as ConversationDetailed;
+      }),
+    reply: protectedProcedure
+      .input(
+        z.object({
+          conversationId: z.number(),
+          body: z.string(),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const url = new URL(
+          `/api/v1/conversations/${input.conversationId}/add_message`,
+          ctx.user.canvas.url,
+        );
+        const query = await fetch(url, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            body: input.body,
+          }),
+        });
+        return query.json();
+      }),
   },
   courses: {
     list: protectedProcedure
@@ -860,7 +975,7 @@ export const canvasRouter = createTRPCRouter({
               const fileIds: number[] = [];
               for (const fileInput of input.files) {
                 const data = new FormData();
-                const file = constructFile(fileInput.name, fileInput.data);
+                const file = constructFile(fileInput.data, fileInput.name);
                 const blob = await put(`uploads/${file.name}`, file, {
                   access: "public",
                   token: env.BLOB_TOKEN,
@@ -1048,10 +1163,7 @@ export const canvasRouter = createTRPCRouter({
                 ...module,
                 items: await Promise.all(
                   module.items?.map(async (item) => {
-                    if (
-                      item.type == "Assignment" ||
-                      item.type == "Discussion"
-                    ) {
+                    if (item.type == "Assignment") {
                       const assignmentURL = new URL(
                         `/api/v1/courses/${input.courseId}/assignments/${item.content_id}`,
                         ctx.user.canvas.url,
@@ -1067,6 +1179,29 @@ export const canvasRouter = createTRPCRouter({
                       });
                       const assignmentData =
                         (await assignmentQuery.json()) as Assignment;
+                      return {
+                        ...item,
+                        content_details: {
+                          ...item.content_details,
+                          ...assignmentData,
+                        },
+                      };
+                    } else if (item.type == "Discussion") {
+                      const assignmentURL = new URL(
+                        `/api/v1/courses/${input.courseId}/discussion_topics/${item.content_id}`,
+                        ctx.user.canvas.url,
+                      );
+                      assignmentURL.searchParams.append(
+                        "include[]",
+                        "submission",
+                      );
+                      const assignmentQuery = await fetch(assignmentURL, {
+                        headers: {
+                          Authorization: `Bearer ${ctx.user.canvas.token}`,
+                        },
+                      });
+                      const assignmentData =
+                        (await assignmentQuery.json()) as DiscussionTopic;
                       return {
                         ...item,
                         content_details: {

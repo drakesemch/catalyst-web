@@ -64,7 +64,10 @@ export default function ModulesPage({
             .map((module) => (
               <AccordionItem value={String(module.id)} key={module.id}>
                 <AccordionTrigger>{module.name}</AccordionTrigger>
-                <AccordionContent className="flex flex-col gap-2">
+                <AccordionContent
+                  className="flex flex-col gap-2"
+                  defaultValue=""
+                >
                   {module.items
                     ?.filter(
                       (item) =>
@@ -81,7 +84,7 @@ export default function ModulesPage({
           {unassignedAssignments.length > 0 && (
             <AccordionItem value="unclassified">
               <AccordionTrigger>Unclassified Assignments</AccordionTrigger>
-              <AccordionContent className="flex flex-col gap-2">
+              <AccordionContent className="flex flex-col gap-2" defaultValue="">
                 {unassignedAssignments.map((assignment) => (
                   <ModuleButton
                     key={assignment.id}
@@ -129,7 +132,7 @@ function ModuleButton({
         marginLeft: `${"indent" in item ? item.indent : 0}rem`,
       }}
     >
-      <div className="flex flex-col items-start gap-1">
+      <div className="flex flex-shrink flex-col items-start gap-1 overflow-hidden">
         <span className="flex items-center gap-2 font-bold">
           {"title" in item ? item.title : item.name}
           <Badge variant="secondary">{moduleType(item)}</Badge>

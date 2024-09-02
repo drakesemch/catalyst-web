@@ -49,7 +49,7 @@ import "@formatjs/intl-durationformat/polyfill";
 import { Document, Page } from "react-pdf";
 import Image from "next/image";
 import { type RefObject, useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, constructFile } from "@/lib/utils";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import {
@@ -96,11 +96,20 @@ export function AttachmentPreview({
     /**/
   },
 }: {
-  attachment: File;
+  attachment:
+    | File
+    | {
+        name: string;
+        data: string;
+        type: string;
+      };
   isRemovable?: boolean;
   onRemove?: () => void;
 }) {
-  console.log(attachment);
+  if ("data" in attachment) {
+    attachment = constructFile(attachment.data, attachment.name, attachment.type);
+  }
+  console.log(attachment, attachment.type);
   return (
     <div className="flex h-16 min-w-96 max-w-96 items-center gap-4 overflow-hidden rounded-xl border px-3">
       {(() => {

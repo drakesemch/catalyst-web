@@ -1,7 +1,14 @@
 import { HydrateClient, api } from "@/trpc/server";
 import ModulesPage from "./client";
 import { Suspense } from "react";
-import { Album, FileText, Plus, Search } from "lucide-react";
+import {
+  Album,
+  ChevronRight,
+  FileText,
+  Plus,
+  Search,
+  SortDesc,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Button } from "@/components/ui/button";
@@ -28,8 +35,22 @@ export default async function ModulePreRender({
 
   return (
     <HydrateClient>
-      <div className="mx-auto flex w-full flex-col justify-center gap-2 p-2 lg:flex-row">
-        <aside className="relative h-[calc((100vh-4.5rem-1px)-2rem)] w-auto flex-shrink-0 rounded-lg border p-4 lg:sticky lg:top-[calc(4.5rem+0.5rem)] lg:h-[calc((100vh-4.5rem-1px)-1rem)] lg:w-[35ch]">
+      <div className="mx-auto flex w-full flex-col justify-center gap-2 lg:flex-row">
+        <aside className="relative flex h-[calc((100vh-4.5rem-1px))] w-auto flex-shrink-0 flex-col gap-2 border-r p-4 lg:sticky lg:top-[calc(4.5rem)] lg:h-[calc((100vh-4.5rem-1px))] lg:w-[35ch]">
+          <Button
+            className="h-auto w-full gap-4"
+            variant="outline"
+            href={`/app/courses/${course}`}
+          >
+            <Album className="text-lg" />
+            <div className="flex max-w-full flex-1 flex-shrink flex-col items-start gap-1 overflow-hidden">
+              <span className="h3">{courseDetails?.classification}</span>
+              <span className="max-w-full truncate text-xs text-muted-foreground">
+                {courseDetails?.original_name}
+              </span>
+            </div>
+            <ChevronRight />
+          </Button>
           <Tabs defaultValue="modules" className="h-full">
             <TabsList className="w-full">
               <TabsTrigger value="course">
@@ -50,11 +71,7 @@ export default async function ModulePreRender({
               className='flex max-h-full flex-col gap-2 [&[data-state="active"]>div]:h-full [&[data-state="active"]]:h-full'
             >
               <h1 className="h1">Modules</h1>
-              <h2 className="text-xs text-muted-foreground">
-                for {courseDetails?.classification ?? "Class"} (
-                {courseDetails?.original_name ?? "Class"})
-              </h2>
-              <div className="m-1 flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
+              <div className="flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
                 <Search />
                 <input
                   type="search"
@@ -62,6 +79,9 @@ export default async function ModulePreRender({
                   className="flex-1 bg-background outline-none"
                 />
               </div>
+              <Button variant="outline" className="w-full justify-start">
+                <SortDesc /> Sort and Filters
+              </Button>
               <div className="mt-auto flex flex-col gap-2">
                 <Button>
                   <Plus /> New Todo Item

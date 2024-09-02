@@ -104,10 +104,10 @@ export async function AppNav() {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      <div className="fixed bottom-0 z-10 flex w-full border-t bg-background md:hidden">
+      <div className="fixed bottom-0 z-10 flex h-[4.5rem] w-full border-t bg-background md:hidden">
         <Link
           href="/app/"
-          className="flex flex-1 flex-col items-center gap-1 py-4 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6"
+          className="flex flex-1 flex-col items-center justify-center gap-1 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6"
         >
           <div data-icon className="rounded-full px-2 py-2 transition-all">
             <FlaskConical />
@@ -116,7 +116,7 @@ export async function AppNav() {
         </Link>
         <Drawer>
           <DrawerTrigger asChild>
-            <button className="flex flex-1 flex-col items-center gap-1 py-4 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6">
+            <button className="flex flex-1 flex-col items-center justify-center gap-1 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6">
               <div data-icon className="rounded-full px-2 py-2 transition-all">
                 <Album />
               </div>
@@ -134,13 +134,13 @@ export async function AppNav() {
             </Suspense>
           </DrawerContent>
         </Drawer>
-        <button className="flex flex-1 flex-col items-center gap-1 py-4 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6">
+        <button className="flex flex-1 flex-col items-center justify-center gap-1 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6">
           <div data-icon className="rounded-full px-2 py-2 transition-all">
             <Wrench />
           </div>
           <span className="text-xs">Tools</span>
         </button>
-        <button className="flex flex-1 flex-col items-center gap-1 py-4 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6">
+        <button className="flex flex-1 flex-col items-center justify-center gap-1 [&:hover_[data-icon]]:bg-secondary [&:hover_[data-icon]]:px-6">
           <div data-icon className="rounded-full px-2 py-2 transition-all">
             <UserCircle />
           </div>

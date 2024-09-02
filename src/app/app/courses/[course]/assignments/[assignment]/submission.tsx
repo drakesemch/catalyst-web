@@ -16,19 +16,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFileUpload } from "@/lib/hooks";
-import { submissionTypeWithIcon } from "@/lib/utils";
+import { submissionTypeWithIcon, clientToBase64 } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { format, formatDistanceStrict, isBefore } from "date-fns";
 import { ArrowRight, Check, FileText, Loader } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-
-const toBase64 = (file: File | Blob) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
 
 export function NewSubmission({
   course,
@@ -172,7 +164,7 @@ export function NewSubmission({
                         files: await Promise.all(
                           files.map(async (file) => ({
                             name: file.name,
-                            data: await toBase64(
+                            data: await clientToBase64(
                               await (
                                 await fetch(URL.createObjectURL(file))
                               ).blob(),

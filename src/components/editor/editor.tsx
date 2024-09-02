@@ -686,7 +686,7 @@ function MenuFooter({
   }, [editor, editorState]);
 
   return (
-    <div className="@[20ch]:mt-2 @[20ch]:flex-row my-4 flex flex-col-reverse items-center justify-between gap-2 px-4">
+    <div className="my-4 flex flex-col-reverse items-center justify-between gap-2 px-4 @[20ch]:mt-2 @[20ch]:flex-row">
       <div className="flex items-center gap-2">
         <DraftMenu>
           <Button
@@ -695,7 +695,7 @@ function MenuFooter({
           >
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              <span className="@[80ch]:inline hidden">History</span>
+              <span className="hidden @[80ch]:inline">History</span>
             </div>
             <Separator orientation="vertical" className="my-0.5 h-auto" />
             <div className="flex items-center gap-2">
@@ -705,7 +705,7 @@ function MenuFooter({
                     return (
                       <>
                         <TextCursor />
-                        <span className="@[80ch]:inline hidden">
+                        <span className="hidden @[80ch]:inline">
                           Saves automatically
                         </span>
                       </>
@@ -714,14 +714,14 @@ function MenuFooter({
                     return (
                       <>
                         <Loader className="animate-spin" />
-                        <span className="@[80ch]:inline hidden">Saving...</span>
+                        <span className="hidden @[80ch]:inline">Saving...</span>
                       </>
                     );
                   case "local":
                     return (
                       <>
                         <Computer />
-                        <span className="@[80ch]:inline hidden">
+                        <span className="hidden @[80ch]:inline">
                           Saved locally
                         </span>
                       </>
@@ -730,7 +730,7 @@ function MenuFooter({
                     return (
                       <>
                         <Check />
-                        <span className="@[80ch]:inline hidden">
+                        <span className="hidden @[80ch]:inline">
                           Saved to cloud
                         </span>
                       </>
@@ -744,25 +744,25 @@ function MenuFooter({
       <div className="flex items-center gap-4 text-xs">
         <div className="flex gap-1">
           <span>
-            C<span className="@[80ch]:inline hidden">haracters</span>
+            C<span className="hidden @[80ch]:inline">haracters</span>
           </span>
           <span className="font-mono font-bold">{characterCount}</span>
         </div>
         <div className="flex gap-1">
           <span>
-            W<span className="@[80ch]:inline hidden">ords</span>
+            W<span className="hidden @[80ch]:inline">ords</span>
           </span>
           <span className="font-mono font-bold">{wordCount}</span>
         </div>
         <div className="flex gap-1">
           <span>
-            S<span className="@[80ch]:inline hidden">entences</span>
+            S<span className="hidden @[80ch]:inline">entences</span>
           </span>
           <span className="font-mono font-bold">{sentenceCount}</span>
         </div>
         <div className="flex gap-1">
           <span>
-            P<span className="@[80ch]:inline hidden">aragraphs</span>
+            P<span className="hidden @[80ch]:inline">aragraphs</span>
           </span>
           <span className="font-mono font-bold">{paragraphCount}</span>
         </div>
