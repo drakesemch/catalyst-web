@@ -83,7 +83,7 @@ export default function DiscussionPage({
             value="course"
             className='flex max-h-full flex-col gap-2 [&[data-state="active"]]:h-full'
           >
-            {/* <CourseSidebar cousrse={course} /> */}
+            {/* <CourseSidebar course={course} /> */}
           </TabsContent>
           <TabsContent
             value="grades"

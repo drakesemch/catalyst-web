@@ -81,7 +81,7 @@ const Confetti = forwardRef<ConfettiRef, Props>((props, ref) => {
 
   useEffect(() => {
     if (!manualstart) {
-      fire();
+      fire()?.catch(console.error);
     }
   }, [manualstart, fire]);
 
@@ -92,6 +92,8 @@ const Confetti = forwardRef<ConfettiRef, Props>((props, ref) => {
     </ConfettiContext.Provider>
   );
 });
+
+Confetti.displayName = "Confetti";
 
 interface ConfettiButtonProps extends ButtonProps {
   options?: ConfettiOptions &
@@ -110,7 +112,7 @@ function ConfettiButton({ options, children, ...props }: ConfettiButtonProps) {
         x: x / window.innerWidth,
         y: y / window.innerHeight,
       },
-    });
+    })?.catch(console.error);
   };
 
   return (
