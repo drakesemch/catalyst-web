@@ -65,9 +65,9 @@ export function Integrations({ className }: { className?: string }) {
           <Circle ref={driveRef} tooltip="Google Drive">
             <GoogleDriveLogo />
           </Circle>
-          <Circle ref={outlookRef} tooltip="Outlook">
+          {/* <Circle ref={outlookRef} tooltip="Outlook">
             <OutlookIcon />
-          </Circle>
+          </Circle> */}
           <Circle ref={geminiRef} tooltip="Gemini AI">
             <GeminiLogo />
           </Circle>

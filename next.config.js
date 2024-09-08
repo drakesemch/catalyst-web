@@ -4,8 +4,6 @@
  */
 await import("./src/env.js");
 
-import withVercelToolbar from "@vercel/toolbar/plugins/next";
-
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
@@ -39,4 +37,4 @@ const config = {
   },
 };
 
-export default withVercelToolbar()(config);
+export default config;

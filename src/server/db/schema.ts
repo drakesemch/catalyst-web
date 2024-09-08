@@ -34,6 +34,19 @@ export const users = createTable("user", {
   image: varchar("image", { length: 255 }),
 });
 
+export const proUsers = createTable("pro_user", {
+  id: varchar("id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => users.id),
+  expires: timestamp("expires", {
+    mode: "date",
+  }).notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
 }));

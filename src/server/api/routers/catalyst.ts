@@ -21,11 +21,58 @@ import { TRPCError } from "@trpc/server";
 import { createCipheriv } from "crypto";
 import { env } from "@/env";
 import { canvasCatalystRouter } from "./catalyst/canvas";
+import { Stripe } from "stripe";
 
 export const catalystRouter = createTRPCRouter({
+  pricing: {
+    pro: publicProcedure.query(async () => {
+      const stripe = new Stripe(env.STRIPE_API);
+      const defaultPrice = await stripe.products.retrieve(env.PRO_ID);
+      return await stripe.prices.list({ product: String(defaultPrice.id) });
+    }),
+    pay: protectedProcedure
+      .input(z.object({ priceId: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const stripe = new Stripe(env.STRIPE_API);
+        let customer = (
+          await stripe.customers.list({
+            email: ctx.user.get?.email,
+          })
+        ).data[0];
+        if (!customer) {
+          customer = await stripe.customers.create({
+            email: ctx.user.get?.email,
+            metadata: {
+              catalyst_user_id: ctx.user.get?.id ?? "guest",
+            },
+          });
+        }
+        if (customer.metadata.catalyst_user_id != ctx.user.get?.id) {
+          await stripe.customers.update(customer.id, {
+            metadata: {
+              catalyst_user_id: ctx.user.get?.id ?? "guest",
+            },
+          });
+        }
+        return await stripe.checkout.sessions.create({
+          mode: "subscription",
+          line_items: [
+            {
+              price: input.priceId,
+              quantity: 1,
+            },
+          ],
+          customer: customer.id,
+          success_url: env.NEXTAUTH_URL + "/app/upgrade/confirm",
+        });
+      }),
+  },
   user: {
     authState: publicProcedure.query(({ ctx }) => {
       return !!ctx.session?.user;
+    }),
+    isPro: protectedProcedure.query(async ({ ctx }) => {
+      return ctx.user.isPro;
     }),
     canvas: canvasCatalystRouter,
     schedule: {

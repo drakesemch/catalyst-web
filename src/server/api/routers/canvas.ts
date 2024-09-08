@@ -4,6 +4,11 @@ import { del, put } from "@vercel/blob";
 import { env } from "@/env";
 import { constructFile } from "@/lib/utils";
 import { Converter } from "showdown";
+import { addDays } from "date-fns";
+import { unstable_cache } from "next/cache";
+import { createClient } from "@vercel/kv";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { courseClassificationDataset } from "./catalyst/canvas";
 
 export interface Term {
   id: number;
@@ -78,6 +83,7 @@ export interface Course {
     Record<string, boolean>
   >;
   template: boolean;
+  classification?: string;
 }
 
 export interface Participant {
@@ -757,6 +763,59 @@ export interface Message {
   attachments: Attachment[];
 }
 
+export interface PlannerNote {
+  id: number;
+  title: string;
+  description: string;
+  user_id: number;
+  workflow_state: string;
+  course_id: number;
+  todo_date: string;
+  linked_object_type: string;
+  linked_object_id: number;
+  linked_object_html_url: string;
+  linked_object_url: string;
+}
+
+export interface PlannerOverride {
+  id: number;
+  plannable_type: string;
+  plannable_id: number;
+  user_id: number;
+  assignment_id: number;
+  workflow_state: string;
+  marked_complete: boolean;
+  dismissed: boolean;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+}
+
+export interface Plannable {
+  id: number;
+  todo_date: string;
+  title: string;
+  details: string;
+  user_id: number;
+  course_id?: number;
+  workflow_state: string;
+  created_at: string;
+  updated_at: string;
+  content_details: Assignment;
+}
+
+export interface PlannerItem {
+  context_type?: string;
+  course_id?: number;
+  course?: Course;
+  planner_override?: PlannerOverride;
+  submissions?: Submission[] | boolean;
+  plannable_id: string;
+  plannable_type: string;
+  plannable: Plannable;
+  html_url: string;
+}
+
 export const canvasRouter = createTRPCRouter({
   users: {
     self: protectedProcedure.query(async ({ ctx }) => {
@@ -767,6 +826,152 @@ export const canvasRouter = createTRPCRouter({
         },
       });
       return (await query.json()) as User;
+    }),
+  },
+  todo: {
+    setCompleted: protectedProcedure
+      .input(
+        z.object({
+          create: z.boolean(),
+          type: z.string(),
+          id: z.number(),
+          completed: z.boolean(),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (input.create) {
+          const url = new URL("/api/v1/planner/overrides", ctx.user.canvas.url);
+          const query = await fetch(url, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              plannable_type: input.type,
+              plannable_id: input.id,
+              marked_complete: input.completed,
+            }),
+          });
+          return query.json();
+        } else {
+          const url = new URL(
+            `/api/v1/planner/overrides/${input.id}`,
+            ctx.user.canvas.url,
+          );
+          console.log(input.id, input.completed);
+          const query = await fetch(url, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              marked_complete: input.completed,
+            }),
+          });
+          return query.json();
+        }
+      }),
+    upcoming: protectedProcedure.query(async ({ ctx }) => {
+      const url = new URL("/api/v1/planner/items", ctx.user.canvas.url);
+      url.searchParams.append("start_date", new Date().toISOString());
+      url.searchParams.append(
+        "end_date",
+        addDays(new Date(), 14).toISOString(),
+      );
+      const query = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${ctx.user.canvas.token}`,
+        },
+      });
+      const data = (await query.json()) as PlannerItem[];
+      for (const item of data) {
+        const courseURL = new URL(
+          `/api/v1/courses/${item.course_id}`,
+          ctx.user.canvas.url,
+        );
+        const courseQuery = await fetch(courseURL, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        const course = (await courseQuery.json()) as Course;
+        const classification = (await unstable_cache(async () => {
+          const classificationRedis = createClient({
+            url: env.CLASSIFICATION_REST_API_URL,
+            token: env.CLASSIFICATION_REST_API_TOKEN,
+          });
+
+          const classification = await classificationRedis.get(
+            String(course.id),
+          );
+
+          if (classification) {
+            return classification;
+          }
+
+          const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+          const model = genAI.getGenerativeModel({
+            model: "gemini-1.5-flash",
+            systemInstruction: "return the output value",
+          });
+
+          const generationConfig = {
+            temperature: 1,
+            topP: 0.95,
+            topK: 64,
+            maxOutputTokens: 100,
+            stopSequences: ["input:", "\n"],
+            responseMimeType: "text/plain",
+          };
+
+          const input = [
+            ...courseClassificationDataset,
+            {
+              text: "input: " + course.original_name,
+            },
+            {
+              text: "output: ",
+            },
+          ];
+
+          const result = await model
+            .generateContent({
+              contents: [{ role: "user", parts: input }],
+              generationConfig,
+            })
+            .catch((err) => {
+              console.error(err);
+              return undefined;
+            });
+
+          const value = result?.response?.text() ?? "Not Available";
+
+          if (value != "Not Available") {
+            await classificationRedis.set(String(course.id), value);
+          }
+
+          return value;
+        }, ["courses", "classifications", String(course.id)])()) as string;
+        item.course = { ...course, classification };
+        if (item.plannable_type == "assignment") {
+          const assignmentURL = new URL(
+            `/api/v1/courses/${item.course_id}/assignments/${item.plannable.id}`,
+            ctx.user.canvas.url,
+          );
+          assignmentURL.searchParams.append("include[]", "submission");
+          const assignmentQuery = await fetch(assignmentURL, {
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+            },
+          });
+          item.plannable.content_details =
+            (await assignmentQuery.json()) as Assignment;
+        }
+      }
+      return data;
     }),
   },
   inbox: {
@@ -880,7 +1085,86 @@ export const canvasRouter = createTRPCRouter({
             },
           });
           const data = (await query.json()) as Course;
-          return { ...data, original_name: data.original_name ?? data.name };
+          const classification = (await unstable_cache(async () => {
+            const classificationRedis = createClient({
+              url: env.CLASSIFICATION_REST_API_URL,
+              token: env.CLASSIFICATION_REST_API_TOKEN,
+            });
+
+            const classification = await classificationRedis.get(
+              String(data.id),
+            );
+
+            if (classification) {
+              return classification;
+            }
+
+            const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+            const model = genAI.getGenerativeModel({
+              model: "gemini-1.5-flash",
+              systemInstruction: "return the output value",
+            });
+
+            const generationConfig = {
+              temperature: 1,
+              topP: 0.95,
+              topK: 64,
+              maxOutputTokens: 100,
+              stopSequences: ["input:", "\n"],
+              responseMimeType: "text/plain",
+            };
+
+            const input = [
+              ...courseClassificationDataset,
+              {
+                text: "input: " + data.original_name,
+              },
+              {
+                text: "output: ",
+              },
+            ];
+
+            const result = await model
+              .generateContent({
+                contents: [{ role: "user", parts: input }],
+                generationConfig,
+              })
+              .catch((err) => {
+                console.error(err);
+                return undefined;
+              });
+
+            const value = result?.response?.text() ?? "Not Available";
+
+            if (value != "Not Available") {
+              await classificationRedis.set(String(data.id), value);
+            }
+
+            return value;
+          }, ["courses", "classifications", String(data.id)])()) as string;
+          return {
+            ...data,
+            original_name: data.original_name ?? data.name,
+            classification,
+          };
+        }),
+      people: protectedProcedure
+        .input(z.object({ courseId: z.number() }))
+        .query(async ({ input, ctx }) => {
+          const url = new URL(
+            `/api/v1/courses/${input.courseId}/users`,
+            ctx.user.canvas.url,
+          );
+          url.searchParams.append("include[]", "avatar_url");
+          url.searchParams.append("include[]", "enrollments");
+          url.searchParams.append("limit", "100");
+          const query = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${ctx.user.canvas.token}`,
+            },
+          });
+          return (await query.json()) as User[];
         }),
       grades: protectedProcedure
         .input(z.object({ courseId: z.number() }))
@@ -1186,6 +1470,17 @@ export const canvasRouter = createTRPCRouter({
                           ...assignmentData,
                         },
                       };
+                    } else if (item.type == "File") {
+                      const fileURL = new URL(
+                        `/api/v1/courses/${input.courseId}/files/${item.content_id}`,
+                        ctx.user.canvas.url,
+                      );
+                      const fileQuery = await fetch(fileURL, {
+                        headers: {
+                          Authorization: `Bearer ${ctx.user.canvas.token}`,
+                        },
+                      });
+                      const fileData = (await fileQuery.json()) as File;
                     } else if (item.type == "Discussion") {
                       const assignmentURL = new URL(
                         `/api/v1/courses/${input.courseId}/discussion_topics/${item.content_id}`,

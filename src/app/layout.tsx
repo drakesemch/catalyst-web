@@ -8,11 +8,8 @@ import { ThemeProvider } from "next-themes";
 import { TRPCReactProvider } from "@/trpc/react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CmdKProvider } from "@/components/catalyst/cmd-k";
-import { VercelToolbar } from "@vercel/toolbar/next";
 import { Toaster } from "@/components/ui/sonner";
-import { env } from "process";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { CSPostHogProvider } from "@/components/posthog/provider";
 
 export const metadata: Metadata = {
   title: {
@@ -26,7 +23,6 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const shouldInjectToolbar = env.NODE_ENV === "development";
   return (
     <html
       lang="en"
@@ -34,26 +30,25 @@ export default function RootLayout({
       suppressHydrationWarning={true}
     >
       <body>
-        <Analytics />
-        <SpeedInsights />
-        <TRPCReactProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <TooltipProvider>
-              <CmdKProvider>
-                <div vaul-drawer-wrapper="" className="bg-background">
-                  {children}
-                  <Toaster richColors />
-                </div>
-              </CmdKProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </TRPCReactProvider>
-        {shouldInjectToolbar && <VercelToolbar />}
+        <CSPostHogProvider>
+          <TRPCReactProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TooltipProvider>
+                <CmdKProvider>
+                  <div vaul-drawer-wrapper="" className="bg-background">
+                    {children}
+                    <Toaster richColors />
+                  </div>
+                </CmdKProvider>
+              </TooltipProvider>
+            </ThemeProvider>
+          </TRPCReactProvider>
+        </CSPostHogProvider>
       </body>
     </html>
   );

@@ -15,6 +15,10 @@ export async function CourseSidebar({ course }: { course: string }) {
     courseId: Number(course),
   });
 
+  const people = await api.canvas.courses.get.people({
+    courseId: Number(course),
+  });
+
   if (!courseDetails) {
     return <>NO COURSE ERROR!</>;
   }
@@ -57,7 +61,16 @@ export async function CourseSidebar({ course }: { course: string }) {
         <UsersRound className="text-lg" />
         <div className="flex flex-1 flex-col items-start gap-1">
           <span className="font-bold">People</span>
-          <span className="text-xs text-muted-foreground">24 Students</span>
+          <span className="text-xs text-muted-foreground">
+            {
+              people.filter((person) =>
+                person.enrollments.some(
+                  (enrollment) => enrollment.type == "StudentEnrollment",
+                ),
+              ).length
+            }{" "}
+            Students
+          </span>
         </div>
         <ChevronRight />
       </Button>

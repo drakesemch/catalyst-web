@@ -91,6 +91,13 @@ export function Messages() {
                 user.full_name.toLowerCase().includes(search.toLowerCase()),
               ),
           )
+          .filter(
+            (message, idx) =>
+              idx >
+                pages
+                  .flatMap((page) => page.data)
+                  .findIndex((msg) => msg.id == message.id) ?? -1,
+          )
           .sort((a, b) =>
             Number(new Date(a.last_message_at)) >
             Number(new Date(b.last_message_at))

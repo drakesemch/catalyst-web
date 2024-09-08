@@ -15,7 +15,7 @@ import {
 } from "@/server/db/schema";
 import { type InferSelectModel, and, eq } from "drizzle-orm";
 
-const courseClassificationDataset = [
+export const courseClassificationDataset = [
   { text: "input: BVW Counseling" },
   { text: "output: Persistent" },
   { text: "input: Health Wellness (online)-Haggerty-SU" },
@@ -261,6 +261,7 @@ export const canvasCatalystRouter = createTRPCRouter({
           `/api/v1/courses/${input.courseId}`,
           ctx.user.canvas.url,
         );
+        url.searchParams.set("include[]", "total_scores");
         const query = await fetch(url, {
           headers: {
             Authorization: `Bearer ${ctx.user.canvas.token}`,

@@ -5,6 +5,8 @@ import {
   Check,
   CheckCheck,
   CircleSlash,
+  CircleX,
+  File as FileIcon,
   FileText,
   HelpCircle,
   Link2,
@@ -77,6 +79,12 @@ export function moduleType(item: ModuleItem | Assignment) {
       return (
         <>
           <Link2 /> External URL
+        </>
+      );
+    case "file":
+      return (
+        <>
+          <FileIcon /> File
         </>
       );
     case "page":
@@ -210,7 +218,7 @@ export function prettyState(state: string) {
     case "unsubmitted":
       return (
         <>
-          <CircleSlash /> Not Submitted
+          <CircleX /> Not Submitted
         </>
       );
     default:
@@ -219,6 +227,21 @@ export function prettyState(state: string) {
           <HelpCircle /> {state}
         </>
       );
+  }
+}
+
+export function prettyEnrollmentType(type: string) {
+  switch (type) {
+    case "StudentEnrollment":
+      return "Student";
+    case "TeacherEnrollment":
+      return "Teacher";
+    case "DesignerEnrollment":
+      return "Designer";
+    case "ObserverEnrollment":
+      return "Observer";
+    default:
+      return type;
   }
 }
 

@@ -77,7 +77,16 @@ export default function ModulesPage({
                           .includes(search.toLowerCase()) ||
                         item.title.toLowerCase().includes(search.toLowerCase()),
                     )
-                    ?.map((item) => <ModuleButton key={item.id} item={item} />)}
+                    ?.map((item) => {
+                      if (item.type == "SubHeader") {
+                        return (
+                          <h2 key={item.id} className="text-lg font-bold">
+                            {item.title}
+                          </h2>
+                        );
+                      }
+                      return <ModuleButton key={item.id} item={item} />;
+                    })}
                 </AccordionContent>
               </AccordionItem>
             ))}

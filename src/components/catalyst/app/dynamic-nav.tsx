@@ -34,7 +34,7 @@ export function Courses() {
   }, []);
 
   return (
-    <div className="flex max-h-96 flex-col gap-2 overflow-auto p-2">
+    <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
       <div className="flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
         <Search />
         <input

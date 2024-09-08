@@ -111,7 +111,7 @@ const TabsTrigger = React.forwardRef<
       attributes: true,
     });
 
-    document.addEventListener("resize", () => {
+    window.addEventListener("resize", () => {
       setSelectedElement(itemRef);
     });
 
@@ -157,7 +157,7 @@ const TabsContent = React.forwardRef<
     >
       <div
         className={cn(
-          "max-h-[300px] p-1 scroll-py-8 overflow-y-auto overflow-x-hidden scroll-smooth",
+          "max-h-[300px] scroll-py-8 overflow-y-auto overflow-x-hidden scroll-smooth p-1",
           className,
         )}
       >

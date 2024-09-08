@@ -13,7 +13,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "@/server/db";
-import { schools, settings, users } from "../db/schema";
+import { proUsers, schools, settings, users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { env } from "@/env";
 import { createDecipheriv } from "crypto";
@@ -78,12 +78,21 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const token =
     decipher.update(encryptedToken, "base64", "utf8") + decipher.final("utf8");
 
+  const isPro =
+    (
+      await db
+        .select()
+        .from(proUsers)
+        .where(eq(proUsers.userId, user?.id ?? ""))
+    ).length > 0;
+
   return {
     db,
     session,
     user: {
       get: user,
       settings: userSettings,
+      isPro,
       canvas: {
         url: school?.canvasURL ?? "https://canvas.instructure.com",
         token,

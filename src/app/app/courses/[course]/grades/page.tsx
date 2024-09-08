@@ -1,28 +1,56 @@
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
+import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { prettyState, submissionTypeWithIcon } from "@/lib/utils";
 import { api } from "@/trpc/server";
-import { Album, Plus, Percent, Undo, Pencil, Slash, Minus } from "lucide-react";
+import {
+  Album,
+  Plus,
+  Percent,
+  Undo,
+  Pencil,
+  Slash,
+  Minus,
+  ChevronRight,
+} from "lucide-react";
 
 export default async function GradesPage({
   params: { course },
 }: {
   params: { course: string };
 }) {
+  const courseDetails = await api.catalyst.user.canvas.courses.get({
+    courseId: Number(course),
+  });
+
   const grades = await api.canvas.courses.get.grades({
     courseId: Number(course),
   });
 
   return (
-    <div className="mx-auto flex w-full max-w-full flex-col justify-center gap-2 p-2 lg:flex-row">
-      <aside className="relative h-[calc((100vh-4.5rem-1px)-2rem)] w-auto flex-shrink-0 rounded-lg border p-4 lg:sticky lg:top-[calc(4.5rem+0.5rem)] lg:h-[calc((100vh-4.5rem-1px)-1rem)] lg:w-[35ch]">
-        <Tabs defaultValue="grades" className="h-full">
+    <div className="mx-auto flex w-full flex-col justify-center gap-2 lg:flex-row">
+      <aside className="relative flex h-[calc((100vh-4.5rem-1px))] w-auto flex-shrink-0 flex-col gap-2 border-r p-4 lg:sticky lg:top-[calc(4.5rem)] lg:h-[calc((100vh-4.5rem-1px))] lg:w-[35ch]">
+        <Button
+          className="h-auto w-full gap-4"
+          variant="outline"
+          href={`/app/courses/${course}`}
+        >
+          <Album className="text-lg" />
+          <div className="flex max-w-full flex-1 flex-shrink flex-col items-start gap-1 overflow-hidden">
+            <span className="h3">{courseDetails?.classification}</span>
+            <span className="max-w-full truncate text-xs text-muted-foreground">
+              {courseDetails?.original_name}
+            </span>
+          </div>
+          <ChevronRight />
+        </Button>
+        <Tabs defaultValue="assignment" className="h-full">
           <TabsList className="w-full">
             <TabsTrigger value="course">
               <Album /> Course
             </TabsTrigger>
-            <TabsTrigger value="grades">
+            <TabsTrigger value="assignment">
               <Percent /> Grades
             </TabsTrigger>
           </TabsList>
@@ -33,22 +61,31 @@ export default async function GradesPage({
             <CourseSidebar course={course} />
           </TabsContent>
           <TabsContent
-            value="grades"
+            value="assignment"
             className='flex max-h-full flex-col gap-2 [&[data-state="active"]>div]:h-full [&[data-state="active"]]:h-full'
           >
-            <h1 className="h1">Grades</h1>
-            <div className="mt-auto flex flex-col gap-2">
-              <Button variant="outline">
-                <Undo /> Undo What-Ifs
-              </Button>
-              <Button>
-                <Plus /> New Graded Item
-              </Button>
+            <h1 className="h3">Grades</h1>
+            <div className="mt-2 flex flex-col gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <PercentageChart
+                  pct={
+                    courseDetails?.enrollments?.at(0)?.computed_current_score ??
+                    -1
+                  }
+                />
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold text-foreground">
+                    {courseDetails?.enrollments?.at(0)
+                      ?.computed_current_score ?? "N/A"}
+                    %
+                  </span>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
       </aside>
-      <main className="mx-auto w-[min(100ch,100%)] flex-shrink px-8 py-4 md:mx-0">
+      <main className="flex-shrink-1 flex max-w-[100ch] flex-1 flex-col gap-2 px-8 py-4">
         <div className="sticky top-[1.5rem] z-10 -mx-4 flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 md:top-[calc((4.5rem+1px)+1.5rem)]">
           <div className="flex-1 px-2">Name</div>
           <div className="w-[10ch] px-2 text-right">score</div>
@@ -62,7 +99,7 @@ export default async function GradesPage({
           {grades.map((assignment) => (
             <div
               key={assignment.id}
-              className="flex items-stretch gap-2 border-b py-2"
+              className="flex flex-col items-stretch gap-2 border-b py-2 md:flex-row"
             >
               <Button
                 variant="ghost"
@@ -92,26 +129,28 @@ export default async function GradesPage({
                     )}
                 </div>
               </Button>
-              <Button
-                className="h-auto w-[10ch] justify-end text-right"
-                variant="ghost"
-              >
-                {assignment.submission?.score ?? "N/A"}
-              </Button>
-              <div className="grid w-[2ch] place-items-center text-right text-muted-foreground">
-                <Slash />
-              </div>
-              <Button
-                className="h-auto w-[10ch] justify-end text-right"
-                variant="ghost"
-              >
-                {assignment.points_possible}
-              </Button>
-              <div className="w-2" />
-              <div className="grid w-10 place-items-center">
-                <Button variant="outline" size="icon">
-                  <Pencil />
+              <div className="flex h-full items-center justify-end gap-2">
+                <Button
+                  className="h-auto w-[10ch] justify-end text-right"
+                  variant="ghost"
+                >
+                  {assignment.submission?.score ?? "N/A"}
                 </Button>
+                <div className="grid w-[2ch] place-items-center text-right text-muted-foreground">
+                  <Slash />
+                </div>
+                <Button
+                  className="h-auto w-[10ch] justify-end text-right"
+                  variant="ghost"
+                >
+                  {assignment.points_possible ?? 0}
+                </Button>
+                <div className="w-2" />
+                <div className="grid w-10 place-items-center">
+                  <Button variant="outline" size="icon">
+                    <Pencil />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}

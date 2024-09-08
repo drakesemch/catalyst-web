@@ -12,6 +12,7 @@ import {
   Album,
   ArrowLeft,
   Calendar as CalendarIcon,
+  ChevronRight,
   Edit,
   Eye,
   Info,
@@ -46,6 +47,10 @@ export default async function AssignmentPage({
 }: {
   params: { course: string; assignment: string };
 }) {
+  const courseDetails = await api.catalyst.user.canvas.courses.get({
+    courseId: Number(course),
+  });
+
   const assignmentDetails = await api.canvas.courses.get.assignments.get({
     courseId: Number(course),
     assignmentId: Number(assignment),
@@ -54,8 +59,22 @@ export default async function AssignmentPage({
   const now = new Date();
 
   return (
-    <div className="mx-auto flex w-full flex-col justify-center gap-2 p-2 lg:flex-row">
-      <aside className="relative h-[calc((100vh-4.5rem-1px)-2rem)] w-auto flex-shrink-0 rounded-lg border p-4 lg:sticky lg:top-[calc(4.5rem+0.5rem)] lg:h-[calc((100vh-4.5rem-1px)-1rem)] lg:w-[35ch]">
+    <div className="mx-auto flex w-full flex-col justify-center gap-2 lg:flex-row">
+      <aside className="relative flex h-[calc((100vh-4.5rem-1px))] w-auto flex-shrink-0 flex-col gap-2 border-r p-4 lg:sticky lg:top-[calc(4.5rem)] lg:h-[calc((100vh-4.5rem-1px))] lg:w-[35ch]">
+        <Button
+          className="h-auto w-full gap-4"
+          variant="outline"
+          href={`/app/courses/${course}`}
+        >
+          <Album className="text-lg" />
+          <div className="flex max-w-full flex-1 flex-shrink flex-col items-start gap-1 overflow-hidden">
+            <span className="h3">{courseDetails?.classification}</span>
+            <span className="max-w-full truncate text-xs text-muted-foreground">
+              {courseDetails?.original_name}
+            </span>
+          </div>
+          <ChevronRight />
+        </Button>
         <Tabs defaultValue="assignment" className="h-full">
           <TabsList className="w-full">
             <TabsTrigger value="course">
@@ -176,9 +195,13 @@ export default async function AssignmentPage({
                     })
                   : "Sometime in the future"}
               </span>
-              {assignmentDetails.submission_types.map((type) =>
-                submissionTypeWithIcon(type),
-              )}
+              <div className="flex flex-col gap-2">
+                {assignmentDetails.submission_types.map((type) => (
+                  <span className="flex items-center gap-2" key={type}>
+                    {submissionTypeWithIcon(type)}
+                  </span>
+                ))}
+              </div>
             </div>
             <div className="mt-auto flex flex-col gap-2">
               <Drawer>
