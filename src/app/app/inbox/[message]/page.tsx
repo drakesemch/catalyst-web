@@ -101,7 +101,7 @@ export default async function MessageItem({
               </div>
               {message.body && (
                 <div
-                  className="p-4"
+                  className="render-fancy p-4"
                   dangerouslySetInnerHTML={{
                     __html: converter
                       .makeHtml(

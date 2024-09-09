@@ -39,7 +39,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { NewSubmission, Submissions } from "./submission";
+import { NewSubmission, SubmissionButtons, Submissions } from "./submission";
 import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
 
 export default async function AssignmentPage({
@@ -204,47 +204,11 @@ export default async function AssignmentPage({
               </div>
             </div>
             <div className="mt-auto flex flex-col gap-2">
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline">
-                    <Eye /> View Submissions
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle>New Submissions</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="overflow-auto">
-                    <Submissions course={course} assignment={assignment} />
-                  </div>
-                </DrawerContent>
-              </Drawer>
-              {assignmentDetails.submission_types.length == 1 &&
-                assignmentDetails.submission_types.at(0) == "external_tool" && (
-                  <Button
-                    href={assignmentDetails.external_tool_tag_attributes?.url}
-                    target="_blank"
-                  >
-                    <SquareArrowOutUpRight /> View External Tool
-                  </Button>
-                )}
-              {(assignmentDetails.submission_types.length != 1 ||
-                assignmentDetails.submission_types.at(0) !=
-                  "external_tool") && (
-                <Drawer>
-                  <DrawerTrigger asChild>
-                    <Button>
-                      <Plus /> New Submission
-                    </Button>
-                  </DrawerTrigger>
-                  <DrawerContent>
-                    <DrawerHeader>
-                      <DrawerTitle>New Submission</DrawerTitle>
-                    </DrawerHeader>
-                    <NewSubmission course={course} assignment={assignment} />
-                  </DrawerContent>
-                </Drawer>
-              )}
+              <SubmissionButtons
+                course={course}
+                assignment={assignment}
+                assignmentDetails={assignmentDetails}
+              />
             </div>
           </TabsContent>
         </Tabs>

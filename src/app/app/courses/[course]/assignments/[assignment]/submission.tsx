@@ -17,17 +17,133 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFileUpload } from "@/lib/hooks";
 import { submissionTypeWithIcon, clientToBase64 } from "@/lib/utils";
+import { Assignment } from "@/server/api/routers/canvas";
 import { api } from "@/trpc/react";
+import confetti from "canvas-confetti";
 import { format, formatDistanceStrict, isBefore } from "date-fns";
-import { ArrowRight, Check, FileText, Loader } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Eye,
+  FileText,
+  Loader,
+  Plus,
+  SquareArrowOutUpRight,
+} from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+
+export function SubmissionButtons({
+  course,
+  assignment,
+  assignmentDetails,
+}: {
+  course: string;
+  assignment: string;
+  assignmentDetails: Assignment;
+}) {
+  const searchParams = useSearchParams();
+  const [submissionsOpen, setSubmissionsOpen] = useState(false);
+  const [newSubmissionOpen, setNewSubmissionOpen] = useState(
+    Boolean(searchParams.get("submit") ?? false),
+  );
+
+  return (
+    <>
+      <Drawer open={submissionsOpen} onOpenChange={setSubmissionsOpen}>
+        <DrawerTrigger asChild>
+          <Button variant="outline">
+            <Eye /> View Submissions
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>View Submissions</DrawerTitle>
+          </DrawerHeader>
+          <div className="overflow-auto">
+            <Submissions course={course} assignment={assignment} />
+          </div>
+        </DrawerContent>
+      </Drawer>
+      {assignmentDetails.submission_types.length == 1 &&
+        assignmentDetails.submission_types.at(0) == "external_tool" && (
+          <Button
+            href={assignmentDetails.external_tool_tag_attributes?.url}
+            target="_blank"
+          >
+            <SquareArrowOutUpRight /> View External Tool
+          </Button>
+        )}
+      {(assignmentDetails.submission_types.length != 1 ||
+        assignmentDetails.submission_types.at(0) != "external_tool") && (
+        <Drawer open={newSubmissionOpen} onOpenChange={setNewSubmissionOpen}>
+          <DrawerTrigger asChild>
+            <Button>
+              <Plus /> New Submission
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>New Submission</DrawerTitle>
+            </DrawerHeader>
+            <NewSubmission
+              course={course}
+              assignment={assignment}
+              onSuccess={() => {
+                setSubmissionsOpen(true);
+                setNewSubmissionOpen(false);
+                () => {
+                  const end = Date.now() + 3 * 1000; // 3 seconds
+                  const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+
+                  const frame = async () => {
+                    if (Date.now() > end) return;
+
+                    confetti({
+                      particleCount: 2,
+                      angle: 60,
+                      spread: 55,
+                      startVelocity: 60,
+                      origin: { x: 0, y: 0.5 },
+                      colors: colors,
+                    })?.catch(console.error);
+                    confetti({
+                      particleCount: 2,
+                      angle: 120,
+                      spread: 55,
+                      startVelocity: 60,
+                      origin: { x: 1, y: 0.5 },
+                      colors: colors,
+                    })?.catch(console.error);
+
+                    await new Promise((resolve) => setTimeout(resolve, 20));
+
+                    requestAnimationFrame(() => {
+                      frame().catch(console.error);
+                    });
+                  };
+
+                  frame().catch(console.error);
+                };
+              }}
+            />
+          </DrawerContent>
+        </Drawer>
+      )}
+    </>
+  );
+}
 
 export function NewSubmission({
   course,
   assignment,
+  onSuccess = () => {
+    /**/
+  },
 }: {
   course: string;
   assignment: string;
+  onSuccess: () => void;
 }) {
   const [assignmentData] =
     api.canvas.courses.get.assignments.get.useSuspenseQuery({
@@ -59,6 +175,12 @@ export function NewSubmission({
   });
 
   const [content, setContent] = useState("");
+
+  useEffect(() => {
+    if (isSuccess) {
+      onSuccess();
+    }
+  }, [isSuccess, onSuccess]);
 
   return (
     <div className="p-4">

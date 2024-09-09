@@ -19,8 +19,8 @@ import type { Assignment, PlannerItem } from "@/server/api/routers/canvas";
 import { api } from "@/trpc/react";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import { format, formatDistanceStrict } from "date-fns";
-import { ArrowRight, Dot } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Dot, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function TodoCard({ todo }: { todo: PlannerItem }) {
   const [isCompleted, setIsCompleted] = useState<CheckedState>(
@@ -29,7 +29,14 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
       todo.plannable.content_details.submission?.workflow_state == "submitted"
     ),
   );
+  const [now, setNow] = useState(new Date());
   const { mutate } = api.canvas.todo.setCompleted.useMutation();
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <Card key={todo.plannable_id}>
       <CardHeader>
@@ -82,7 +89,7 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
                 todo.plannable.todo_date ??
                 "",
             ),
-            new Date(),
+            now,
             {
               addSuffix: true,
             },
@@ -118,7 +125,10 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
         </CardDescription>
       </CardHeader>
       <CardFooter>
-        <Button variant="outline" href={`/app${todo.html_url}`}>
+        <Button variant="outline" href={`/app${todo.html_url}?submit=true`}>
+          Submit <Upload />
+        </Button>
+        <Button href={`/app${todo.html_url}`}>
           Open <ArrowRight />
         </Button>
       </CardFooter>

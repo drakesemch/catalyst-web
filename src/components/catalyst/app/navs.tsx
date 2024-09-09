@@ -165,7 +165,7 @@ export async function AppNav() {
                 <HoverCardContent
                   className="w-auto p-0"
                   side="bottom"
-                  sideOffset={16}
+                  sideOffset={24}
                   align="end"
                 >
                   <div className="flex justify-stretch gap-2 p-4">
@@ -203,7 +203,7 @@ export async function AppNav() {
                 <HoverCardContent
                   className="w-auto p-0"
                   side="bottom"
-                  sideOffset={16}
+                  sideOffset={24}
                   align="end"
                 >
                   <div className="flex justify-stretch gap-2 p-4">
@@ -406,7 +406,7 @@ function Tools() {
             Take a break to refocus
           </span>
         </div>
-        <Badge>Pro</Badge>
+        <Badge variant="secondary">Pre Release</Badge>
       </Button>
       <Button
         variant="outline"

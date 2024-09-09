@@ -9,8 +9,15 @@ const DrawerContext = React.createContext<true | null>(null);
 
 const Drawer = ({
   shouldScaleBackground = true,
+  defaultOpen = false,
+  open = false,
+  onOpenChange = () => {
+    /**/
+  },
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+}: React.ComponentProps<typeof DrawerPrimitive.Root> & {
+  defaultOpen?: boolean;
+}) => {
   // const context = React.useContext(DrawerContext);
   // return context == null ? (
   //   <DrawerPrimitive.Root
@@ -23,9 +30,16 @@ const Drawer = ({
   //     {...props}
   //   />
   // );
+  const [stateOpen, setStateOpened] = React.useState(open ?? defaultOpen);
+
   return (
     <DrawerPrimitive.NestedRoot
       shouldScaleBackground={shouldScaleBackground}
+      open={stateOpen}
+      onOpenChange={(val) => {
+        setStateOpened(val);
+        onOpenChange(val);
+      }}
       {...props}
     />
   );
