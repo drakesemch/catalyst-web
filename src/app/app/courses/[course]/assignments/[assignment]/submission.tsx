@@ -17,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFileUpload } from "@/lib/hooks";
 import { submissionTypeWithIcon, clientToBase64 } from "@/lib/utils";
-import { Assignment } from "@/server/api/routers/canvas";
+import type { Assignment } from "@/server/api/routers/canvas";
 import { api } from "@/trpc/react";
 import confetti from "canvas-confetti";
 import { format, formatDistanceStrict, isBefore } from "date-fns";

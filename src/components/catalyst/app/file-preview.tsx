@@ -107,7 +107,11 @@ export function AttachmentPreview({
   onRemove?: () => void;
 }) {
   if ("data" in attachment) {
-    attachment = constructFile(attachment.data, attachment.name, attachment.type);
+    attachment = constructFile(
+      attachment.data,
+      attachment.name,
+      attachment.type,
+    );
   }
   console.log(attachment, attachment.type);
   return (

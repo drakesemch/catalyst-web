@@ -15,6 +15,7 @@ export const env = createEnv({
     CLASSIFICATION_REST_API_URL: z.string().url(),
     CLASSIFICATION_REST_API_TOKEN: z.string(),
     NEXTAUTH_SECRET: z.string(),
+    SENTRY_AUTH_TOKEN: z.string(),
     NEXTAUTH_URL: z.preprocess(
       // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
       // Since NextAuth.js automatically uses the VERCEL_URL if present.
@@ -56,6 +57,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     STRIPE_API: process.env.STRIPE_API,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     PRO_ID: process.env.PRO_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

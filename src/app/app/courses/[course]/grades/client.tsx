@@ -25,7 +25,6 @@ import {
   Dot,
   Minus,
   MoreHorizontal,
-  Pencil,
   Percent,
   Slash,
   Undo,

@@ -14,26 +14,23 @@ import {
   Calendar as CalendarIcon,
   ChevronRight,
   Edit,
-  Eye,
   Info,
   NotepadText,
-  Plus,
   Save,
   Sparkles,
-  SquareArrowOutUpRight,
   Timer,
   Undo,
 } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Separator } from "@/components/ui/separator";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+// import {
+//   Drawer,
+//   DrawerContent,
+//   DrawerHeader,
+//   DrawerTitle,
+//   DrawerTrigger,
+// } from "@/components/ui/drawer";
 import {
   InputOTP,
   InputOTPGroup,

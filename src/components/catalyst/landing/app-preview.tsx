@@ -29,7 +29,7 @@ export function MobilePreview() {
 
   return (
     <div className="absolute bottom-10 right-1/2 -z-30 translate-x-1/2 md:right-10 md:translate-x-0">
-      <div className="animate-float relative h-96 w-60 rounded-2xl border-4 border-secondary bg-background md:rotate-6">
+      <div className="relative h-96 w-60 animate-float rounded-2xl border-4 border-secondary bg-background md:rotate-6">
         <div className="absolute left-1/2 top-2 h-4 w-16 -translate-x-1/2 rounded-full border bg-black"></div>
         <div className="absolute top-2 flex w-full items-center justify-between px-4 text-xs">
           <div className="w-16 text-center font-bold">{time}</div>
