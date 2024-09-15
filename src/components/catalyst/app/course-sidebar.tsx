@@ -6,8 +6,8 @@ import {
   FileText,
   UsersRound,
   Percent,
-  ListCheck,
-  MessageCircle,
+  // ListCheck,
+  // MessageCircle,
 } from "lucide-react";
 
 export async function CourseSidebar({ course }: { course: string }) {
@@ -83,12 +83,13 @@ export async function CourseSidebar({ course }: { course: string }) {
         <div className="flex flex-1 flex-col items-start gap-1">
           <span className="font-bold">Grades</span>
           <span className="text-xs text-muted-foreground">
-            1 Missing Assignment
+            {courseDetails?.enrollments?.at(0)?.computed_current_score ?? "N/A"}
+            %
           </span>
         </div>
         <ChevronRight />
       </Button>
-      <Button
+      {/* <Button
         className="h-auto w-full gap-4"
         variant="outline"
         href={`/app/courses/${course}/todo`}
@@ -113,7 +114,7 @@ export async function CourseSidebar({ course }: { course: string }) {
           <span className="text-xs text-muted-foreground">2 Scores added</span>
         </div>
         <ChevronRight />
-      </Button>
+      </Button> */}
     </>
   );
 }

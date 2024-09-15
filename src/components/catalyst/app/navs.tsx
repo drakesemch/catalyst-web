@@ -347,7 +347,11 @@ function CourseLoading() {
 function Tools() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
-      <Button
+      <div className="grid h-96 w-[40ch] place-items-center text-xs text-muted-foreground">
+        No tools available.
+        <br /> Check back later for updates.
+      </div>
+      {/* <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
       >
@@ -433,7 +437,7 @@ function Tools() {
           </span>
         </div>
         <Badge>Pro</Badge>
-      </Button>
+      </Button> */}
     </div>
   );
 }
@@ -450,6 +454,18 @@ function SettingCards() {
           <span className="font-bold">Status</span>
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <div className="size-2 rounded-full bg-green-500" /> Online
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
+      >
+        <Inbox />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Inbox</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            View your messages
           </span>
         </div>
       </Button>

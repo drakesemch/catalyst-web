@@ -113,6 +113,77 @@ export default async function AssignmentPage({
                   </span>
                 </div>
               </div>
+              <span className="font-bold">Score Statistics:</span>
+              <div className="relative my-2 h-4 w-full">
+                <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded-full bg-muted" />
+                <div
+                  className="absolute left-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-muted-foreground"
+                  style={{
+                    left: `${((assignmentDetails.score_statistics?.min ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%`,
+                    width: `${(((assignmentDetails.score_statistics?.max ?? 0) - (assignmentDetails.score_statistics?.min ?? 0)) / (assignmentDetails.points_possible ?? 1)) * 100}%`,
+                  }}
+                />
+                <div
+                  className="absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-muted-foreground"
+                  style={{
+                    left: `${((assignmentDetails.score_statistics?.lower_q ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%`,
+                    width: `calc(${(((assignmentDetails.score_statistics?.median ?? 0) - (assignmentDetails.score_statistics?.lower_q ?? 0)) / (assignmentDetails.points_possible ?? 1)) * 100}% - 1px)`,
+                  }}
+                />
+                <div
+                  className="absolute left-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-muted-foreground"
+                  style={{
+                    left: `calc(${((assignmentDetails.score_statistics?.median ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}% + 1px)`,
+                    width: `calc(${(((assignmentDetails.score_statistics?.upper_q ?? 0) - (assignmentDetails.score_statistics?.median ?? 0)) / (assignmentDetails.points_possible ?? 1)) * 100}% - 1px)`,
+                  }}
+                />
+                <div
+                  className="absolute top-1/2 h-3 w-1 -translate-y-1/2 rounded-full bg-foreground text-left"
+                  style={{
+                    left: `${((assignmentDetails.submission?.score ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%`,
+                  }}
+                />
+                <span
+                  className="absolute left-0 top-full w-[5ch] text-left"
+                  style={{
+                    left: `min(${((assignmentDetails.score_statistics?.min ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%, calc(100% - 5ch))`,
+                  }}
+                >
+                  {assignmentDetails.score_statistics?.min ?? 0}
+                </span>
+                <span
+                  className="absolute bottom-full left-0 w-[5ch] text-left"
+                  style={{
+                    left: `min(${((assignmentDetails.score_statistics?.lower_q ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%, calc(100% - 5ch))`,
+                  }}
+                >
+                  {assignmentDetails.score_statistics?.lower_q ?? 0}
+                </span>
+                <span
+                  className="absolute left-0 top-full w-[5ch] text-center"
+                  style={{
+                    left: `min(${((assignmentDetails.score_statistics?.median ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%, calc(100% - 5ch))`,
+                  }}
+                >
+                  {assignmentDetails.score_statistics?.median ?? 0}
+                </span>
+                <span
+                  className="absolute bottom-full left-0 w-[5ch] text-right"
+                  style={{
+                    left: `min(${((assignmentDetails.score_statistics?.upper_q ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%, calc(100% - 5ch))`,
+                  }}
+                >
+                  {assignmentDetails.score_statistics?.upper_q ?? 0}
+                </span>
+                <span
+                  className="absolute left-0 top-full w-[5ch] text-right"
+                  style={{
+                    left: `min(${((assignmentDetails.score_statistics?.max ?? 0) / (assignmentDetails.points_possible ?? 1)) * 100}%, calc(100% - 5ch))`,
+                  }}
+                >
+                  {assignmentDetails.score_statistics?.max ?? 0}
+                </span>
+              </div>
               <span className="flex h-4 items-center gap-2">
                 {prettyState(
                   assignmentDetails.submission?.workflow_state ?? "unsubmitted",
@@ -196,8 +267,9 @@ export default async function AssignmentPage({
                   : "Sometime in the future"}
               </span>
               <div className="flex flex-col gap-2">
+                <b>Submitting: </b>
                 {assignmentDetails.submission_types.map((type) => (
-                  <span className="flex items-center gap-2" key={type}>
+                  <span className="ml-2 flex items-center gap-2" key={type}>
                     {submissionTypeWithIcon(type)}
                   </span>
                 ))}

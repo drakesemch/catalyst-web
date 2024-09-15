@@ -815,6 +815,23 @@ export interface PlannerItem {
   html_url: string;
 }
 
+export interface GradingRules {
+  drop_lowest: number;
+  drop_highest: number;
+  never_drop: number[];
+}
+
+export interface AssignmentGroup {
+  id: number;
+  name: string;
+  position: number;
+  group_weight: number;
+  sis_source_id: string;
+  integration_data: Record<string, string>;
+  assignments: Assignment[];
+  rules: GradingRules | null;
+}
+
 export const canvasRouter = createTRPCRouter({
   users: {
     self: protectedProcedure.query(async ({ ctx }) => {
@@ -1165,23 +1182,40 @@ export const canvasRouter = createTRPCRouter({
           });
           return (await query.json()) as User[];
         }),
-      grades: protectedProcedure
-        .input(z.object({ courseId: z.number() }))
-        .query(async ({ input, ctx }) => {
-          const url = new URL(
-            `/api/v1/courses/${input.courseId}/assignments`,
-            ctx.user.canvas.url,
-          );
-          url.searchParams.append("per_page", "1000");
-          url.searchParams.append("include[]", "submission");
-          const query = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${ctx.user.canvas.token}`,
-            },
-          });
-          if (!query.ok) return [];
-          return (await query.json()) as Assignment[];
-        }),
+      grades: {
+        list: protectedProcedure
+          .input(z.object({ courseId: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/assignments`,
+              ctx.user.canvas.url,
+            );
+            url.searchParams.append("per_page", "1000");
+            url.searchParams.append("include[]", "submission");
+            url.searchParams.append("include[]", "score_statistics");
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            if (!query.ok) return [];
+            return (await query.json()) as Assignment[];
+          }),
+        groups: protectedProcedure
+          .input(z.object({ courseId: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/assignment_groups`,
+              ctx.user.canvas.url,
+            );
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            return (await query.json()) as AssignmentGroup[];
+          }),
+      },
       frontPage: protectedProcedure
         .input(z.object({ courseId: z.number() }))
         .query(async ({ input, ctx }) => {
@@ -1380,6 +1414,7 @@ export const canvasRouter = createTRPCRouter({
               ctx.user.canvas.url,
             );
             url.searchParams.append("include[]", "submission");
+            url.searchParams.append("include[]", "score_statistics");
             const query = await fetch(url, {
               headers: {
                 Authorization: `Bearer ${ctx.user.canvas.token}`,
@@ -1480,6 +1515,13 @@ export const canvasRouter = createTRPCRouter({
                         },
                       });
                       const fileData = (await fileQuery.json()) as File;
+                      return {
+                        ...item,
+                        content_details: {
+                          ...item.content_details,
+                          ...fileData,
+                        },
+                      };
                     } else if (item.type == "Discussion") {
                       const assignmentURL = new URL(
                         `/api/v1/courses/${input.courseId}/discussion_topics/${item.content_id}`,

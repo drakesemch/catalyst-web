@@ -74,6 +74,11 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
   /* shadcn/ui typography helpers */
   .h1 {
     @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;

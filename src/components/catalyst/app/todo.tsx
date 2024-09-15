@@ -41,7 +41,7 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
     <Card key={todo.plannable_id}>
       <CardHeader>
         <CardTitle>
-          <label className="flex cursor-pointer items-center gap-2">
+          <label className="flex cursor-pointer items-center gap-2 overflow-hidden">
             <Checkbox
               defaultChecked={isCompleted}
               onCheckedChange={(val) => {
@@ -57,7 +57,7 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
             />
             <div
               className={cn(
-                "relative transition-all delay-300 after:absolute after:-left-1 after:top-1/2 after:h-0.5 after:w-0 after:-translate-y-1/2 after:rounded-full after:bg-foreground after:transition-all after:delay-0 after:content-['']",
+                "relative truncate transition-all delay-300 after:absolute after:-left-1 after:top-1/2 after:h-0.5 after:w-0 after:-translate-y-1/2 after:rounded-full after:bg-foreground after:transition-all after:delay-0 after:content-['']",
                 isCompleted &&
                   "opacity-30 delay-0 after:w-[calc(100%+0.5rem)] after:delay-300",
               )}
@@ -105,18 +105,22 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
         </CardDescription>
         <CardDescription
           className={cn(
-            "transition-all delay-300",
+            "mt-2 flex flex-col items-start gap-2 transition-all delay-300 sm:flex-row sm:items-center",
             isCompleted && "opacity-30 delay-0",
           )}
         >
-          {prettyState(
-            todo.plannable.content_details?.submission?.workflow_state ?? "",
-          )}
-          <Dot />
-          {moduleType({
-            type: todo.plannable_type,
-          } as unknown as Assignment)}{" "}
-          <Dot />
+          <span className="flex items-center gap-2">
+            {prettyState(
+              todo.plannable.content_details?.submission?.workflow_state ?? "",
+            )}
+          </span>
+          <Dot className="hidden sm:block" />
+          <span className="flex items-center gap-2">
+            {moduleType({
+              type: todo.plannable_type,
+            } as unknown as Assignment)}{" "}
+          </span>
+          <Dot className="hidden sm:block" />
           {todo.plannable.content_details?.submission_types.map((type) => (
             <span className="flex items-center gap-2" key={type}>
               {submissionTypeWithIcon(type)}
@@ -125,7 +129,10 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
         </CardDescription>
       </CardHeader>
       <CardFooter>
-        <Button variant="outline" href={`/app${todo.html_url}?submit=true`}>
+        <Button
+          variant="outline"
+          href={`/app${todo.html_url.split("/submissions")[0]}?submit=true`}
+        >
           Submit <Upload />
         </Button>
         <Button href={`/app${todo.html_url}`}>
