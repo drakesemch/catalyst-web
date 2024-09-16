@@ -1079,11 +1079,13 @@ export const canvasRouter = createTRPCRouter({
             Authorization: `Bearer ${ctx.user.canvas.token}`,
           },
         });
+        let data = (await query.json()) as Course[];
+        data = data?.map?.((course) => ({
+          ...course,
+          original_name: course.original_name ?? course.name,
+        }));
         return {
-          data: ((await query.json()) as Course[])?.map?.((course) => ({
-            ...course,
-            original_name: course.original_name ?? course.name,
-          })),
+          data: data,
           nextCursor: Number(input?.cursor ?? 0) + Number(input?.limit ?? 10),
         };
       }),

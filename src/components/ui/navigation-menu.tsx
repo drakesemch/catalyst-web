@@ -109,7 +109,7 @@ const NavigationMenuViewport = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     className={cn(
-      "absolute left-[max(calc((100%-120ch)/2),2rem)] top-full flex justify-center",
+      "absolute left-[max(calc((100%-140ch)/2),0rem)] top-full flex justify-center",
     )}
   >
     <NavigationMenuPrimitive.Viewport

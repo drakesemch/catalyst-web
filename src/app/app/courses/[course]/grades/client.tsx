@@ -127,10 +127,10 @@ export function GradesClient({
             className='flex max-h-full flex-col gap-2 [&[data-state="active"]>div]:h-full [&[data-state="active"]]:h-full'
           >
             <h1 className="h3">Grades</h1>
-            <p className="text-muted-foreground">
-              <AlertCircle /> Grade Calculator is in early beta, calculations
-              are not 100% accurate, please do not refer the parenthesized
-              value.
+            <p className="flex gap-1 text-xs text-destructive">
+              <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
+              early beta, calculations are not 100% accurate, please do not
+              refer the parenthesized value.
             </p>
             <div className="mt-2 flex flex-col gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ export function GradesClient({
                   <span className="text-lg font-bold text-foreground">
                     {courseDetails?.enrollments?.at(0)
                       ?.computed_current_score ?? "N/A"}
-                    % ({calculatedWhatIfScore}%)
+                    % ({calculatedWhatIfScore.toFixed(2)}%)
                   </span>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import { env } from "@/env";
 import type { Assignment, ModuleItem } from "@/server/api/routers/canvas";
 import { type ClassValue, clsx } from "clsx";
 import {
+  Camera,
   Check,
   CheckCheck,
   CircleSlash,
@@ -158,6 +159,12 @@ export function submissionTypeWithIcon(submission: string) {
       return (
         <>
           <Upload /> File Upload
+        </>
+      );
+    case "media_recording":
+      return (
+        <>
+          <Camera /> Media Recording
         </>
       );
     case "on_paper":

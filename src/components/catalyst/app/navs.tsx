@@ -26,7 +26,7 @@ import {
 } from "../../ui/navigation-menu";
 import { Separator } from "../../ui/separator";
 import { Button } from "@/components/ui/button";
-import { Courses } from "./dynamic-nav";
+import { Courses, Notifications } from "./dynamic-nav";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -63,7 +63,7 @@ export async function AppNav() {
         viewport={{
           className: "left-[calc(max(calc((100%-120ch)/2),1rem)+10ch)]",
         }}
-        className="hidden md:flex"
+        className="z-20 hidden md:flex"
       >
         <NavigationMenuList>
           <NavigationMenuItem>
@@ -104,10 +104,26 @@ export async function AppNav() {
             </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <NavigationMenuLink href="/app/social">
+            <NavigationMenuTrigger>
               <UsersRound />
               Social
-            </NavigationMenuLink>
+            </NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <div className="flex justify-stretch gap-2 p-4">
+                <Button
+                  variant="secondary"
+                  className="flex h-auto min-h-48 w-48 flex-col items-start justify-end gap-2 text-2xl"
+                  href="/app/social"
+                >
+                  <UsersRound />
+                  Social
+                  <span className="h-auto max-w-full whitespace-pre text-wrap text-xs text-muted-foreground">
+                    Connect with friends and classmates.
+                  </span>
+                </Button>
+                <Social />
+              </div>
+            </NavigationMenuContent>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger>
@@ -119,7 +135,7 @@ export async function AppNav() {
                 <Button
                   variant="secondary"
                   className="flex h-auto min-h-48 w-48 flex-col items-start justify-end gap-2 text-2xl"
-                  href="/app/courses"
+                  href="/app/tools"
                 >
                   <Wrench className="text-5xl" strokeWidth={1} />
                   Tools
@@ -172,6 +188,7 @@ export async function AppNav() {
                         Catch up on what you{"'"}ve missed.
                       </span>
                     </Button>
+                    <Notifications />
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -337,10 +354,108 @@ function CourseLoading() {
   );
 }
 
+function Social() {
+  return (
+    <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
+      <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
+        This feature is not available.
+        <br /> Check back later for updates.
+      </div>
+      {/* <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Calculator />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Calculator</span>
+          <span className="text-xs text-muted-foreground">
+            Perform calculations with ease
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <ChartLine />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Graphing Calculator</span>
+          <span className="text-xs text-muted-foreground">
+            Plot graphs and functions
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Table />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Periodic Table</span>
+          <span className="text-xs text-muted-foreground">
+            Explore the elements.
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Percent />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Grade Calculator</span>
+          <span className="text-xs text-muted-foreground">
+            Enter what-if grades and what-if percentages
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Gamepad2 />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Games</span>
+          <span className="text-xs text-muted-foreground">
+            Take a break to refocus
+          </span>
+        </div>
+        <Badge variant="secondary">Pre Release</Badge>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Text />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Assignment Summarizer</span>
+          <span className="text-xs text-muted-foreground">
+            Understand your assignment better
+          </span>
+        </div>
+        <Badge>Pro</Badge>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <File />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Paper Proof-reader</span>
+          <span className="text-xs text-muted-foreground">
+            Improve your writing
+          </span>
+        </div>
+        <Badge>Pro</Badge>
+      </Button> */}
+    </div>
+  );
+}
+
 function Tools() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
-      <div className="grid h-96 w-[40ch] place-items-center text-xs text-muted-foreground">
+      <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
         No tools available.
         <br /> Check back later for updates.
       </div>
@@ -474,18 +589,28 @@ function SettingCards() {
           </span>
         </div>
       </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
-      >
-        <Bell />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Notifications</span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            Catch up on what you{"'"}ve missed
-          </span>
-        </div>
-      </Button>
+      <Drawer>
+        <DrawerTrigger asChild>
+          <Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
+          >
+            <Bell />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Notifications</span>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                Catch up on what you{"'"}ve missed
+              </span>
+            </div>
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Notifications</DrawerTitle>
+          </DrawerHeader>
+          <Notifications />
+        </DrawerContent>
+      </Drawer>
       <Button
         variant="outline"
         className="hidden h-auto w-full flex-1 items-center gap-3 md:flex"

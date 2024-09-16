@@ -1,5 +1,4 @@
 import { TimeOfDay } from "@/components/catalyst/app/time-of-day";
-import { TodoCard } from "@/components/catalyst/app/todo";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,11 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/trpc/server";
 import { ArrowRight, Dot, SquareArrowOutUpRight } from "lucide-react";
+import { Todos } from "./client";
 
 export default async function AppPage() {
-  const todos = await api.canvas.todo.upcoming();
   return (
     <div className="mx-auto flex w-full flex-col justify-center gap-2 lg:flex-row">
       <main className="flex max-w-[100ch] flex-1 flex-col gap-2 p-4 py-16">
@@ -87,16 +85,7 @@ export default async function AppPage() {
           Your planned items for the next 14 days.
         </p>
         <div className="flex animate-fade-in flex-col gap-4 opacity-0 animate-delay-1400">
-          {todos
-            .sort((a, b) =>
-              Number(new Date(a?.plannable.todo_date ?? 0)) >
-              Number(new Date(b?.plannable.todo_date ?? 0))
-                ? -1
-                : 1,
-            )
-            .map((todo) => (
-              <TodoCard key={todo.plannable_id} todo={todo} />
-            ))}
+          <Todos />
           <Button
             variant="outline"
             className="h-auto justify-between p-8 text-lg"

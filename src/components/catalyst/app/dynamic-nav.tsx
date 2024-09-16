@@ -11,9 +11,26 @@ import {
   formatDistanceStrict,
 } from "date-fns";
 import { Progress } from "@/components/ui/progress";
-import { CircleAlert, Search } from "lucide-react";
+import {
+  Check,
+  CircleAlert,
+  CircleSlash,
+  CircleX,
+  MoreVertical,
+  Search,
+  UserRound,
+  UserRoundX,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { PercentageChart } from "./percentage-chart";
+import { Notification, NotificationMeta } from "./notifications";
+import { toast } from "sonner";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 
 export function Courses() {
   const [{ data: courses }] =
@@ -276,6 +293,50 @@ export function Courses() {
             </div>
           );
         })}
+    </div>
+  );
+}
+
+export function Notifications() {
+  const { data: notifications } =
+    api.catalyst.user.notifications.list.active.useQuery();
+
+  if (notifications?.length == 0) {
+    return (
+      <div className="flex max-h-96 flex-col gap-2 overflow-auto p-4 md:w-[40ch]">
+        <div className="grid h-96 w-full place-items-center text-center text-xs text-muted-foreground">
+          No notifications available.
+          <br /> Check back later for updates.
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex max-h-96 flex-col gap-2 overflow-auto md:w-[40ch]">
+      {notifications?.map((notification) => (
+        <div className="rounded border" key={notification.id}>
+          <Notification notification={notification as NotificationMeta} />
+        </div>
+      ))}
+      <Button
+        onClick={() =>
+          toast.info("Friend Request", {
+            id: "friend-request-quinn",
+            description: "Friend request from Quinn",
+            action: (
+              <Button
+                size="action"
+                className="bg-blue-500 hover:bg-blue-500/80"
+              >
+                Details
+              </Button>
+            ),
+          })
+        }
+      >
+        Test
+      </Button>
     </div>
   );
 }

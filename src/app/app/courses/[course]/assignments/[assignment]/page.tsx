@@ -36,7 +36,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { NewSubmission, SubmissionButtons, Submissions } from "./submission";
+import { SubmissionButtons } from "./submission";
 import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
 
 export default async function AssignmentPage({

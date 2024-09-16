@@ -39,16 +39,16 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TooltipProvider>
-                <CmdKProvider>
-                  <div vaul-drawer-wrapper="" className="bg-background">
-                    {children}
-                    <Toaster richColors />
-                  </div>
-                </CmdKProvider>
+                <CmdKProvider>{children}</CmdKProvider>
               </TooltipProvider>
             </ThemeProvider>
           </TRPCReactProvider>
         </CSPostHogProvider>
+        <Toaster
+          richColors
+          className="fixed right-2 top-2 z-0 md:right-[calc(max(calc((100%-120ch)/2),4rem))] md:top-[calc(4.5rem+.5rem+1px)] [&>li]:w-[calc(100vw-2rem)] md:[&>li]:w-[25rem]"
+          position="top-right"
+        />
       </body>
     </html>
   );

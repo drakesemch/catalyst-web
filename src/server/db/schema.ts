@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTableCreator,
   primaryKey,
   text,
@@ -329,5 +330,43 @@ export const scheduleDateToScheduleRelation = relations(
       fields: [scheduleDates.scheduleId],
       references: [schedules.id],
     }),
+  }),
+);
+
+export const notifications = createTable(
+  "notification",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    data: jsonb("data"),
+    dismissed: boolean("dismissed").notNull().default(false),
+  },
+  (notification) => ({
+    userIdIdx: index("notification_user_id_idx").on(notification.userId),
+  }),
+);
+
+export const userRelationships = createTable(
+  "user_relationship",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    relatedUserId: varchar("related_user_id", { length: 255 }).notNull(),
+    acceptedFriends: boolean("accepted_friends").notNull().default(false),
+    blocked: boolean("blocked").notNull().default(false),
+  },
+  (userRelationship) => ({
+    userIdIdx: index("user_relationship_user_id_idx").on(
+      userRelationship.userId,
+    ),
+    relatedUserIdIdx: index("user_relationship_related_user_id_idx").on(
+      userRelationship.relatedUserId,
+    ),
   }),
 );

@@ -1,6 +1,5 @@
 "use client";
 
-import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { UserAvatar } from "@/components/catalyst/user-avatar";
 import { TextEditor } from "@/components/editor/editor";
 import { Button } from "@/components/ui/button";

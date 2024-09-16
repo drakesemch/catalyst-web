@@ -7,6 +7,7 @@ import {
 import { blogRouter } from "./catalyst/blogs";
 import { z } from "zod";
 import {
+  notifications,
   periodTimes,
   periodType,
   periods,
@@ -15,6 +16,7 @@ import {
   schoolPermissions,
   schools,
   settings,
+  users,
 } from "@/server/db/schema";
 import { and, count, eq, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -74,6 +76,45 @@ export const catalystRouter = createTRPCRouter({
     isPro: protectedProcedure.query(async ({ ctx }) => {
       return ctx.user.isPro;
     }),
+    friends: {
+      request: {
+        getDetails: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .query(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            return (await ctx.db
+              .select()
+              .from(users)
+              .where(and(eq(users.id, input.id))))[0];
+          }),
+      },
+    },
+    notifications: {
+      list: {
+        active: protectedProcedure.query(async ({ ctx }) => {
+          const user = ctx.user.get;
+          if (!user)
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "User not found",
+            });
+          return await ctx.db
+            .select()
+            .from(notifications)
+            .where(
+              and(
+                eq(notifications.userId, user.id),
+                eq(notifications.dismissed, false),
+              ),
+            );
+        }),
+      },
+    },
     canvas: canvasCatalystRouter,
     schedule: {
       values: {
