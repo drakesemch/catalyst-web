@@ -43,17 +43,17 @@ function CarouselPictures() {
     {
       title: "Courses",
       description: "Easily view and find your course",
-      image: "/images/dashboard.png",
+      image: "/images/courses.png",
     },
     {
-      title: "Games",
-      description: "Play games with friends and classmates.",
-      image: "/images/dashboard.png",
+      title: "Grades",
+      description: "Easily view and preview grades.",
+      image: "/images/grades.png",
     },
     {
       title: "Messaging",
       description: "Easily communicate with your teachers and classmates.",
-      image: "/images/dashboard.png",
+      image: "/images/inbox.png",
     },
   ]);
 

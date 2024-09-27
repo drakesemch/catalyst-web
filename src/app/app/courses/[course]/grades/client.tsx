@@ -37,12 +37,14 @@ export function GradesClient({
   grades,
   gradeGroups,
   courseSidebar,
+  useGrades,
 }: {
   course: string;
   courseDetails: Course;
   grades: Assignment[];
   gradeGroups: AssignmentGroup[];
   courseSidebar: React.ReactNode;
+  useGrades: boolean;
 }) {
   const [scoreOverrides, setScoreOverrides] = useState<
     Record<number, string | undefined>
@@ -127,11 +129,13 @@ export function GradesClient({
             className='flex max-h-full flex-col gap-2 [&[data-state="active"]>div]:h-full [&[data-state="active"]]:h-full'
           >
             <h1 className="h3">Grades</h1>
-            <p className="flex gap-1 text-xs text-destructive">
-              <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
-              early beta, calculations are not 100% accurate, please do not
-              refer the parenthesized value.
-            </p>
+            {useGrades && (
+              <p className="flex gap-1 text-xs text-destructive">
+                <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
+                early beta, calculations are not 100% accurate, please do not
+                refer the parenthesized value.
+              </p>
+            )}
             <div className="mt-2 flex flex-col gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <PercentageChart
@@ -144,7 +148,7 @@ export function GradesClient({
                   <span className="text-lg font-bold text-foreground">
                     {courseDetails?.enrollments?.at(0)
                       ?.computed_current_score ?? "N/A"}
-                    % ({calculatedWhatIfScore.toFixed(2)}%)
+                    % {useGrades && <>({calculatedWhatIfScore.toFixed(2)}%)</>}
                   </span>
                 </div>
               </div>
@@ -270,13 +274,17 @@ export function GradesClient({
                           )}
                         </span>
                         <Minus />
-                        <span className="flex items-center gap-1">
-                          <CalendarIcon />
-                          {format(
-                            new Date(assignment?.due_at ?? ""),
-                            "MMM d, yyyy 'at' h:mm a",
-                          )}
-                        </span>
+                        {assignment?.due_at ? (
+                          <span className="flex items-center gap-1">
+                            <CalendarIcon />
+                            {format(
+                              new Date(assignment?.due_at ?? ""),
+                              "MMM d, yyyy 'at' h:mm a",
+                            )}
+                          </span>
+                        ) : (
+                          <>No due date set</>
+                        )}
                         <Minus />
                         {assignment?.submission_types.map((type) => (
                           <span className="flex items-center gap-1" key={type}>
@@ -351,7 +359,11 @@ export function GradesClient({
                 <div className="grid w-10 place-items-center">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" size="icon">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        disabled={!useGrades}
+                      >
                         <MoreHorizontal />
                       </Button>
                     </PopoverTrigger>
@@ -367,6 +379,7 @@ export function GradesClient({
                               -1
                             }
                             onChange={(val) => {
+                              if (!useGrades) return;
                               setScoreOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: (
@@ -387,6 +400,7 @@ export function GradesClient({
                             size="icon"
                             className="flex-shrink-0"
                             onClick={() => {
+                              if (!useGrades) return;
                               setScoreOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: undefined,
@@ -400,6 +414,7 @@ export function GradesClient({
                             size="icon"
                             className="flex-shrink-0"
                             onClick={() => {
+                              if (!useGrades) return;
                               setScoreOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: "",
@@ -419,6 +434,7 @@ export function GradesClient({
                               -1
                             }
                             onChange={(val) => {
+                              if (!useGrades) return;
                               setTotalOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: (
@@ -439,6 +455,7 @@ export function GradesClient({
                             size="icon"
                             className="flex-shrink-0"
                             onClick={() => {
+                              if (!useGrades) return;
                               setTotalOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: undefined,

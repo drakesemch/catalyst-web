@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       });
       break;
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      console.error(`Unhandled event type ${event.type}`);
   }
 
   return new Response("Webhook received", { status: 200 });

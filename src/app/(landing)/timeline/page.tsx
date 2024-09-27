@@ -17,10 +17,22 @@ export default function TimelinePage() {
         "When we began developing Catalyst, our initial ideas quickly evolved as we recognized the potential to create something truly exceptional. We aimed for perfection in every aspect, from user interface design to feature integration, ensuring a seamless and engaging experience for all users. This commitment to excellence drove us to refine and enhance Catalyst continually, resulting in a powerful and intuitive platform that transforms the Canvas LMS experience.",
     },
     {
+      date: new Date(2024, 4, 1),
+      title: "Re-design Started",
+      description:
+        "As we progressed with the development of Catalyst, we realized the importance of user feedback and engagement. We decided to re-design the platform to enhance its usability and functionality, making it more intuitive and user-friendly. This re-design phase allowed us to incorporate valuable insights from our users, ensuring that Catalyst meets their needs and expectations. By focusing on user experience and feedback, we were able to create a more engaging and feature-rich learning platform.",
+    },
+    {
       date: new Date(2024, 9, 1),
       title: "Limited Beta Release",
       description:
-        "During this phase, a select group of users will have exclusive access to the application, allowing us to gather valuable feedback and make final adjustments. This beta period is crucial for ensuring Catalyst meets the highest standards of quality and functionality. By participating, you'll help shape the future of Catalyst and experience its innovative features before anyone else.",
+        "As we approached the beta release of Catalyst, we were excited to share our progress with a select group of users. This limited beta period allowed us to gather valuable feedback and insights, helping us identify areas for improvement and refine the platform further. The feedback we received was invaluable, guiding us in our mission to create a more intuitive, feature-rich, and engaging learning platform. During this phase, not all features were fully implemented, but we are committed to delivering a complete and polished experience in the final release.",
+    },
+    {
+      date: new Date(2024, 10, 1),
+      title: "Full Beta Release",
+      description:
+        "Following the success of the limited beta release, we are excited to announce the full beta release of Catalyst. This release marks a significant milestone in our journey, bringing us one step closer to our vision of transforming the Canvas LMS experience. With a focus on user feedback and continuous improvement, we have refined and enhanced Catalyst to deliver a more intuitive, feature-rich, and engaging learning platform. We are confident that Catalyst will revolutionize the way you interact with your educational platform, offering unparalleled functionality and a seamless user experience.",
     },
     {
       date: new Date(2025, 0, 1),

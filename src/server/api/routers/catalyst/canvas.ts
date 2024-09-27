@@ -426,7 +426,7 @@ export const canvasCatalystRouter = createTRPCRouter({
             enrollment_state: z
               .enum(["active", "invited_or_pending", "completed"])
               .optional(),
-            limit: z.number().max(100).optional(),
+            limit: z.number().max(1000).optional(),
             include: z.array(z.enum(["total_scores"])).optional(),
             cursor: z.string().optional(),
           })
@@ -448,7 +448,7 @@ export const canvasCatalystRouter = createTRPCRouter({
               ? url.searchParams.set("enrollment_state", input.enrollment_state)
               : null;
             url.searchParams.set("page", String(input?.cursor ?? 1));
-            url.searchParams.set("per_page", String(input?.limit ?? 10));
+            url.searchParams.set("per_page", String(input?.limit ?? 100));
             input?.include?.forEach((include) =>
               url.searchParams.append("include[]", include),
             );

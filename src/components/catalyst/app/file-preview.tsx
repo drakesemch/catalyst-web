@@ -329,6 +329,7 @@ function AudioVideoControls({
   }, [audio, speed]);
 
   useEffect(() => {
+    const currAudio = audio.current;
     const onKeyPress = (evt: KeyboardEvent) => {
       (async () => {
         console.log("code", evt.code);
@@ -355,36 +356,34 @@ function AudioVideoControls({
         }
         if (evt.code == "ArrowLeft") {
           evt.preventDefault();
-          setCurrentTime(Math.max((audio.current?.currentTime ?? 5) - 5, 0));
+          setCurrentTime(Math.max((currAudio?.currentTime ?? 5) - 5, 0));
         }
         if (evt.code == "ArrowRight") {
           evt.preventDefault();
-          setCurrentTime(
-            Math.min((audio.current?.currentTime ?? 0) + 5, duration),
-          );
+          setCurrentTime(Math.min((currAudio?.currentTime ?? 0) + 5, duration));
         }
       })().catch(console.error);
     };
 
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onTimeUpdate = () => setCurrentTime(audio.current?.currentTime ?? 0);
-    const onDurationChange = () => setDuration(audio.current?.duration ?? 0);
+    const onTimeUpdate = () => setCurrentTime(currAudio?.currentTime ?? 0);
+    const onDurationChange = () => setDuration(currAudio?.duration ?? 0);
     const onEnded = () => setIsPlaying(false);
 
     document.body.addEventListener("keydown", onKeyPress);
-    audio.current?.addEventListener("play", onPlay);
-    audio.current?.addEventListener("pause", onPause);
-    audio.current?.addEventListener("timeupdate", onTimeUpdate);
-    audio.current?.addEventListener("durationchange", onDurationChange);
-    audio.current?.addEventListener("ended", onEnded);
+    currAudio?.addEventListener("play", onPlay);
+    currAudio?.addEventListener("pause", onPause);
+    currAudio?.addEventListener("timeupdate", onTimeUpdate);
+    currAudio?.addEventListener("durationchange", onDurationChange);
+    currAudio?.addEventListener("ended", onEnded);
     return () => {
       document.body.removeEventListener("keydown", onKeyPress);
-      audio.current?.removeEventListener("play", onPlay);
-      audio.current?.removeEventListener("pause", onPause);
-      audio.current?.removeEventListener("timeupdate", onTimeUpdate);
-      audio.current?.removeEventListener("durationchange", onDurationChange);
-      audio.current?.removeEventListener("ended", onEnded);
+      currAudio?.removeEventListener("play", onPlay);
+      currAudio?.removeEventListener("pause", onPause);
+      currAudio?.removeEventListener("timeupdate", onTimeUpdate);
+      currAudio?.removeEventListener("durationchange", onDurationChange);
+      currAudio?.removeEventListener("ended", onEnded);
     };
   }, [duration, audio, isVideo, videoParent]);
 

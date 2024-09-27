@@ -26,7 +26,7 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
   const [isCompleted, setIsCompleted] = useState<CheckedState>(
     !!(
       todo.planner_override?.marked_complete ??
-      todo.plannable.content_details.submission?.workflow_state == "submitted"
+      todo.plannable.content_details?.submission?.workflow_state == "submitted"
     ),
   );
   const [now, setNow] = useState(new Date());
@@ -68,33 +68,38 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
             </div>
           </label>
         </CardTitle>
-        <CardDescription
-          className={cn(
-            "transition-all delay-300",
-            isCompleted && "opacity-30 delay-0",
-          )}
-        >
-          Due at{" "}
-          {format(
-            new Date(
-              todo.plannable.content_details?.due_at ??
-                todo.plannable.todo_date ??
-                "",
-            ),
-            "hh:mm:ss a 'on' EEE, MMM dd",
-          )}{" "}
-          {formatDistanceStrict(
-            new Date(
-              todo.plannable.content_details?.due_at ??
-                todo.plannable.todo_date ??
-                "",
-            ),
-            now,
-            {
-              addSuffix: true,
-            },
-          )}
-        </CardDescription>
+        {(todo.plannable.content_details?.due_at ??
+          todo.plannable.todo_date) && (
+          <>
+            <CardDescription
+              className={cn(
+                "transition-all delay-300",
+                isCompleted && "opacity-30 delay-0",
+              )}
+            >
+              Due at{" "}
+              {format(
+                new Date(
+                  todo.plannable.content_details?.due_at ??
+                    todo.plannable.todo_date ??
+                    Date.now(),
+                ),
+                "hh:mm:ss a 'on' EEE, MMM dd",
+              )}{" "}
+              {formatDistanceStrict(
+                new Date(
+                  todo.plannable.content_details?.due_at ??
+                    todo.plannable.todo_date ??
+                    "",
+                ),
+                now,
+                {
+                  addSuffix: true,
+                },
+              )}
+            </CardDescription>
+          </>
+        )}
         <CardDescription
           className={cn(
             "transition-all delay-300",

@@ -65,7 +65,7 @@ async function Header() {
         <AnimatedShinyText className="inline-flex items-center justify-center !text-muted-foreground/70 transition ease-out hover:!text-foreground/70">
           <div className="inline-flex gap-2">
             <span>🪲</span>
-            <span>Timeline: In Development</span>
+            <span>Timeline: Limited Beta Release</span>
           </div>
           <ArrowRight className="ml-1 size-3 transition-transform duration-300 ease-in-out group-hover:translate-x-0.5" />
         </AnimatedShinyText>

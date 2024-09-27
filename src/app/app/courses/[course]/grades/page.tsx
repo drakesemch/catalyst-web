@@ -2,6 +2,7 @@ import { api } from "@/trpc/server";
 import { GradesClient } from "./client";
 import { notFound } from "next/navigation";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
+import { expGradeCalculator } from "@/app/flags";
 
 export default async function GradesPage({
   params: { course },
@@ -32,6 +33,7 @@ export default async function GradesPage({
         courseDetails={courseDetails}
         grades={grades}
         gradeGroups={gradeGroups}
+        useGrades={await expGradeCalculator()}
       />
     </div>
   );

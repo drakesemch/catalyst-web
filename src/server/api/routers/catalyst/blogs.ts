@@ -13,6 +13,7 @@ const getBlog = unstable_cache(
     const markdownFile = await fetch(pathname);
     const markdownContent = await markdownFile.text();
     const matterResult = matter(markdownContent);
+    console.log("content", markdownContent, matterResult);
 
     // Use remark to convert markdown into HTML string
     const processedContent = await remark()
@@ -23,7 +24,7 @@ const getBlog = unstable_cache(
       .toString()
       .replaceAll("<h1>", "<h1 class='h1'>")
       .replaceAll("<h2>", "<h2 class='h2'>")
-      .replaceAll("<h3>", "<h3 class='h3'>")
+      .replaceAll("<h3>", "<h3 class='h3 mt-4'>")
       .replaceAll("<h4>", "<h4 class='h4'>")
       .replaceAll("<h5>", "<h5 class='h5'>")
       .replaceAll("<h6>", "<h6 class='h6'>")
@@ -49,25 +50,27 @@ export const blogRouter = createTRPCRouter({
         async () =>
           list({
             cursor: input.cursor ?? undefined,
-            limit: input.limit ?? 10,
+            limit: input.limit ?? 100,
             prefix: "blogs/",
+            mode: "expanded",
             token: env.BLOB_TOKEN,
           }),
         ["blogs", String(input.cursor ?? 0), String(input.limit ?? 0)],
       )();
 
-      const data = blogs.blobs as (ListBlobResultBlob & {
+      let data = blogs.blobs as (ListBlobResultBlob & {
         html: string;
         metadata: Record<string, unknown>;
       })[];
 
-      await Promise.all(
+      data = await Promise.all(
         data.map(async (blog) => {
           const { html, metadata } = await getBlog(
             blog.downloadUrl.split("?")[0]!,
           );
           blog.html = html;
           blog.metadata = metadata;
+          return blog;
         }),
       );
 
@@ -87,20 +90,21 @@ export const blogRouter = createTRPCRouter({
         }),
       ["blogs", input],
     )();
-    const data = blog.blobs as (ListBlobResultBlob & {
+    let data = blog.blobs as (ListBlobResultBlob & {
       html: string;
       metadata: Record<string, unknown>;
     })[];
 
-    await Promise.all(
+    data = await Promise.all(
       data.map(async (blog) => {
         const { html, metadata } = await getBlog(
           blog.downloadUrl.split("?")[0]!,
         );
         blog.html = html;
         blog.metadata = metadata;
+        return blog;
       }),
     );
-    return data[0];
+    return data.at(0);
   }),
 });

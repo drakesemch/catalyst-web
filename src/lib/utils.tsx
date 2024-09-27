@@ -42,7 +42,7 @@ export function replaceCanvasURL(str?: string) {
       ? `${window.location.protocol}//${window.location.host}`
       : env.NODE_ENV == "development"
         ? "http://localhost:3000"
-        : "https://catalyst.blue-flame.tech"
+        : "https://catalyst.bluefla.me"
   }/app/`;
   return str
     ?.replace(new RegExp("https://.*\\.instructure.com/api/v1/", "g"), baseURL)
@@ -107,6 +107,7 @@ export function moduleType(item: ModuleItem | Assignment) {
         </>
       );
     case "discussion":
+    case "discussion_topic":
       return (
         <>
           <MessageCircle /> Discussion
@@ -192,6 +193,7 @@ export function submissionTypeWithIcon(submission: string) {
           <Link2 /> URL
         </>
       );
+    case "":
     case "none":
       return (
         <>
@@ -226,6 +228,12 @@ export function prettyState(state: string) {
       return (
         <>
           <CircleX /> Not Submitted
+        </>
+      );
+    case "":
+      return (
+        <>
+          <CircleX /> Not Submitted (Inferred)
         </>
       );
     default:

@@ -18,8 +18,8 @@ export default function AuthPage() {
           </p>
           <Button
             type="submit"
-            onClick={() =>
-              signIn("google", {
+            onClick={async () =>
+              await signIn("google", {
                 callbackUrl: `${window.location.origin}/app`,
               })
             }

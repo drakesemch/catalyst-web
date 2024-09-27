@@ -7,6 +7,18 @@ export default function TimelinePage() {
       <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
         <div className="flex w-[min(80ch,100%)] flex-col gap-6">
           <h1 className="h1">About</h1>
+          <p className="p rounded bg-destructive/30 p-4">
+            With the initial beta release of Catalyst, you might notice that
+            some of the promised features are not fully implemented, which could
+            leave you feeling a bit underwhelmed. However, rest assured that we
+            are actively working to enhance the platform and deliver the
+            complete experience you{"'"}ve been anticipating. As a student
+            myself, with homework and other commitments, my time is often
+            limited, but I remain fully dedicated to improving Catalyst. I
+            appreciate your understanding and patience as I balance my
+            responsibilities and continue refining the platform for the best
+            possible experience.
+          </p>
           <p className="p">
             Catalyst was created with the vision of enhancing the learning
             experience for users of Canvas LMS. We set out to build more than

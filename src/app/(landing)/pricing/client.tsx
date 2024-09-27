@@ -49,9 +49,6 @@ const plans = [
         name: "Grade History",
       },
       {
-        name: "Games",
-      },
-      {
         name: "Pre-Released Features",
       },
       // {

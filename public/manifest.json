@@ -1,0 +1,9 @@
+{
+  "name": "PWA App",
+  "short_name": "App",
+  "theme_color": "#00FF00",
+  "background_color": "#00FF00",
+  "start_url": "/app/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

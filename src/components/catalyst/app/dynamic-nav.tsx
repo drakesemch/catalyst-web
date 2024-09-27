@@ -12,25 +12,36 @@ import {
 } from "date-fns";
 import { Progress } from "@/components/ui/progress";
 import {
-  Check,
+  Archive,
+  Bell,
+  BellDot,
+  // Check,
   CircleAlert,
-  CircleSlash,
-  CircleX,
-  MoreVertical,
+  // CircleSlash,
+  // CircleX,
+  LogOut,
+  // MoreVertical,
   Search,
-  UserRound,
-  UserRoundX,
+  // UserRound,
+  // UserRoundX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PercentageChart } from "./percentage-chart";
-import { Notification, NotificationMeta } from "./notifications";
-import { toast } from "sonner";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
+  Notification,
+  type NotificationMeta,
+  // newPopupNotification,
+} from "./notifications";
+// import { toast } from "sonner";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+// import { Separator } from "@/components/ui/separator";
+import { signOut } from "next-auth/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function Courses() {
   const [{ data: courses }] =
@@ -77,7 +88,7 @@ export function Courses() {
             .includes(courseSearch.toLowerCase())
         );
       }).length == 0 && (
-        <div className="flex w-full items-center justify-center p-2 text-muted-foreground">
+        <div className="w-84 flex items-center justify-center p-2 text-xs text-muted-foreground">
           No courses found.
         </div>
       )}
@@ -298,45 +309,100 @@ export function Courses() {
 }
 
 export function Notifications() {
-  const { data: notifications } =
+  const { data: activeNotifications, isPending: activePending } =
     api.catalyst.user.notifications.list.active.useQuery();
 
-  if (notifications?.length == 0) {
+  const { data: archivedNotifications, isPending: archivedPending } =
+    api.catalyst.user.notifications.list.archived.useQuery();
+
+  function TabContent({
+    value,
+    pending,
+    notifications,
+    emptyMessage,
+  }: {
+    value: string;
+    pending: boolean;
+    notifications: NotificationMeta[] | undefined;
+    emptyMessage: string;
+  }) {
     return (
-      <div className="flex max-h-96 flex-col gap-2 overflow-auto p-4 md:w-[40ch]">
-        <div className="grid h-96 w-full place-items-center text-center text-xs text-muted-foreground">
-          No notifications available.
-          <br /> Check back later for updates.
-        </div>
-      </div>
+      <TabsContent value={value} className="mt-0 flex flex-col gap-1">
+        {(() => {
+          if (pending) {
+            return Array(5)
+              .fill(0)
+              .map((_, i) => <Skeleton key={i} className="h-48" />);
+          }
+          if (notifications?.length == 0) {
+            return (
+              <div className="flex max-h-96 flex-col gap-2 overflow-auto p-4 md:w-[40ch]">
+                <div className="grid h-96 w-full place-items-center text-center text-xs text-muted-foreground">
+                  {emptyMessage}
+                  <br /> Check back later for updates.
+                </div>
+              </div>
+            );
+          } else {
+            return notifications?.map((notification) => (
+              <div
+                className="overflow-hidden rounded-lg border"
+                key={notification.id}
+              >
+                <Notification toast={undefined} notification={notification} />
+              </div>
+            ));
+          }
+        })()}
+      </TabsContent>
     );
   }
 
   return (
     <div className="flex max-h-96 flex-col gap-2 overflow-auto md:w-[40ch]">
-      {notifications?.map((notification) => (
-        <div className="rounded border" key={notification.id}>
-          <Notification notification={notification as NotificationMeta} />
-        </div>
-      ))}
-      <Button
-        onClick={() =>
-          toast.info("Friend Request", {
-            id: "friend-request-quinn",
-            description: "Friend request from Quinn",
-            action: (
-              <Button
-                size="action"
-                className="bg-blue-500 hover:bg-blue-500/80"
-              >
-                Details
-              </Button>
-            ),
-          })
-        }
-      >
-        Test
-      </Button>
+      <Tabs defaultValue="active">
+        <TabsList className="w-full">
+          <span className="mr-auto flex items-center gap-1 px-2 text-xs">
+            <Bell /> Notifications
+          </span>
+          <TabsTrigger value="active">
+            <BellDot /> Active
+          </TabsTrigger>
+          <TabsTrigger value="archived">
+            <Archive /> Archived
+          </TabsTrigger>
+        </TabsList>
+        <TabContent
+          value="active"
+          pending={activePending}
+          notifications={activeNotifications as unknown as NotificationMeta[]}
+          emptyMessage="No new notifications available."
+        />
+        <TabContent
+          value="archived"
+          pending={archivedPending}
+          notifications={archivedNotifications as unknown as NotificationMeta[]}
+          emptyMessage="No archived notifications available."
+        />
+      </Tabs>
     </div>
+  );
+}
+
+export function SignOutButton() {
+  return (
+    <Button
+      variant="outline"
+      className="flex h-auto w-full flex-1 items-center gap-3"
+      onClick={() => signOut()}
+    >
+      <LogOut />
+      <div className="flex flex-1 flex-col items-start gap-1">
+        <span className="font-bold">Sign out</span>
+        <span className="text-xs text-muted-foreground">
+          Sign out of your account
+        </span>
+      </div>
+    </Button>
   );
 }

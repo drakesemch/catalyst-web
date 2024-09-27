@@ -87,10 +87,12 @@ export const catalystRouter = createTRPCRouter({
                 code: "UNAUTHORIZED",
                 message: "User not found",
               });
-            return (await ctx.db
-              .select()
-              .from(users)
-              .where(and(eq(users.id, input.id))))[0];
+            return (
+              await ctx.db
+                .select()
+                .from(users)
+                .where(and(eq(users.id, input.id)))
+            )[0];
           }),
       },
     },
@@ -113,7 +115,43 @@ export const catalystRouter = createTRPCRouter({
               ),
             );
         }),
+        archived: protectedProcedure.query(async ({ ctx }) => {
+          const user = ctx.user.get;
+          if (!user)
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "User not found",
+            });
+          return await ctx.db
+            .select()
+            .from(notifications)
+            .where(
+              and(
+                eq(notifications.userId, user.id),
+                eq(notifications.dismissed, true),
+              ),
+            );
+        }),
       },
+      archive: protectedProcedure
+        .input(z.object({ dismissed: z.boolean(), id: z.string() }))
+        .mutation(async ({ input, ctx }) => {
+          const user = ctx.user.get;
+          if (!user)
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "User not found",
+            });
+          await ctx.db
+            .update(notifications)
+            .set({ dismissed: input.dismissed })
+            .where(
+              and(
+                eq(notifications.userId, user.id),
+                eq(notifications.id, input.id),
+              ),
+            );
+        }),
     },
     canvas: canvasCatalystRouter,
     schedule: {

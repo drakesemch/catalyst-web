@@ -70,13 +70,19 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const encryptedToken =
     userSettings.find((s) => s.key == "canvas_token")?.value ?? "";
 
-  const decipher = createDecipheriv(
-    "aes-256-cbc",
-    env.NEXTAUTH_SECRET.substring(0, 32),
-    env.NEXTAUTH_SECRET.substring(33, 33 + 16),
-  );
-  const token =
-    decipher.update(encryptedToken, "base64", "utf8") + decipher.final("utf8");
+  let token = undefined;
+  try {
+    const decipher = createDecipheriv(
+      "aes-256-cbc",
+      env.NEXTAUTH_SECRET.substring(0, 32),
+      env.NEXTAUTH_SECRET.substring(33, 33 + 16),
+    );
+    token =
+      decipher.update(encryptedToken, "base64", "utf8") +
+      decipher.final("utf8");
+  } catch (err) {
+    console.warn(err);
+  }
 
   const isPro =
     (

@@ -6,13 +6,13 @@ import {
   Inbox,
   UserCircle,
   Search,
-  Settings,
-  School,
-  Sparkles,
-  Clock,
-  HelpCircle,
-  PlusCircle,
-  Command,
+  // Settings,
+  // School,
+  // Sparkles,
+  // Clock,
+  // HelpCircle,
+  // PlusCircle,
+  // Command,
   UserRound,
   Bell,
 } from "lucide-react";
@@ -39,13 +39,14 @@ import {
 import Link from "next/link";
 import { HydrateClient, api } from "@/trpc/server";
 import { UserAvatar } from "../user-avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { OpenCmdK } from "../cmd-k";
+// import { OpenCmdK } from "../cmd-k";
+import { SignOutButton } from "./dynamic-nav";
+import { expNotifications } from "@/app/flags";
 
 export async function AppNav() {
   await api.catalyst.user.canvas.courses.list
@@ -178,17 +179,14 @@ export async function AppNav() {
                   align="end"
                 >
                   <div className="flex justify-stretch gap-2 p-4">
-                    <Button
-                      variant="secondary"
-                      className="flex h-auto min-h-48 w-48 flex-col items-start justify-end gap-2 text-2xl"
-                    >
-                      <Bell className="text-5xl" strokeWidth={1} />
-                      Notifications
-                      <span className="h-auto max-w-full whitespace-pre text-wrap text-left text-xs text-muted-foreground">
-                        Catch up on what you{"'"}ve missed.
+                    {(await expNotifications()) ? (
+                      <Notifications />
+                    ) : (
+                      <span className="max-w-[30ch] text-xs text-muted-foreground">
+                        This feature is currently being developed, and will be
+                        available soon.
                       </span>
-                    </Button>
-                    <Notifications />
+                    )}
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -550,10 +548,14 @@ function Tools() {
   );
 }
 
-function SettingCards() {
+async function SettingCards() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:w-[40ch] md:max-w-[40ch] md:pr-2">
-      <Button
+      <div className="flex-1 text-xs text-muted-foreground">
+        No settings available.
+        <br /> Check back later for updates.
+      </div>
+      {/* <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
       >
@@ -564,7 +566,7 @@ function SettingCards() {
             <div className="size-2 rounded-full bg-green-500" /> Online
           </span>
         </div>
-      </Button>
+      </Button> */}
       <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
@@ -577,7 +579,7 @@ function SettingCards() {
           </span>
         </div>
       </Button>
-      <Button
+      {/* <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
       >
@@ -588,7 +590,7 @@ function SettingCards() {
             View your friends and social feed
           </span>
         </div>
-      </Button>
+      </Button> */}
       <Drawer>
         <DrawerTrigger asChild>
           <Button
@@ -608,10 +610,17 @@ function SettingCards() {
           <DrawerHeader>
             <DrawerTitle>Notifications</DrawerTitle>
           </DrawerHeader>
-          <Notifications />
+          {(await expNotifications()) ? (
+            <Notifications />
+          ) : (
+            <span className="max-w-[30ch] text-xs text-muted-foreground">
+              This feature is currently being developed, and will be available
+              soon.
+            </span>
+          )}
         </DrawerContent>
       </Drawer>
-      <Button
+      {/* <Button
         variant="outline"
         className="hidden h-auto w-full flex-1 items-center gap-3 md:flex"
       >
@@ -692,7 +701,8 @@ function SettingCards() {
             Access all your settings
           </span>
         </div>
-      </Button>
+      </Button> */}
+      <SignOutButton />
     </div>
   );
 }

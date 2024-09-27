@@ -38,8 +38,13 @@ export default async function Blog({
                   ),
                 );
               }
-              const date = parseISOString(data?.metadata.postDate as string);
-              return format(date, "MMMM dd, yyyy 'at' h:mm a");
+              const date = parseISOString(
+                (data?.metadata?.postDate as string) ?? Date.toString(),
+              );
+              return format(
+                date,
+                "MMMM dd, yyyy 'at' h:mm a",
+              ) as unknown as string;
             })()}
           </p>
           <div dangerouslySetInnerHTML={{ __html: data?.html ?? "" }} />

@@ -48,7 +48,11 @@ export function useFileUpload({
     return (
       <div className="flex flex-col gap-4">
         {includeDropzone && (
-          <Dropzone onUpload={(file) => setFiles(Array.from(file))} />
+          <Dropzone
+            onUpload={(file) =>
+              setFiles((files) => [...files, ...Array.from(file ?? [])])
+            }
+          />
         )}
         {files.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -82,7 +86,12 @@ export function useFileUpload({
             className="hidden"
             multiple={multiple}
             accept={fileTypes?.map((itm) => `.${itm}`)?.join(",")}
-            onChange={(evt) => setFiles(Array.from(evt.target.files ?? []))}
+            onChange={(evt) =>
+              setFiles((files) => [
+                ...files,
+                ...Array.from(evt.target.files ?? []),
+              ])
+            }
           />
           <div className="flex flex-col items-center gap-1">
             <div className="flex items-center gap-1 font-bold">
