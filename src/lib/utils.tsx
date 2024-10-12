@@ -17,6 +17,7 @@ import {
   Presentation,
   SquareArrowOutUpRight,
   SquareCheck,
+  StickyNote,
   Table,
   Upload,
 } from "lucide-react";
@@ -86,6 +87,18 @@ export function moduleType(item: ModuleItem | Assignment) {
       return (
         <>
           <FileIcon /> File
+        </>
+      );
+    case "planner_note":
+      return (
+        <>
+          <StickyNote /> Note
+        </>
+      );
+    case "wiki_page":
+      return (
+        <>
+          <FileText /> Wiki Page
         </>
       );
     case "page":

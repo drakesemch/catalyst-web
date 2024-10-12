@@ -1230,7 +1230,12 @@ export const canvasRouter = createTRPCRouter({
               Authorization: `Bearer ${ctx.user.canvas.token}`,
             },
           });
-          return (await query.json()) as Page;
+          try {
+            return (await query.json()) as Page;
+          } catch (err) {
+            console.error(err);
+            return {} as Page;
+          }
         }),
       pages: {
         get: protectedProcedure

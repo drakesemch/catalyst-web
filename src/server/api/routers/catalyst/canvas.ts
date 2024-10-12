@@ -11,9 +11,11 @@ import {
   periods,
   scheduleDates,
   scheduleValues,
+  schedules,
   settings,
 } from "@/server/db/schema";
 import { type InferSelectModel, and, eq } from "drizzle-orm";
+import { db } from "@/server/db";
 
 export const courseClassificationDataset = [
   { text: "input: BVW Counseling" },
@@ -253,6 +255,47 @@ export const canvasCatalystRouter = createTRPCRouter({
       token: ctx.user.canvas.token,
     };
   }),
+  schedule: {
+    current: protectedProcedure.query(async ({ ctx }) => {
+      let now = new Date();
+      now = new Date(
+        `${String(now.getUTCFullYear()).padStart(4, "0")}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}T00:00:00.000Z`,
+      );
+      const scheduleDate = (
+        await db
+          .select()
+          .from(scheduleDates)
+          .where(
+            and(
+              eq(
+                scheduleDates.schoolId,
+                ctx.user.settings?.find((setting) => setting.key == "school_id")
+                  ?.value ?? "",
+              ),
+              eq(scheduleDates.date, now),
+            ),
+          )
+      ).at(0);
+      const schedule = (
+        await db
+          .select()
+          .from(schedules)
+          .where(eq(schedules.id, scheduleDate?.scheduleId ?? ""))
+      ).at(0);
+      if (scheduleDate == undefined)
+        return {
+          ...(schedule ?? {}),
+          ...(scheduleDate ?? {}),
+          times: [],
+        };
+      const times = await db
+        .select()
+        .from(periodTimes)
+        .where(eq(periodTimes.scheduleId, scheduleDate.scheduleId))
+        .fullJoin(periods, eq(periodTimes.optionId, periods.optionId));
+      return { ...schedule, ...scheduleDate, times };
+    }),
+  },
   courses: {
     get: protectedProcedure
       .input(z.object({ courseId: z.number() }))
@@ -269,64 +312,74 @@ export const canvasCatalystRouter = createTRPCRouter({
         });
         if (!query.ok) return null;
         const course = (await query.json()) as Course;
-        const classification = (await unstable_cache(async () => {
-          const classificationRedis = createClient({
-            url: env.CLASSIFICATION_REST_API_URL,
-            token: env.CLASSIFICATION_REST_API_TOKEN,
-          });
-
-          const classification = await classificationRedis.get(
-            String(course.id),
-          );
-
-          if (classification) {
-            return classification;
-          }
-
-          const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-
-          const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
-            systemInstruction: "return the output value",
-          });
-
-          const generationConfig = {
-            temperature: 1,
-            topP: 0.95,
-            topK: 64,
-            maxOutputTokens: 100,
-            stopSequences: ["input:", "\n"],
-            responseMimeType: "text/plain",
-          };
-
-          const input = [
-            ...courseClassificationDataset,
-            {
-              text: "input: " + course.original_name,
-            },
-            {
-              text: "output: ",
-            },
-          ];
-
-          const result = await model
-            .generateContent({
-              contents: [{ role: "user", parts: input }],
-              generationConfig,
-            })
-            .catch((err) => {
-              console.error(err);
-              return undefined;
+        const classification = (await unstable_cache(
+          async () => {
+            const classificationRedis = createClient({
+              url: env.CLASSIFICATION_REST_API_URL,
+              token: env.CLASSIFICATION_REST_API_TOKEN,
             });
 
-          const value = result?.response?.text() ?? "Not Available";
+            try {
+              const classification = await classificationRedis.get(
+                String(course.id),
+              );
 
-          if (value != "Not Available") {
-            await classificationRedis.set(String(course.id), value);
-          }
+              if (classification) {
+                return classification;
+              }
+            } catch (err) {
+              console.error(err);
+            }
 
-          return value;
-        }, ["courses", "classifications", String(course.id)])()) as string;
+            const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+            const model = genAI.getGenerativeModel({
+              model: "gemini-1.5-flash",
+              systemInstruction: "return the output value",
+            });
+
+            const generationConfig = {
+              temperature: 1,
+              topP: 0.95,
+              topK: 64,
+              maxOutputTokens: 100,
+              stopSequences: ["input:", "\n"],
+              responseMimeType: "text/plain",
+            };
+
+            const input = [
+              ...courseClassificationDataset,
+              {
+                text: "input: " + course.original_name,
+              },
+              {
+                text: "output: ",
+              },
+            ];
+
+            const result = await model
+              .generateContent({
+                contents: [{ role: "user", parts: input }],
+                generationConfig,
+              })
+              .catch((err) => {
+                console.error(err);
+                return undefined;
+              });
+
+            const value = result?.response?.text() ?? "Not Available";
+
+            if (value != "Not Available") {
+              await classificationRedis.set(String(course.id), value);
+            }
+
+            return value;
+          },
+          ["courses", "classifications", String(course.id)],
+          {
+            revalidate: 60 /*s*/ * 60 /*m*/ * 24 /*h*/ * 7 /*d*/,
+          },
+        )()) as string;
         const periodValues = await ctx.db
           .select()
           .from(scheduleValues)
@@ -457,11 +510,20 @@ export const canvasCatalystRouter = createTRPCRouter({
                 Authorization: `Bearer ${ctx.user.canvas.token}`,
               },
             });
-            if (!query.ok)
+            if (!query.ok) {
               return {
-                data: [] as Return,
+                data: [
+                  {
+                    classification: "Canvas Not Linked",
+                    original_name: "This is an issue on Catalyst :(",
+                    data: {
+                      missingAssignments: 0,
+                    },
+                  },
+                ] as Return,
                 nextCursor: 0,
               };
+            }
             const courses = (((await query.json()) as Course[]) ?? [])?.map(
               (course) => ({
                 ...course,
@@ -523,93 +585,109 @@ export const canvasCatalystRouter = createTRPCRouter({
 
             const updatedCourses = await Promise.all(
               courses?.map(async (course) => {
-                const classification = (await unstable_cache(async () => {
-                  const classificationRedis = createClient({
-                    url: env.CLASSIFICATION_REST_API_URL,
-                    token: env.CLASSIFICATION_REST_API_TOKEN,
-                  });
-
-                  const classification = await classificationRedis.get(
-                    String(course.id),
-                  );
-
-                  if (classification) {
-                    return classification;
-                  }
-
-                  const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-
-                  const model = genAI.getGenerativeModel({
-                    model: "gemini-1.5-flash",
-                    systemInstruction: "return the output value",
-                  });
-
-                  const generationConfig = {
-                    temperature: 1,
-                    topP: 0.95,
-                    topK: 64,
-                    maxOutputTokens: 100,
-                    stopSequences: ["input:", "\n"],
-                    responseMimeType: "text/plain",
-                  };
-
-                  const input = [
-                    ...courseClassificationDataset,
-                    {
-                      text: "input: " + course.original_name,
-                    },
-                    {
-                      text: "output: ",
-                    },
-                  ];
-
-                  const result = await model
-                    .generateContent({
-                      contents: [{ role: "user", parts: input }],
-                      generationConfig,
-                    })
-                    .catch((err) => {
-                      console.error(err);
-                      return undefined;
+                let classification = "Not Available";
+                try {
+                  classification = (await unstable_cache(async () => {
+                    const classificationRedis = createClient({
+                      url: env.CLASSIFICATION_REST_API_URL,
+                      token: env.CLASSIFICATION_REST_API_TOKEN,
                     });
 
-                  const value = result?.response?.text() ?? "Not Available";
+                    try {
+                      const classification = await classificationRedis.get(
+                        String(course.id),
+                      );
 
-                  if (value != "Not Available") {
-                    await classificationRedis.set(String(course.id), value);
-                  }
+                      if (classification) {
+                        return classification;
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
 
-                  return value;
-                }, [
-                  "courses",
-                  "classifications",
-                  String(course.id),
-                ])()) as string;
+                    const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
-                const assignmentURL = new URL(
-                  `/api/v1/courses/${course.id}/students/submissions`,
-                  ctx.user.canvas.url,
-                );
+                    const model = genAI.getGenerativeModel({
+                      model: "gemini-1.5-flash",
+                      systemInstruction: "return the output value",
+                    });
 
-                assignmentURL.searchParams.set("per_page", "100");
-                assignmentURL.searchParams.append("include[]", "assignment");
+                    const generationConfig = {
+                      temperature: 1,
+                      topP: 0.95,
+                      topK: 64,
+                      maxOutputTokens: 100,
+                      stopSequences: ["input:", "\n"],
+                      responseMimeType: "text/plain",
+                    };
 
-                const assignmentsQuery = await fetch(assignmentURL, {
-                  headers: {
-                    Authorization: `Bearer ${ctx.user.canvas.token}`,
-                  },
-                });
+                    const input = [
+                      ...courseClassificationDataset,
+                      {
+                        text: "input: " + course.original_name,
+                      },
+                      {
+                        text: "output: ",
+                      },
+                    ];
 
-                const submissionData =
-                  (await assignmentsQuery.json()) as Submission[];
+                    const result = await model
+                      .generateContent({
+                        contents: [{ role: "user", parts: input }],
+                        generationConfig,
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                        return undefined;
+                      });
 
-                const missingAssignments = submissionData.filter(
-                  (assignment) =>
-                    (!assignment.excused &&
-                      assignment.score == 0 &&
-                      assignment.assignment?.points_possible != 0) ||
-                    assignment.missing,
-                ).length;
+                    const value = result?.response?.text() ?? "Not Available";
+
+                    if (value != "Not Available") {
+                      await classificationRedis.set(String(course.id), value);
+                    }
+
+                    return value;
+                  }, [
+                    "courses",
+                    "classifications",
+                    String(course.id),
+                  ])()) as string;
+                } catch (err) {
+                  // probably went over some limit
+                  console.error(err);
+                }
+
+                let missingAssignments;
+
+                try {
+                  const assignmentURL = new URL(
+                    `/api/v1/courses/${course.id}/students/submissions`,
+                    ctx.user.canvas.url,
+                  );
+
+                  assignmentURL.searchParams.set("per_page", "100");
+                  assignmentURL.searchParams.append("include[]", "assignment");
+
+                  const assignmentsQuery = await fetch(assignmentURL, {
+                    headers: {
+                      Authorization: `Bearer ${ctx.user.canvas.token}`,
+                    },
+                  });
+
+                  const submissionData =
+                    (await assignmentsQuery.json()) as Submission[];
+
+                  missingAssignments = submissionData.filter(
+                    (assignment) =>
+                      (!assignment.excused &&
+                        assignment.score == 0 &&
+                        assignment.assignment?.points_possible != 0) ||
+                      assignment.missing,
+                  ).length;
+                } catch (err) {
+                  // something doesn't work
+                }
 
                 return {
                   ...course,

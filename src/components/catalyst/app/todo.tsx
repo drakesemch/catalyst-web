@@ -126,6 +126,11 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
             } as unknown as Assignment)}{" "}
           </span>
           <Dot className="hidden sm:block" />
+          {(todo.plannable.content_details?.submission_types?.length ?? 0) == 0 && (
+            <span className="flex items-center gap-2" key="none">
+            {submissionTypeWithIcon("none")}
+          </span>
+          )}
           {todo.plannable.content_details?.submission_types.map((type) => (
             <span className="flex items-center gap-2" key={type}>
               {submissionTypeWithIcon(type)}
@@ -136,7 +141,7 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
       <CardFooter>
         <Button
           variant="outline"
-          href={`/app${todo.html_url.split("/submissions")[0]}?submit=true`}
+          href={`/app${todo?.html_url?.split("/submissions")[0]}?submit=true`}
         >
           Submit <Upload />
         </Button>

@@ -147,7 +147,7 @@ export function Courses() {
             );
           return (
             <div
-              key={course.id}
+              key={course.id ?? -1}
               className={cn(
                 "flex w-full flex-col rounded border",
                 isCurrent && "bg-secondary",
