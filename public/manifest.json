@@ -4,6 +4,7 @@
   "theme_color": "#00FF00",
   "background_color": "#00FF00",
   "start_url": "/app/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait"
 }
