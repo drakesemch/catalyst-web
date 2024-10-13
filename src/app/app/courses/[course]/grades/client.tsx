@@ -37,14 +37,12 @@ export function GradesClient({
   grades,
   gradeGroups,
   courseSidebar,
-  useGrades,
 }: {
   course: string;
   courseDetails: Course;
   grades: Assignment[];
   gradeGroups: AssignmentGroup[];
   courseSidebar: React.ReactNode;
-  useGrades: boolean;
 }) {
   const [scoreOverrides, setScoreOverrides] = useState<
     Record<number, string | undefined>
@@ -136,13 +134,12 @@ export function GradesClient({
             className='flex max-h-full flex-col gap-2 [&[data-state="active"]>div]:h-full [&[data-state="active"]]:h-full'
           >
             <h1 className="h3">Grades</h1>
-            {useGrades && (
-              <p className="flex gap-1 text-xs text-destructive">
-                <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
-                early beta, calculations are close to accurate, but please
-                double check with Canvas to ensure that they are correct!
-              </p>
-            )}
+
+            <p className="flex gap-1 text-xs text-destructive">
+              <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
+              early beta, calculations are close to accurate, but please double
+              check with Canvas to ensure that they are correct!
+            </p>
             <div className="mt-2 flex flex-col gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <PercentageChart
@@ -153,7 +150,7 @@ export function GradesClient({
                 />
                 <div className="flex flex-col">
                   <span className="text-lg font-bold text-foreground">
-                    {useGrades && calculatedWhatIfScore.toFixed(2) + "%"}
+                    {calculatedWhatIfScore.toFixed(2)}%
                   </span>
                   <span className="text-xs text-foreground">
                     Canvas Reported Score:{" "}
@@ -370,11 +367,7 @@ export function GradesClient({
                 <div className="grid w-10 place-items-center">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        disabled={!useGrades}
-                      >
+                      <Button variant="outline" size="icon">
                         <MoreHorizontal />
                       </Button>
                     </PopoverTrigger>
@@ -390,7 +383,6 @@ export function GradesClient({
                               ""
                             }
                             onChange={(val) => {
-                              if (!useGrades) return;
                               setScoreOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: (
@@ -411,7 +403,6 @@ export function GradesClient({
                             size="icon"
                             className="flex-shrink-0"
                             onClick={() => {
-                              if (!useGrades) return;
                               setScoreOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: undefined,
@@ -425,7 +416,6 @@ export function GradesClient({
                             size="icon"
                             className="flex-shrink-0"
                             onClick={() => {
-                              if (!useGrades) return;
                               setScoreOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: "",
@@ -445,7 +435,6 @@ export function GradesClient({
                               -1
                             }
                             onChange={(val) => {
-                              if (!useGrades) return;
                               setTotalOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: (
@@ -466,7 +455,6 @@ export function GradesClient({
                             size="icon"
                             className="flex-shrink-0"
                             onClick={() => {
-                              if (!useGrades) return;
                               setTotalOverrides((prev) => ({
                                 ...prev,
                                 [assignment.id]: undefined,

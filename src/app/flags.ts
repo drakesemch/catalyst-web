@@ -19,8 +19,3 @@ export const expHomePageCards = flag({
   key: "homePageCards",
   decide: () => false,
 });
-
-export const expGradeCalculator = flag({
-  key: "gradeCalc",
-  decide: () => false,
-});
