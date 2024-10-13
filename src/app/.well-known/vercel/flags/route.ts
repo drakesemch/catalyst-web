@@ -40,15 +40,6 @@ export async function GET(request: NextRequest) {
           { value: false, label: "Disabled" },
         ],
       },
-      gradeCalc: {
-        description:
-          "Controls whether to allow the grade calculator to be used",
-        origin: "https://catalyst.bluefla.me/flags#grade-calc",
-        options: [
-          { value: true, label: "Enabled" },
-          { value: false, label: "Disabled" },
-        ],
-      },
     },
   });
 }

@@ -288,12 +288,121 @@ export const canvasCatalystRouter = createTRPCRouter({
           ...(scheduleDate ?? {}),
           times: [],
         };
-      const times = await db
-        .select()
-        .from(periodTimes)
-        .where(eq(periodTimes.scheduleId, scheduleDate.scheduleId))
-        .fullJoin(periods, eq(periodTimes.optionId, periods.optionId));
-      return { ...schedule, ...scheduleDate, times };
+      const times = await Promise.all(
+        (
+          await db
+            .select()
+            .from(periodTimes)
+            .where(eq(periodTimes.scheduleId, scheduleDate.scheduleId))
+            .fullJoin(periods, eq(periodTimes.optionId, periods.optionId))
+            .fullJoin(
+              scheduleValues,
+              and(
+                eq(periods.periodId, scheduleValues.periodId),
+                eq(scheduleValues.userId, ctx.user.get?.id ?? ""),
+              ),
+            )
+        ).map(async (period) => {
+          if (period.schedule_value?.value == undefined) return;
+          if (period.period?.type == "course") {
+            const url = new URL(
+              `/api/v1/courses/${period.schedule_value?.value ?? 0}`,
+              ctx.user.canvas.url,
+            );
+            url.searchParams.set("include[]", "total_scores");
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            if (!query.ok) return null;
+            const course = (await query.json()) as Course;
+            const classification = (await unstable_cache(
+              async () => {
+                const classificationRedis = createClient({
+                  url: env.CLASSIFICATION_REST_API_URL,
+                  token: env.CLASSIFICATION_REST_API_TOKEN,
+                });
+
+                try {
+                  const classification = await classificationRedis.get(
+                    String(course.id),
+                  );
+
+                  if (classification) {
+                    return classification;
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
+
+                const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
+
+                const model = genAI.getGenerativeModel({
+                  model: "gemini-1.5-flash",
+                  systemInstruction: "return the output value",
+                });
+
+                const generationConfig = {
+                  temperature: 1,
+                  topP: 0.95,
+                  topK: 64,
+                  maxOutputTokens: 100,
+                  stopSequences: ["input:", "\n"],
+                  responseMimeType: "text/plain",
+                };
+
+                const input = [
+                  ...courseClassificationDataset,
+                  {
+                    text: "input: " + course.original_name,
+                  },
+                  {
+                    text: "output: ",
+                  },
+                ];
+
+                const result = await model
+                  .generateContent({
+                    contents: [{ role: "user", parts: input }],
+                    generationConfig,
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                    return undefined;
+                  });
+
+                const value = result?.response?.text() ?? "Not Available";
+
+                if (value != "Not Available") {
+                  await classificationRedis.set(String(course.id), value);
+                }
+
+                return value;
+              },
+              ["courses", "classifications", String(course.id)],
+              {
+                revalidate: 60 /*s*/ * 60 /*m*/ * 24 /*h*/ * 7 /*d*/,
+              },
+            )()) as string;
+
+            period.schedule_value.value = {
+              ...course,
+              original_name: course.original_name ?? course.name,
+              classification,
+            } as unknown as string;
+          } else if (period.period?.type == "single") {
+            period.schedule_value.value = (period.schedule_value?.value ==
+              period.period.optionId) as unknown as string;
+          }
+          return period;
+        }),
+      );
+
+      const revised_times = times as Array<
+        (typeof times)[0] & { schedule_value: { value: boolean | Course } }
+      >;
+      return { ...schedule, ...scheduleDate, times: revised_times };
     }),
   },
   courses: {

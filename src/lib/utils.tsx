@@ -273,6 +273,13 @@ export function prettyEnrollmentType(type: string) {
   }
 }
 
+export function fromUTCTime(date: string) {
+  const now = new Date();
+  return new Date(
+    `${String(now.getUTCFullYear()).padStart(4, "0")}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}T${String(date.split(":").at(0) ?? 0).padStart(2, "0")}:${String(date.split(":").at(1) ?? 0).padStart(2, "0")}:${String(date.split(":").at(2) ?? 0).padStart(2, "0")}.000Z`,
+  );
+}
+
 export async function clientToBase64(file: File | Blob) {
   return await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

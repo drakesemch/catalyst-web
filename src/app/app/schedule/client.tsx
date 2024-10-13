@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { cn, fromUTCTime } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import {
   differenceInSeconds,
@@ -13,12 +13,7 @@ import {
 } from "date-fns";
 import { useEffect, useState } from "react";
 
-function fromUTCTime(date: string) {
-  const now = new Date();
-  return new Date(
-    `${String(now.getUTCFullYear()).padStart(4, "0")}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-${String(now.getUTCDate()).padStart(2, "0")}T${String(date.split(":").at(0) ?? 0).padStart(2, "0")}:${String(date.split(":").at(1) ?? 0).padStart(2, "0")}:${String(date.split(":").at(2) ?? 0).padStart(2, "0")}.000Z`,
-  );
-}
+
 
 export function ScheduleClientPage() {
   const [schedule] =
@@ -41,66 +36,63 @@ export function ScheduleClientPage() {
           {schedule.times
             .sort(
               (a, b) =>
-                Number(fromUTCTime(a.period_time?.start ?? "0:00")) -
-                Number(fromUTCTime(b.period_time?.start ?? "0:00")),
+                Number(fromUTCTime(a?.period_time?.start ?? "0:00")) -
+                Number(fromUTCTime(b?.period_time?.start ?? "0:00")),
             )
             .map((period) => {
               const diffPct = isBefore(
                 new Date(),
                 new Date(
                   format(now, "yyyy-MM-dd ") +
-                    period.period_time?.start +
-                    " UTC",
+                  period?.period_time?.start +
+                  " UTC",
                 ),
               )
                 ? 0
                 : differenceInSeconds(
-                    new Date(),
-                    new Date(
-                      format(now, "yyyy-MM-dd ") +
-                        period.period_time?.start +
-                        " UTC",
-                    ),
-                  ) /
-                  differenceInSeconds(
-                    new Date(
-                      format(now, "yyyy-MM-dd ") +
-                        period.period_time?.end +
-                        " UTC",
-                    ),
-                    new Date(
-                      format(now, "yyyy-MM-dd ") +
-                        period.period_time?.start +
-                        " UTC",
-                    ),
-                  );
+                  new Date(),
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    period?.period_time?.start +
+                    " UTC",
+                  ),
+                ) /
+                differenceInSeconds(
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    period?.period_time?.end +
+                    " UTC",
+                  ),
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    period?.period_time?.start +
+                    " UTC",
+                  ),
+                );
               const isCurrent =
                 isAfter(
                   now,
                   new Date(
-                    new Date(
-                      format(now, "yyyy-MM-dd ") +
-                        period.period_time?.start +
-                        " UTC",
-                    ),
+                    format(now, "yyyy-MM-dd ") +
+                    period?.period_time?.start +
+                    " UTC",
                   ),
                 ) &&
                 isBefore(
                   now,
                   new Date(
-                    new Date(
-                      format(now, "yyyy-MM-dd ") +
-                        period.period_time?.end +
-                        " UTC",
-                    ),
+                    format(now, "yyyy-MM-dd ") +
+                    period?.period_time?.end +
+                    " UTC",
                   ),
                 );
 
               return (
                 <div
-                  key={period.period?.id ?? -1}
+                  key={period?.period?.id ?? -1}
                   className={cn(
                     "flex w-full flex-col rounded border",
+                    typeof period?.schedule_value?.value == "boolean" && period?.schedule_value?.value == false && "opacity-20",
                     isCurrent && "bg-secondary",
                   )}
                 >
@@ -116,15 +108,15 @@ export function ScheduleClientPage() {
                     >
                       <div className="flex flex-1 flex-col items-start justify-center gap-1 overflow-hidden">
                         <span className="font-bold">
-                          {period.period?.periodName}
+                          {period?.period?.periodName}
                         </span>
                         <span className="max-w-full truncate text-xs text-muted-foreground">
-                          {period.period?.optionName}
+                          {period?.period?.optionName}
                         </span>
                       </div>
                     </Button>
                   </div>
-                  {period.period_time && (
+                  {period?.period_time && (
                     <div
                       className={cn(
                         "flex flex-col border-t",
@@ -139,8 +131,8 @@ export function ScheduleClientPage() {
                           {format(
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                period.period_time?.start +
-                                " UTC",
+                              period?.period_time?.start +
+                              " UTC",
                             ),
                             "hh:mm a",
                           )}
@@ -153,8 +145,8 @@ export function ScheduleClientPage() {
                               new Date(
                                 new Date(
                                   format(now, "yyyy-MM-dd ") +
-                                    period.period_time?.start +
-                                    " UTC",
+                                  period?.period_time?.start +
+                                  " UTC",
                                 ),
                               ),
                             )
@@ -166,8 +158,8 @@ export function ScheduleClientPage() {
                           {format(
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                period.period_time?.end +
-                                " UTC",
+                              period?.period_time?.end +
+                              " UTC",
                             ),
                             "hh:mm a",
                           )}
@@ -179,8 +171,8 @@ export function ScheduleClientPage() {
                             new Date(),
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                period.period_time?.start +
-                                " UTC",
+                              period?.period_time?.start +
+                              " UTC",
                             ),
                           )
                             ? "Starts "
@@ -188,8 +180,8 @@ export function ScheduleClientPage() {
                           {formatDistanceStrict(
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                period.period_time?.start +
-                                " UTC",
+                              period?.period_time?.start +
+                              " UTC",
                             ),
                             new Date(),
                             {
@@ -202,8 +194,8 @@ export function ScheduleClientPage() {
                             new Date(),
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                period.period_time?.end +
-                                " UTC",
+                              period?.period_time?.end +
+                              " UTC",
                             ),
                           )
                             ? "Ends "
@@ -211,8 +203,8 @@ export function ScheduleClientPage() {
                           {formatDistanceStrict(
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                period.period_time?.end +
-                                " UTC",
+                              period?.period_time?.end +
+                              " UTC",
                             ),
                             new Date(),
                             {
