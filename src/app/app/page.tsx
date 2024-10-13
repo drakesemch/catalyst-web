@@ -40,7 +40,7 @@ export default async function AppPage() {
           </Button>
         </div>
         <div className="mt-8" />
-        <div className="w-full fixed bottom-0 left-0 border-t bg-background flex items-center justify-center">
+        <div className="w-full fixed bottom-[4.5rem] md:bottom-0 left-0 border-t bg-background flex items-center justify-center">
           <div className="max-w-[100ch] w-full flex items-center justify-between py-4 px-6">
             <div className="flex flex-col gap-1">
               <span className="font-bold">Catalyst</span>

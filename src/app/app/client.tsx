@@ -255,15 +255,15 @@ export function NewTodo() {
           </DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-2 p-4">
-          <div className="flex gap-2 items-center justify-between">
+          <div className="flex gap-2 flex-col sm:flex-row items-start sm:items-center justify-between">
             <span className="font-bold">Title</span>
-            <Input placeholder="New Todo Item" className="w-full md:w-[31ch]" value={title} onChange={evt => setTitle(evt.target.value)} />
+            <Input placeholder="New Todo Item" className="w-full sm:w-[31ch]" value={title} onChange={evt => setTitle(evt.target.value)} />
           </div>
-          <div className="flex gap-2 items-center justify-between">
+          <div className="flex gap-2 flex-col sm:flex-row items-start sm:items-center justify-between">
             <span className="font-bold">Due Date</span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full md:w-[30ch] justify-start">
+                <Button variant="outline" className="w-full sm:w-[30ch] justify-start">
                   <CalendarIcon />
                   {date ? format(date, "PPP") : <span>Pick a date</span>}
                 </Button>
