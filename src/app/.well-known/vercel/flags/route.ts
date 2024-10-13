@@ -32,14 +32,6 @@ export async function GET(request: NextRequest) {
           { value: false, label: "Disabled" },
         ],
       },
-      homePageCards: {
-        description: "Controls whether to show cards on the home page",
-        origin: "https://catalyst.bluefla.me/flags#home-page-cards",
-        options: [
-          { value: true, label: "Enabled" },
-          { value: false, label: "Disabled" },
-        ],
-      },
     },
   });
 }

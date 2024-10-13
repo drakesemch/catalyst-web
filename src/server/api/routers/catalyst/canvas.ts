@@ -479,7 +479,11 @@ export const canvasCatalystRouter = createTRPCRouter({
             const value = result?.response?.text() ?? "Not Available";
 
             if (value != "Not Available") {
-              await classificationRedis.set(String(course.id), value);
+              try {
+                await classificationRedis.set(String(course.id), value);
+              } catch (err) {
+                console.error(err);
+              }
             }
 
             return value;

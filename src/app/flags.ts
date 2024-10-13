@@ -14,8 +14,3 @@ export const expTools = flag({
   key: "tools",
   decide: () => false,
 });
-
-export const expHomePageCards = flag({
-  key: "homePageCards",
-  decide: () => false,
-});

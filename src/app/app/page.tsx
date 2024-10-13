@@ -2,7 +2,6 @@ import { TimeOfDay } from "@/components/catalyst/app/time-of-day";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { HomePageCards, Todos } from "./client";
-import { expHomePageCards } from "../flags";
 import { api } from "@/trpc/server";
 
 export default async function AppPage() {
@@ -23,11 +22,7 @@ export default async function AppPage() {
             {(user?.name ?? "Friend").split(" ").at(0)}!
           </span>
         </h1>
-        {(await expHomePageCards()) ? (
-          <HomePageCards />
-        ) : (
-          <></>
-        )}
+        <HomePageCards />
         <h3 className="h1 mt-4 animate-fade-in text-4xl opacity-0 animate-delay-1200" id="todo">
           Todo
         </h3>
