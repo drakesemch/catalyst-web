@@ -845,6 +845,34 @@ export const canvasRouter = createTRPCRouter({
     }),
   },
   todo: {
+    create: protectedProcedure
+      .input(
+        z.object({
+          title: z.string(),
+          description: z.string().optional(),
+          due_at: z.string().optional(),
+          course_id: z.number().optional(),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const url = new URL("/api/v1/planner_notes", ctx.user.canvas.url);
+        const query = await fetch(url, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: input.title,
+            details: input.description,
+            todo_date: input.due_at,
+            course_id: input.course_id,
+          }),
+        });
+        // console.log(await query.text());
+        // return;
+        return query.json();
+      }),
     setCompleted: protectedProcedure
       .input(
         z.object({

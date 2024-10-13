@@ -12,9 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowRight, SquareArrowOutUpRight } from "lucide-react";
+import { ArrowDown, ArrowRight, Calendar as CalendarIcon, CircleSlash, Loader, Plus, Save, SquareArrowOutUpRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { format, formatDistanceStrict, isAfter, isBefore, isEqual } from "date-fns";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export function Todos() {
   const { data, isPending } = api.canvas.todo.upcoming.useQuery();
@@ -225,5 +229,60 @@ export function HomePageCards() {
         </CardFooter>
       </Card>
     </div>
+  );
+}
+
+export function NewTodo() {
+  const { mutate: createTodo, isPending } = api.canvas.todo.create.useMutation();
+
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState<Date | undefined>();
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button>
+          Add Todo Item <Plus />
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>
+            Add Todo Item
+          </DrawerTitle>
+          <DrawerDescription>
+            Add an item to your todo list
+          </DrawerDescription>
+        </DrawerHeader>
+        <div className="flex flex-col gap-2 p-4">
+          <div className="flex gap-2 items-center justify-between">
+            <span className="font-bold">Title</span>
+            <Input placeholder="New Todo Item" className="w-full md:w-[31ch]" value={title} onChange={evt => setTitle(evt.target.value)} />
+          </div>
+          <div className="flex gap-2 items-center justify-between">
+            <span className="font-bold">Due Date</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full md:w-[30ch] justify-start">
+                  <CalendarIcon />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0">
+                <Calendar mode="single" selected={date} onSelect={setDate} />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        <DrawerFooter className="flex flex-row justify-end items-center gap-2">
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel <CircleSlash /></Button>
+          </DrawerClose>
+          <Button onClick={() => createTodo({ title, due_at: date ? format(date, "yyyy-MM-dd") : undefined })} disabled={isPending}>
+            {isPending ? (<>Saving <Loader className="animate-spin" /></>) : (<>Save <Save /></>)}
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 }

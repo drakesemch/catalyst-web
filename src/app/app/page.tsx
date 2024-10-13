@@ -1,8 +1,9 @@
 import { TimeOfDay } from "@/components/catalyst/app/time-of-day";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import { HomePageCards, Todos } from "./client";
+import { ArrowRight, Plus } from "lucide-react";
+import { HomePageCards, NewTodo, Todos } from "./client";
 import { api } from "@/trpc/server";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 export default async function AppPage() {
   const user = await api.catalyst.user.get();
@@ -37,6 +38,16 @@ export default async function AppPage() {
           >
             View All <ArrowRight />
           </Button>
+        </div>
+        <div className="mt-8" />
+        <div className="w-full fixed bottom-0 left-0 border-t bg-background flex items-center justify-center">
+          <div className="max-w-[100ch] w-full flex items-center justify-between py-4 px-6">
+            <div className="flex flex-col gap-1">
+              <span className="font-bold">Catalyst</span>
+              <span className="text-xs text-muted-foreground">Created with ❤️ by Drake Semchyshyn and the Blue Flame Team</span>
+            </div>
+            <NewTodo />
+          </div>
         </div>
       </main>
     </div>
