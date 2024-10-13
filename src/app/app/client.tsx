@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowRight, SquareArrowOutUpRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { format, formatDistanceStrict, isAfter, isBefore } from "date-fns";
+import { format, formatDistanceStrict, isAfter, isBefore, isEqual } from "date-fns";
 
 export function Todos() {
   const { data, isPending } = api.canvas.todo.upcoming.useQuery();
@@ -59,7 +59,7 @@ export function HomePageCards() {
   }, []);
 
   const currentClass = useMemo(() => {
-    let currentPeriods = schedule.times.filter((period) => isAfter(
+    let currentPeriods = schedule.times.filter((period) => typeof period.schedule_value.value != "boolean" || period.schedule_value.value != false).filter((period) => isAfter(
       now,
       new Date(
         new Date(
@@ -80,7 +80,7 @@ export function HomePageCards() {
         ),
       ));
     if (currentPeriods.length == 0) {
-      currentPeriods = schedule.times.filter((period) => isBefore(
+      currentPeriods = schedule.times.filter((period) => typeof period.schedule_value.value != "boolean" || period.schedule_value.value != false).filter((period) => isBefore(
         now,
         new Date(
           new Date(
@@ -109,13 +109,36 @@ export function HomePageCards() {
     return currentPeriod;
   }, [schedule, now]);
 
+  const dateToCompare = useMemo(() => {
+    const startDate = new Date(
+      format(now, "yyyy-MM-dd ") +
+      currentClass?.period_time?.start +
+      " UTC",
+    );
+    const endDate = new Date(
+      format(now, "yyyy-MM-dd ") +
+      currentClass?.period_time?.end +
+      " UTC",
+    );
+
+    if (isBefore(now, startDate)) {
+      return startDate;
+    } else {
+      return endDate;
+    }
+  }, [currentClass?.period_time, now]);
+
   return (
     <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex animate-fade-in items-center gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
       <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
         <CardHeader>
           <CardTitle>Current Class</CardTitle>
           <CardDescription>
-            {currentClass?.schedule_value.value.classification} ({currentClass?.schedule_value.value.original_name})
+            {typeof currentClass?.schedule_value.value == "boolean" && currentClass?.schedule_value.value == true ? (
+              <>{currentClass?.period?.periodName} ({currentClass?.period?.optionName})</>
+            ) : (
+              <>{currentClass?.schedule_value.value.classification} ({currentClass?.schedule_value.value.original_name})</>
+            )}
           </CardDescription>
         </CardHeader>
         <CardFooter>
@@ -127,27 +150,10 @@ export function HomePageCards() {
       <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
         <CardHeader>
           <CardTitle>Time Remaining</CardTitle>
-          <CardDescription>{isBefore(
-            new Date(),
-            new Date(
-              format(now, "yyyy-MM-dd ") +
-              currentClass?.period_time?.end +
-              " UTC",
-            ),
-          )
-            ? "Ends "
-            : "Ended "}
-            {formatDistanceStrict(
-              new Date(
-                format(now, "yyyy-MM-dd ") +
-                currentClass?.period_time?.end +
-                " UTC",
-              ),
-              new Date(),
-              {
-                addSuffix: true,
-              },
-            )}</CardDescription>
+          <CardDescription>
+            {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "Ends" : "Starts"}
+            {" "}{formatDistanceStrict(dateToCompare, now, { addSuffix: true })}
+          </CardDescription>
         </CardHeader>
         <CardFooter>
           <Button variant="outline" href="/app/schedule/">
