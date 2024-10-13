@@ -52,6 +52,9 @@ export function TimerClientPage() {
         ),
       ))
     };
+    if (currentPeriods.length == 0) {
+      return null;
+    }
     const currentPeriod = currentPeriods.reduce((a, b) => {
       if (Number(new Date(
         format(now, "yyyy-MM-dd ") +
@@ -124,6 +127,25 @@ export function TimerClientPage() {
   const secondsOnes = useMemo(() => {
     return seconds % 10
   }, [seconds]);
+
+  if (currentClass == null) {
+    return (
+      <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">
+        <div className="flex flex-col">
+          <div className="text-lg sm:text-2xl">
+            <h1>No active class</h1>
+          </div>
+          <div className="flex gap-2 leading-none overflow-hidden text-6xl sm:text-8xl items-center" suppressHydrationWarning>
+            00
+            <span className="text-3xl text-muted">:</span>
+            00
+            <span className="text-3xl text-muted">:</span>
+            00
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">

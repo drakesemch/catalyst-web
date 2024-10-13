@@ -5,6 +5,7 @@ import {
   Camera,
   Check,
   CheckCheck,
+  CircleCheck,
   CircleSlash,
   CircleX,
   File as FileIcon,
@@ -38,13 +39,12 @@ export function prettyBody(str?: string) {
 }
 
 export function replaceCanvasURL(str?: string) {
-  const baseURL = `${
-    typeof window != "undefined"
+  const baseURL = `${typeof window != "undefined"
       ? `${window.location.protocol}//${window.location.host}`
       : env.NODE_ENV == "development"
         ? "http://localhost:3000"
         : "https://catalyst.bluefla.me"
-  }/app/`;
+    }/app/`;
   return str
     ?.replace(new RegExp("https://.*\\.instructure.com/api/v1/", "g"), baseURL)
     ?.replace(new RegExp("https://.*\\.instructure.com/", "g"), baseURL);
@@ -92,7 +92,7 @@ export function moduleType(item: ModuleItem | Assignment) {
     case "planner_note":
       return (
         <>
-          <StickyNote /> Note
+          <CircleCheck /> Custom Todo-Item
         </>
       );
     case "wiki_page":

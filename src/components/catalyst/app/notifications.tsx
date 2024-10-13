@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
+import { format } from "date-fns";
 import {
   AlertCircle,
   Archive,
   ArchiveRestore,
+  CalendarX2,
   Check,
   // CircleSlash,
   MoreHorizontal,
@@ -23,17 +25,20 @@ export type NotificationMeta = {
   id: string;
   dismissed: boolean;
   data:
-    | {
-        type: "catalyst.friend-request" | "catalyst.friend-added";
-        user: string;
-      }
-    | {
-        type: "canvas.grade-change";
-        course: number;
-        assignment: number;
-        old: number;
-        new: number;
-      };
+  | {
+    type: "catalyst.friend-request" | "catalyst.friend-added";
+    user: string;
+  }
+  | {
+    type: "catalyst.schedule.add-date";
+  }
+  | {
+    type: "canvas.grade-change";
+    course: number;
+    assignment: number;
+    old: number;
+    new: number;
+  };
 };
 
 export type ToastData = {
@@ -81,6 +86,10 @@ export function Notification({
     case "canvas.grade-change":
       NotificationComponent =
         GradeChangeNotification as unknown as typeof UnsupportedNotification;
+      break;
+    case "catalyst.schedule.add-date":
+      NotificationComponent =
+        AddScheduleDateNotification as unknown as typeof UnsupportedNotification;
       break;
     case "catalyst.friend-request":
       NotificationComponent =
@@ -131,6 +140,63 @@ function UnsupportedNotification({
           }}
         >
           <Archive /> Archive
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AddScheduleDateNotification({
+  toastData,
+  notification,
+  archive,
+}: {
+  toastData: ToastData | undefined;
+  notification: {
+    id: string;
+    dismissed: boolean;
+    data: object;
+  };
+  archive: () => void;
+}) {
+  return (
+    <div className="flex select-none flex-col gap-2 bg-background p-3 pl-4">
+      <div className="flex items-center gap-2">
+        <CalendarX2 className="flex-shrink-0" />
+        <div className="flex flex-1 flex-col items-start">
+          <span className="font-bold">Missing Schedule Data</span>
+          <span className="text-xs text-muted-foreground">
+            We are missing schedule data, please ensure that you are keeping up to date with the schedules, otherwise, we may transer your role to someone else.
+          </span>
+        </div>
+      </div>
+      <div className="flex items-center justify-start gap-1 overflow-auto">
+        <Button
+          variant="outline"
+          size="action"
+          onClick={() => {
+            toast.dismiss(toastData?.id);
+          }}
+        >
+          <SquareArrowOutUpRight /> Open Scheduling Information
+        </Button>
+        <Button
+          variant="outline"
+          size="action"
+          onClick={() => {
+            toast.dismiss(toastData?.id);
+            archive();
+          }}
+        >
+          {notification.dismissed ? (
+            <>
+              <ArchiveRestore /> Restore
+            </>
+          ) : (
+            <>
+              <Archive /> Archive
+            </>
+          )}
         </Button>
       </div>
     </div>
@@ -253,7 +319,15 @@ function FriendRequestNotification({
             archive();
           }}
         >
-          <Archive /> Archive
+          {notification.dismissed ? (
+            <>
+              <ArchiveRestore /> Restore
+            </>
+          ) : (
+            <>
+              <Archive /> Archive
+            </>
+          )}
         </Button>
       </div>
     </div>

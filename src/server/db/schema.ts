@@ -343,6 +343,7 @@ export const notifications = createTable(
     userId: varchar("user_id", { length: 255 }).notNull(),
     data: jsonb("data"),
     dismissed: boolean("dismissed").notNull().default(false),
+    sentAt: timestamp("sent_at", { mode: "date" }).notNull(),
   },
   (notification) => ({
     userIdIdx: index("notification_user_id_idx").on(notification.userId),

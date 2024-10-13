@@ -91,21 +91,24 @@ export function HomePageCards() {
         ),
       ))
     };
-    const currentPeriod = currentPeriods.reduce((a, b) => {
-      if (Number(new Date(
-        format(now, "yyyy-MM-dd ") +
-        a?.period_time?.end +
-        " UTC",
-      )) < Number(new Date(
-        format(now, "yyyy-MM-dd ") +
-        b?.period_time?.end +
-        " UTC",
-      ))) {
-        return a;
-      } else {
-        return b;
-      }
-    });
+    let currentPeriod = null;
+    if (currentPeriods.length > 0) {
+      currentPeriod = currentPeriods.reduce((a, b) => {
+        if (Number(new Date(
+          format(now, "yyyy-MM-dd ") +
+          a?.period_time?.end +
+          " UTC",
+        )) < Number(new Date(
+          format(now, "yyyy-MM-dd ") +
+          b?.period_time?.end +
+          " UTC",
+        ))) {
+          return a;
+        } else {
+          return b;
+        }
+      });
+    }
     return currentPeriod;
   }, [schedule, now]);
 
@@ -129,41 +132,74 @@ export function HomePageCards() {
   }, [currentClass?.period_time, now]);
 
   return (
-    <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex animate-fade-in items-center gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
-      <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
-        <CardHeader>
-          <CardTitle>Current Class</CardTitle>
-          <CardDescription>
-            {typeof currentClass?.schedule_value.value == "boolean" && currentClass?.schedule_value.value == true ? (
-              <>{currentClass?.period?.periodName} ({currentClass?.period?.optionName})</>
-            ) : (
-              <>{currentClass?.schedule_value.value.classification} ({currentClass?.schedule_value.value.original_name})</>
-            )}
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button href="/app/courses">
-            Open Course <ArrowRight />
-          </Button>
-        </CardFooter>
-      </Card>
-      <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
-        <CardHeader>
-          <CardTitle>Time Remaining</CardTitle>
-          <CardDescription>
-            {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "Ends" : "Starts"}
-            {" "}{formatDistanceStrict(dateToCompare, now, { addSuffix: true })}
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button variant="outline" href="/app/schedule/">
-            Open Schedule <ArrowRight />
-          </Button>
-          <Button variant="outline" href="/app/schedule/now">
-            View In Fullscreen <SquareArrowOutUpRight />
-          </Button>
-        </CardFooter>
-      </Card>
+    <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex items-stretch animate-fade-in items-center gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
+      {currentClass != null ? (
+        <>
+          <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
+            <CardHeader>
+              <CardTitle>Current Class</CardTitle>
+              <CardDescription>
+                {typeof currentClass?.schedule_value.value == "boolean" && currentClass?.schedule_value.value == true ? (
+                  <>{currentClass?.period?.periodName} ({currentClass?.period?.optionName})</>
+                ) : (
+                  <>{currentClass?.schedule_value.value.classification} ({currentClass?.schedule_value.value.original_name})</>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button href={`/app/courses/${currentClass?.schedule_value.value?.id ?? ""}`}>
+                Open Course <ArrowRight />
+              </Button>
+            </CardFooter>
+          </Card>
+          <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
+            <CardHeader>
+              <CardTitle>Time Remaining</CardTitle>
+              <CardDescription>
+                {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "Ends" : "Starts"}
+                {" "}{formatDistanceStrict(dateToCompare, now, { addSuffix: true })}
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button variant="outline" href="/app/schedule/">
+                Open Schedule <ArrowRight />
+              </Button>
+              <Button variant="outline" href="/app/schedule/now">
+                View In Fullscreen <SquareArrowOutUpRight />
+              </Button>
+            </CardFooter>
+          </Card>
+        </>
+      ) : (
+        <>
+          <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
+            <CardHeader>
+              <CardTitle>No Current Class</CardTitle>
+              <CardDescription>
+                You are not currently in a class
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button href="/app/courses" variant="secondary">
+                View All Courses <ArrowRight />
+              </Button>
+            </CardFooter>
+          </Card>
+          <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
+            <CardHeader>
+              <CardTitle>Schedule</CardTitle>
+              <CardDescription>
+                View your upcoming schedule
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button variant="outline" href="/app/schedule/">
+                Open Schedule <ArrowRight />
+              </Button>
+            </CardFooter>
+          </Card>
+        </>
+      )}
       <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
         <CardHeader>
           <CardTitle>Assignments</CardTitle>
