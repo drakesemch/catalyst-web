@@ -81,13 +81,6 @@ export function GradesClient({
         );
       groups[group.id] =
         totalPoints == 0 ? undefined : pointsScored / totalPoints;
-      console.log(
-        "groups",
-        group.name,
-        groups[group.id],
-        pointsScored,
-        totalPoints,
-      );
     });
     gradeGroups.forEach((group) => {
       if (groups[group.id] == undefined) return;
@@ -172,7 +165,7 @@ export function GradesClient({
                     (assignment) =>
                       scoreOverrides[assignment?.id] != undefined &&
                       scoreOverrides[assignment?.id] !=
-                        assignment.submission?.score,
+                      assignment.submission?.score,
                   );
                   const score = assignments
                     .filter(
@@ -185,8 +178,8 @@ export function GradesClient({
                         prev +
                         Number(
                           scoreOverrides[assignment?.id] ??
-                            assignment.submission?.score ??
-                            0,
+                          assignment.submission?.score ??
+                          0,
                         ),
                       0,
                     );
@@ -201,8 +194,8 @@ export function GradesClient({
                         prev +
                         Number(
                           totalOverrides[assignment?.id] ??
-                            assignment.points_possible ??
-                            0,
+                          assignment.points_possible ??
+                          0,
                         ),
                       0,
                     );
@@ -279,7 +272,7 @@ export function GradesClient({
                         <span className="flex items-center gap-1">
                           {prettyState(
                             assignment.submission?.workflow_state ??
-                              "unsubmitted",
+                            "unsubmitted",
                           )}
                         </span>
                         <Minus />
@@ -307,9 +300,9 @@ export function GradesClient({
               <div className="flex h-full items-center justify-end gap-2">
                 <div className="flex h-auto w-[10ch] items-center justify-end gap-1 p-2 text-right">
                   {(scoreOverrides[assignment?.id] ?? "NO") == "" ||
-                  (scoreOverrides[assignment?.id] ??
-                    assignment.submission?.score ??
-                    -1) != (assignment.submission?.score ?? -1) ? (
+                    (scoreOverrides[assignment?.id] ??
+                      assignment.submission?.score ??
+                      -1) != (assignment.submission?.score ?? -1) ? (
                     <>
                       <span>
                         {scoreOverrides[assignment?.id] == ""
@@ -340,7 +333,7 @@ export function GradesClient({
                     (totalOverrides[assignment?.id] ??
                       assignment.points_possible ??
                       -1) != assignment.points_possible) ??
-                  -1) ? (
+                    -1) ? (
                     <>
                       <span>
                         {totalOverrides[assignment?.id] == ""

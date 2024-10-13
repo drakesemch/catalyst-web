@@ -128,10 +128,10 @@ export function TimerClientPage() {
   return (
     <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">
       <div className="flex flex-col">
-        <div className="text-2xl">
+        <div className="text-lg sm:text-2xl">
           <h1>Time until {currentClass?.period?.periodName} {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "ends" : "starts"}</h1>
         </div>
-        <div className="flex gap-2 leading-none overflow-hidden text-8xl items-center" suppressHydrationWarning>
+        <div className="flex gap-2 leading-none overflow-hidden text-6xl sm:text-8xl items-center" suppressHydrationWarning>
           <Digit value={hoursTens} className={[hoursTens].every((v) => v == 0) ? "text-muted" : ""} />
           <Digit value={hoursOnes} className={[hoursTens, hoursOnes,].every((v) => v == 0) ? "text-muted" : ""} />
           <span className="text-3xl text-muted">:</span>
@@ -151,7 +151,7 @@ export function TimerClientPage() {
   );
 }
 
-const fontSize = 96;
+const fontSize = 80;
 const padding = 15;
 const height = fontSize + padding;
 
