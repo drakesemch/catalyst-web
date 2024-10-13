@@ -60,30 +60,37 @@ export function GradesClient({
     let weightsAdded = 0;
     let calculatedScore = 0;
     grades.forEach((grade) => {
-      if (
-        (scoreOverrides[grade.id] ?? grade.submission?.score) == undefined ||
-        Number(totalOverrides[grade.id] ?? grade.points_possible ?? 0) == 0
-      )
+      if ((scoreOverrides[grade.id] ?? grade.submission?.score ?? -1) == -1)
         return;
       groups[grade.assignment_group_id] ??= 0;
-      groups[grade.assignment_group_id]! +=
-        Number(scoreOverrides[grade.id] ?? grade.submission?.score ?? 0) /
-        Number(totalOverrides[grade.id] ?? grade.points_possible ?? 1);
+      groups[grade.assignment_group_id]! += Number(
+        scoreOverrides[grade.id] ?? grade.submission?.score ?? 0,
+      );
     });
-    console.log("group totals", groups);
     gradeGroups.forEach((group) => {
-      const assignments = grades
+      const pointsScored = groups[group.id]!;
+      const totalPoints = grades
         .filter((assignment) => assignment.assignment_group_id == group.id)
         .filter(
           (assignment) =>
-            assignment?.submission?.score != undefined &&
-            assignment?.points_possible != undefined &&
-            assignment?.points_possible != 0,
-        ).length;
+            (scoreOverrides[assignment.id] ??
+              assignment.submission?.score ??
+              -1) != -1,
+        )
+        .reduce(
+          (prev, assignment) => prev + (assignment.points_possible ?? 0),
+          0,
+        );
       groups[group.id] =
-        assignments == 0 ? undefined : groups[group.id]! / assignments;
+        totalPoints == 0 ? undefined : pointsScored / totalPoints;
+      console.log(
+        "groups",
+        group.name,
+        groups[group.id],
+        pointsScored,
+        totalPoints,
+      );
     });
-    console.log("groups", groups);
     gradeGroups.forEach((group) => {
       if (groups[group.id] == undefined) return;
       weightsAdded += group.group_weight;
@@ -132,8 +139,8 @@ export function GradesClient({
             {useGrades && (
               <p className="flex gap-1 text-xs text-destructive">
                 <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
-                early beta, calculations are not 100% accurate, please do not
-                refer the parenthesized value.
+                early beta, calculations are close to accurate, but please
+                double check with Canvas to ensure that they are correct!
               </p>
             )}
             <div className="mt-2 flex flex-col gap-4 text-xs text-muted-foreground">
@@ -146,9 +153,13 @@ export function GradesClient({
                 />
                 <div className="flex flex-col">
                   <span className="text-lg font-bold text-foreground">
+                    {useGrades && calculatedWhatIfScore.toFixed(2) + "%"}
+                  </span>
+                  <span className="text-xs text-foreground">
+                    Canvas Reported Score:{" "}
                     {courseDetails?.enrollments?.at(0)
                       ?.computed_current_score ?? "N/A"}
-                    % {useGrades && <>({calculatedWhatIfScore.toFixed(2)}%)</>}
+                    %
                   </span>
                 </div>
               </div>
@@ -170,7 +181,7 @@ export function GradesClient({
                     .filter(
                       (assignment) =>
                         scoreOverrides[assignment?.id] != "" &&
-                        (assignment.submission?.score ?? -1),
+                        (assignment.submission?.score ?? -1) != -1,
                     )
                     .reduce(
                       (prev, assignment) =>
@@ -186,7 +197,7 @@ export function GradesClient({
                     .filter(
                       (assignment) =>
                         scoreOverrides[assignment?.id] != "" &&
-                        (assignment.submission?.score ?? -1),
+                        (assignment.submission?.score ?? -1) != -1,
                     )
                     .reduce(
                       (prev, assignment) =>
@@ -214,7 +225,8 @@ export function GradesClient({
                           )}
                         </div>
                         <div className="flex items-center gap-1 text-right">
-                          {score}/{outOf} <Dot />{" "}
+                          {Math.round(score * 100) / 100}/
+                          {Math.round(outOf * 100) / 100} <Dot />{" "}
                           {((score / outOf) * 100).toFixed(2) == "NaN"
                             ? "N/A"
                             : ((score / outOf) * 100).toFixed(2)}
@@ -297,11 +309,10 @@ export function GradesClient({
               </Button>
               <div className="flex h-full items-center justify-end gap-2">
                 <div className="flex h-auto w-[10ch] items-center justify-end gap-1 p-2 text-right">
-                  {(((scoreOverrides[assignment?.id] ?? "NO") == "" ||
-                    (scoreOverrides[assignment?.id] ??
-                      assignment.submission?.score ??
-                      -1) != assignment.submission?.score) ??
-                  -1) ? (
+                  {(scoreOverrides[assignment?.id] ?? "NO") == "" ||
+                  (scoreOverrides[assignment?.id] ??
+                    assignment.submission?.score ??
+                    -1) != (assignment.submission?.score ?? -1) ? (
                     <>
                       <span>
                         {scoreOverrides[assignment?.id] == ""
@@ -376,7 +387,7 @@ export function GradesClient({
                             value={
                               scoreOverrides[assignment?.id] ??
                               assignment?.submission?.score ??
-                              -1
+                              ""
                             }
                             onChange={(val) => {
                               if (!useGrades) return;

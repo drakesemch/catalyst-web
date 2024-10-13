@@ -13,7 +13,6 @@ const getBlog = unstable_cache(
     const markdownFile = await fetch(pathname);
     const markdownContent = await markdownFile.text();
     const matterResult = matter(markdownContent);
-    console.log("content", markdownContent, matterResult);
 
     // Use remark to convert markdown into HTML string
     const processedContent = await remark()

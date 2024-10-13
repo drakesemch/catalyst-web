@@ -15,7 +15,7 @@ import {
 function pickColor(score: number) {
   if (score >= 100) return "hsl(217.2 91.2% 59.8%)";
   if (score >= 90) return "hsl(160.1 84.1% 39.4%)";
-  if (score >= 80) return "hsl(142.1 70.6% 45.3%)";
+  if (score >= 80) return "hsl(83.7 80.5% 44.3%)";
   if (score >= 70) return "hsl(37.7 92.1% 50.2%)";
   if (score >= 0) return "hsl(0 84.2% 60.2%)";
 }

@@ -678,13 +678,16 @@ export const canvasCatalystRouter = createTRPCRouter({
                   const submissionData =
                     (await assignmentsQuery.json()) as Submission[];
 
-                  missingAssignments = submissionData.filter(
+                  const missing = submissionData.filter(
                     (assignment) =>
+                      (assignment.missing &&
+                        assignment.assignment?.points_possible != 0) ||
                       (!assignment.excused &&
                         assignment.score == 0 &&
-                        assignment.assignment?.points_possible != 0) ||
-                      assignment.missing,
-                  ).length;
+                        assignment.assignment?.points_possible != 0),
+                  );
+
+                  missingAssignments = missing.length;
                 } catch (err) {
                   // something doesn't work
                 }

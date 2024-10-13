@@ -875,7 +875,6 @@ export const canvasRouter = createTRPCRouter({
             `/api/v1/planner/overrides/${input.id}`,
             ctx.user.canvas.url,
           );
-          console.log(input.id, input.completed);
           const query = await fetch(url, {
             method: "PUT",
             headers: {

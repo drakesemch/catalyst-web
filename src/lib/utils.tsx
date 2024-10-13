@@ -287,7 +287,6 @@ export async function serverToBase64(file: File | Blob) {
 }
 
 export function constructFile(data: string, filename: string, type?: string) {
-  console.log(data);
   const arr = data.split(",");
   const mime = type ?? arr[0]!.match(/:(.*?);/)?.[1];
   const bstr = atob(arr[arr.length - 1] ?? "");

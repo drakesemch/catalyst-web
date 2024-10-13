@@ -133,7 +133,6 @@ export function Dropzone({ onUpload }: { onUpload: (file: FileList) => void }) {
       popover.current?.close();
     };
     const onDragEnd = () => {
-      console.log("end");
       popover.current?.close();
     };
     window.addEventListener("dragover", onDragOver);
