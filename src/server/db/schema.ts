@@ -350,6 +350,15 @@ export const notifications = createTable(
   }),
 );
 
+export const courseClassification = createTable("course_classification", {
+  id: varchar("id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  key: varchar("key", { length: 255 }).notNull(),
+  value: varchar("value"),
+});
+
 export const userRelationships = createTable(
   "user_relationship",
   {

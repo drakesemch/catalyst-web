@@ -406,7 +406,7 @@ export const catalystRouter = createTRPCRouter({
             return school;
           }),
         periods: protectedProcedure
-          .input(z.object({ id: z.string() }).optional())
+          .input(z.object({ id: z.string().optional() }).optional())
           .query(async ({ input, ctx }) => {
             const user = ctx.user.get;
             if (!user)
@@ -595,6 +595,78 @@ export const catalystRouter = createTRPCRouter({
 
           return finalSchedules;
         }),
+      },
+      saved: {
+        get: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .query(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+
+            return await ctx.db
+              .select()
+              .from(schools)
+              .where(
+                eq(
+                  schools.id,
+                  input?.id ??
+                    ctx.user.settings.find((val) => val.key == "school_id")
+                      ?.value ??
+                    "",
+                ),
+              );
+          }),
+        schedules: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .query(async ({ input, ctx }) => {
+            const listedSchedules = await ctx.db
+              .select()
+              .from(schedules)
+              .fullJoin(schools, eq(schedules.schoolId, schools.id))
+              .where(
+                or(
+                  eq(
+                    schools.id,
+                    input?.id ??
+                      ctx.user.settings?.find((val) => val.key == "school_id")
+                        ?.value ??
+                      "",
+                  ),
+                  eq(schedules.draftState, "saved"),
+                ),
+              );
+
+            const finalSchedules = await Promise.all(
+              listedSchedules.map(async (schedule) => {
+                const listedPeriods = await ctx.db
+                  .select()
+                  .from(periodTimes)
+                  .fullJoin(periods, eq(periodTimes.optionId, periods.optionId))
+                  .fullJoin(
+                    scheduleValues,
+                    and(
+                      eq(periods.periodId, scheduleValues.periodId),
+                      eq(scheduleValues.userId, ctx.user.get?.id ?? ""),
+                    ),
+                  )
+                  .where(
+                    eq(periodTimes.scheduleId, schedule?.schedule?.id ?? ""),
+                  )
+                  .orderBy(periodTimes.order);
+
+                return {
+                  ...schedule,
+                  periods: listedPeriods,
+                };
+              }),
+            );
+
+            return finalSchedules;
+          }),
       },
     },
     save: protectedProcedure.mutation(async ({ ctx }) => {

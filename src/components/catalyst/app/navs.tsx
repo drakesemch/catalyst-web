@@ -15,6 +15,8 @@ import {
   // Command,
   UserRound,
   Bell,
+  School,
+  Home,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -551,10 +553,6 @@ function Tools() {
 async function SettingCards() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:w-[40ch] md:max-w-[40ch] md:pr-2">
-      <div className="flex-1 text-xs text-muted-foreground">
-        No settings available.
-        <br /> Check back later for updates.
-      </div>
       {/* <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
@@ -620,6 +618,32 @@ async function SettingCards() {
           )}
         </DrawerContent>
       </Drawer>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+        href="/app/schools"
+      >
+        <School />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">School</span>
+          <span className="text-xs text-muted-foreground">
+            Manage your school information
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        href="/home"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Home />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Exit App</span>
+          <span className="text-xs text-muted-foreground">
+            View the landing page of Catalyst
+          </span>
+        </div>
+      </Button>
       {/* <Button
         variant="outline"
         className="hidden h-auto w-full flex-1 items-center gap-3 md:flex"
@@ -628,18 +652,6 @@ async function SettingCards() {
         <div className="flex flex-1 flex-col items-start gap-1">
           <span className="font-bold">Friends</span>
           <span className="text-xs text-muted-foreground">Manage Friends</span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <School />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">School</span>
-          <span className="text-xs text-muted-foreground">
-            Manage your school information
-          </span>
         </div>
       </Button>
       <Button

@@ -8,6 +8,8 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "@vercel/kv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { courseClassificationDataset } from "./catalyst/canvas";
+import { courseClassification } from "@/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export interface Term {
   id: number;
@@ -946,12 +948,33 @@ export const canvasRouter = createTRPCRouter({
             token: env.CLASSIFICATION_REST_API_TOKEN,
           });
 
-          const classification = await classificationRedis.get(
-            String(course.id),
-          );
+          try {
+            const classification = await classificationRedis.get(
+              String(course.id),
+            );
 
-          if (classification) {
-            return classification;
+            if (classification) {
+              return classification;
+            }
+          } catch (err) {
+            console.error(err);
+          }
+
+          const classificationFromDB = await ctx.db
+            .select()
+            .from(courseClassification)
+            .where(eq(courseClassification.key, String(course.id)));
+
+          if (classificationFromDB.length > 0) {
+            try {
+              await classificationRedis.set(
+                String(course.id),
+                classificationFromDB[0]!.value,
+              );
+            } catch (err) {
+              console.error(err);
+            }
+            return classificationFromDB[0]!.value;
           }
 
           const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
@@ -993,7 +1016,15 @@ export const canvasRouter = createTRPCRouter({
           const value = result?.response?.text() ?? "Not Available";
 
           if (value != "Not Available") {
-            await classificationRedis.set(String(course.id), value);
+            try {
+              await classificationRedis.set(String(course.id), value);
+              await ctx.db.insert(courseClassification).values({
+                key: String(course.id),
+                value,
+              });
+            } catch (err) {
+              console.error(err);
+            }
           }
 
           return value;
@@ -1386,7 +1417,11 @@ export const canvasRouter = createTRPCRouter({
                 } else {
                   fileIds.push(response?.id ?? 0);
                 }
-                await del(blob.url);
+                try {
+                  await del(blob.url);
+                } catch (err) {
+                  console.error(err);
+                }
               }
               const submitURL = new URL(
                 `/api/v1/courses/${input.courseId}/assignments/${input.assignmentId}/submissions`,

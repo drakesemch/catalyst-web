@@ -59,7 +59,7 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
               className={cn(
                 "relative truncate transition-all delay-300 after:absolute after:-left-1 after:top-1/2 after:h-0.5 after:w-0 after:-translate-y-1/2 after:rounded-full after:bg-foreground after:transition-all after:delay-0 after:content-['']",
                 isCompleted &&
-                  "opacity-30 delay-0 after:w-[calc(100%+0.5rem)] after:delay-300",
+                "opacity-30 delay-0 after:w-[calc(100%+0.5rem)] after:delay-300",
               )}
             >
               {todo.plannable.content_details?.name ??
@@ -70,36 +70,36 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
         </CardTitle>
         {(todo.plannable.content_details?.due_at ??
           todo.plannable.todo_date) && (
-          <>
-            <CardDescription
-              className={cn(
-                "transition-all delay-300",
-                isCompleted && "opacity-30 delay-0",
-              )}
-            >
-              Due at{" "}
-              {format(
-                new Date(
-                  todo.plannable.content_details?.due_at ??
+            <>
+              <CardDescription
+                className={cn(
+                  "transition-all delay-300",
+                  isCompleted && "opacity-30 delay-0",
+                )}
+              >
+                Due at{" "}
+                {format(
+                  new Date(
+                    todo.plannable.content_details?.due_at ??
                     todo.plannable.todo_date ??
                     Date.now(),
-                ),
-                "hh:mm:ss a 'on' EEE, MMM dd",
-              )}{" "}
-              {formatDistanceStrict(
-                new Date(
-                  todo.plannable.content_details?.due_at ??
+                  ),
+                  "hh:mm:ss a 'on' EEE, MMM dd",
+                )}{" "}
+                {formatDistanceStrict(
+                  new Date(
+                    todo.plannable.content_details?.due_at ??
                     todo.plannable.todo_date ??
                     "",
-                ),
-                now,
-                {
-                  addSuffix: true,
-                },
-              )}
-            </CardDescription>
-          </>
-        )}
+                  ),
+                  now,
+                  {
+                    addSuffix: true,
+                  },
+                )}
+              </CardDescription>
+            </>
+          )}
         <CardDescription
           className={cn(
             "transition-all delay-300",
@@ -128,8 +128,8 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
           <Dot className="hidden sm:block" />
           {(todo.plannable.content_details?.submission_types?.length ?? 0) == 0 && (
             <span className="flex items-center gap-2" key="none">
-            {submissionTypeWithIcon("none")}
-          </span>
+              {submissionTypeWithIcon("none")}
+            </span>
           )}
           {todo.plannable.content_details?.submission_types.map((type) => (
             <span className="flex items-center gap-2" key={type}>
@@ -145,9 +145,15 @@ export function TodoCard({ todo }: { todo: PlannerItem }) {
         >
           Submit <Upload />
         </Button>
-        <Button href={`/app${todo.html_url}`}>
-          Open <ArrowRight />
-        </Button>
+        {todo.plannable_type == "planner_note" ? (
+          <Button disabled>
+            Edit <ArrowRight />
+          </Button>
+        ) : (
+          <Button href={`/app${todo.html_url}`}>
+            Open <ArrowRight />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

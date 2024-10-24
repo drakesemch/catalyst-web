@@ -26,11 +26,16 @@ export function Todos() {
   if (isPending) {
     return (
       <>
-        {Array(10)
-          .fill(0)
-          .map((_, i) => (
-            <Skeleton key={i} className="h-48" />
-          ))}
+        <div className="flex flex-col gap-2 bg-background px-4 py-2 -mb-32 mt-16 z-10 mx-auto rounded-lg sticky top-12 md:top-24 text-xs text-muted-foreground">
+          <h3 className="flex items-center gap-2"><Loader className="animate-spin" /> Loading Todo Items...</h3>
+        </div>
+        <div className="flex flex-col gap-4 blur-xl">
+          {Array(10)
+            .fill(0)
+            .map((_, i) => (
+              <Skeleton key={i} className="h-48" />
+            ))}
+        </div>
       </>
     );
   }

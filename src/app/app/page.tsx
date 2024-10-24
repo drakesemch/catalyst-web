@@ -4,6 +4,7 @@ import { ArrowRight, Plus } from "lucide-react";
 import { HomePageCards, NewTodo, Todos } from "./client";
 import { api } from "@/trpc/server";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 
 export default async function AppPage() {
   const user = await api.catalyst.user.get();
@@ -32,19 +33,24 @@ export default async function AppPage() {
         </p>
         <div className="flex animate-fade-in flex-col gap-4 opacity-0 animate-delay-1400">
           <Todos />
-          <Button
+          <div className="flex justify-center text-xs text-muted-foreground py-8">
+            Only showing the last 14 days.
+          </div>
+          {/* <Button
             variant="outline"
             className="h-auto justify-between p-8 text-lg"
           >
             View All <ArrowRight />
-          </Button>
+          </Button> */}
         </div>
         <div className="mt-8" />
-        <div className="w-full fixed bottom-[4.5rem] md:bottom-0 left-0 border-t bg-background flex items-center justify-center">
-          <div className="max-w-[100ch] w-full flex items-center justify-between py-4 px-6">
+        <div className="w-full fixed bottom-[4.5rem] md:bottom-0 left-0 bg-background flex items-center justify-center">
+          <SquigglySeparator fillColor="hsl(var(--ui-background))" waveColor="hsl(var(--ui-secondary))" className="absolute -top-4 left-0 w-full rotate-180" />
+          <div className="max-w-[100ch] w-full flex items-center justify-between pt-4 pb-5 p-6">
             <div className="flex flex-col gap-1">
               <span className="font-bold">Catalyst</span>
-              <span className="text-xs text-muted-foreground">Created with ❤️ by Drake Semchyshyn and the Blue Flame Team</span>
+              <span className="text-xs text-muted-foreground sm:block hidden">Created with ❤️ by Drake Semchyshyn and the Blue Flame Team</span>
+              <span className="text-xs text-muted-foreground sm:hidden block">Created with ❤️</span>
             </div>
             <NewTodo />
           </div>

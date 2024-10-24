@@ -1,8 +1,10 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { differenceInSeconds, format, isAfter, isBefore, isEqual } from "date-fns";
+import { differenceInSeconds, format, formatDistanceStrict, isAfter, isBefore, isEqual } from "date-fns";
 import { type MotionValue, motion, useSpring, useTransform } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
@@ -128,6 +130,36 @@ export function TimerClientPage() {
     return seconds % 10
   }, [seconds]);
 
+  const diffPct = useMemo(() => isBefore(
+    new Date(),
+    new Date(
+      format(now, "yyyy-MM-dd ") +
+      currentClass?.period_time?.start +
+      " UTC",
+    ),
+  )
+    ? 0
+    : differenceInSeconds(
+      new Date(),
+      new Date(
+        format(now, "yyyy-MM-dd ") +
+        currentClass?.period_time?.start +
+        " UTC",
+      ),
+    ) /
+    differenceInSeconds(
+      new Date(
+        format(now, "yyyy-MM-dd ") +
+        currentClass?.period_time?.end +
+        " UTC",
+      ),
+      new Date(
+        format(now, "yyyy-MM-dd ") +
+        currentClass?.period_time?.start +
+        " UTC",
+      ),
+    ), [currentClass, now]);
+
   if (currentClass == null) {
     return (
       <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">
@@ -150,8 +182,8 @@ export function TimerClientPage() {
   return (
     <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">
       <div className="flex flex-col">
-        <div className="text-lg sm:text-2xl">
-          <h1>Time until {currentClass?.period?.periodName} {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "ends" : "starts"}</h1>
+        <div className="flex items-center justify-start text-lg font-bold text-muted">
+          <span>{currentClass?.period?.periodName} {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "ends" : "starts"} in</span>
         </div>
         <div className="flex gap-2 leading-none overflow-hidden text-6xl sm:text-8xl items-center" suppressHydrationWarning>
           <Digit value={hoursTens} className={[hoursTens].every((v) => v == 0) ? "text-muted" : ""} />
@@ -163,11 +195,107 @@ export function TimerClientPage() {
           <Digit value={secondsTens} className={[hoursTens, hoursOnes, minutesTens, minutesOnes, secondsTens].every((v) => v == 0) ? "text-muted" : ""} />
           <Digit value={secondsOnes} className={[hoursTens, hoursOnes, minutesTens, minutesOnes, secondsTens, secondsOnes].every((v) => v == 0) ? "text-muted" : ""} />
         </div>
-        <div className="flex items-center justify-around text-xs text-muted">
+        <div className="flex items-center justify-around text-xs text-muted mb-4">
           <span>hours</span>
           <span>minutes</span>
           <span>seconds</span>
         </div>
+        <Button variant="outline" href={typeof currentClass?.schedule_value?.value == "boolean" ? undefined : `/app/courses/${currentClass?.schedule_value?.value?.id}`} className="items-start h-auto flex-col gap-0">
+          <h1 className="text-2xl font-bold">{currentClass?.period?.periodName}{typeof currentClass?.schedule_value?.value == "boolean" ? "" : ": " + currentClass?.schedule_value?.value?.classification}</h1>
+          <h2 className="text-base text-muted-foreground">{typeof currentClass?.schedule_value?.value == "boolean" ? currentClass?.period?.optionName : currentClass?.schedule_value?.value?.original_name}</h2>
+          <div
+            className="flex flex-col border-t -mx-4 mt-2 pt-1 w-[calc(100%+2rem)]"
+          >
+            <div className="flex items-center gap-4 px-4 py-2 text-xs">
+              <div className="-mr-2 size-2 rounded-full bg-green-500" />
+              <span>
+                {format(
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    currentClass?.period_time?.start +
+                    " UTC",
+                  ),
+                  "hh:mm a",
+                )}
+              </span>
+              <Progress
+                className="flex-1"
+                value={
+                  isBefore(
+                    now,
+                    new Date(
+                      new Date(
+                        format(now, "yyyy-MM-dd ") +
+                        currentClass?.period_time?.start +
+                        " UTC",
+                      ),
+                    ),
+                  )
+                    ? 0
+                    : Math.min(100, Math.max(0, diffPct * 100))
+                }
+              />
+              <span>
+                {format(
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    currentClass?.period_time?.end +
+                    " UTC",
+                  ),
+                  "hh:mm a",
+                )}
+              </span>
+            </div>
+            <div className="-mt-2 flex items-center justify-between gap-4 px-4 py-2 text-xs text-muted-foreground">
+              <span>
+                {isBefore(
+                  new Date(),
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    currentClass?.period_time?.start +
+                    " UTC",
+                  ),
+                )
+                  ? "Starts "
+                  : "Started "}
+                {formatDistanceStrict(
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    currentClass?.period_time?.start +
+                    " UTC",
+                  ),
+                  new Date(),
+                  {
+                    addSuffix: true,
+                  },
+                )}
+              </span>
+              <span>
+                {isBefore(
+                  new Date(),
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    currentClass?.period_time?.end +
+                    " UTC",
+                  ),
+                )
+                  ? "Ends "
+                  : "Ended "}
+                {formatDistanceStrict(
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                    currentClass?.period_time?.end +
+                    " UTC",
+                  ),
+                  new Date(),
+                  {
+                    addSuffix: true,
+                  },
+                )}
+              </span>
+            </div>
+          </div>
+        </Button>
       </div>
     </div>
   );

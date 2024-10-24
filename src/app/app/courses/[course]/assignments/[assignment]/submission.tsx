@@ -76,60 +76,62 @@ export function SubmissionButtons({
         )}
       {(assignmentDetails.submission_types.length != 1 ||
         assignmentDetails.submission_types.at(0) != "external_tool") && (
-        <Drawer open={newSubmissionOpen} onOpenChange={setNewSubmissionOpen}>
-          <DrawerTrigger asChild>
-            <Button>
-              <Plus /> New Submission
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle>New Submission</DrawerTitle>
-            </DrawerHeader>
-            <NewSubmission
-              course={course}
-              assignment={assignment}
-              onSuccess={() => {
-                setSubmissionsOpen(true);
-                setNewSubmissionOpen(false);
-                () => {
-                  const end = Date.now() + 3 * 1000; // 3 seconds
-                  const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
+          <Drawer open={newSubmissionOpen} onOpenChange={setNewSubmissionOpen}>
+            <DrawerTrigger asChild>
+              <Button>
+                <Plus /> New Submission
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>New Submission</DrawerTitle>
+              </DrawerHeader>
+              <NewSubmission
+                course={course}
+                assignment={assignment}
+                onSuccess={() => {
+                  console.log("set success, show confetti")
+                  // setSubmissionsOpen(true);
+                  setSubmissionsOpen(false);
+                  setNewSubmissionOpen(false);
+                  (() => {
+                    const end = Date.now() + 3 * 1000; // 3 seconds
+                    const colors = ["#a786ff", "#fd8bbc", "#eca184", "#f8deb1"];
 
-                  const frame = async () => {
-                    if (Date.now() > end) return;
+                    const frame = async () => {
+                      if (Date.now() > end) return;
 
-                    confetti({
-                      particleCount: 2,
-                      angle: 60,
-                      spread: 55,
-                      startVelocity: 60,
-                      origin: { x: 0, y: 0.5 },
-                      colors: colors,
-                    })?.catch(console.error);
-                    confetti({
-                      particleCount: 2,
-                      angle: 120,
-                      spread: 55,
-                      startVelocity: 60,
-                      origin: { x: 1, y: 0.5 },
-                      colors: colors,
-                    })?.catch(console.error);
+                      confetti({
+                        particleCount: 2,
+                        angle: 60,
+                        spread: 55,
+                        startVelocity: 60,
+                        origin: { x: 0, y: 0.5 },
+                        colors: colors,
+                      })?.catch(console.error);
+                      confetti({
+                        particleCount: 2,
+                        angle: 120,
+                        spread: 55,
+                        startVelocity: 60,
+                        origin: { x: 1, y: 0.5 },
+                        colors: colors,
+                      })?.catch(console.error);
 
-                    await new Promise((resolve) => setTimeout(resolve, 20));
+                      await new Promise((resolve) => setTimeout(resolve, 20));
 
-                    requestAnimationFrame(() => {
-                      frame().catch(console.error);
-                    });
-                  };
+                      requestAnimationFrame(() => {
+                        frame().catch(console.error);
+                      });
+                    };
 
-                  frame().catch(console.error);
-                };
-              }}
-            />
-          </DrawerContent>
-        </Drawer>
-      )}
+                    frame().catch(console.error);
+                  })();
+                }}
+              />
+            </DrawerContent>
+          </Drawer>
+        )}
     </>
   );
 }
