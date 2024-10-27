@@ -168,7 +168,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
             duration,
             ease: [0.16, 1, 0.3, 1], // https://easings.net/#easeOutExpo
             repeat: Infinity,
-            repeatDelay: 0,
+            repeatdelay: 0,
           }}
         >
           <stop stopColor={gradientStartColor} stopOpacity="0"></stop>

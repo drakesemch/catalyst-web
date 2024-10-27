@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/react";
-import { format } from "date-fns";
 import {
   AlertCircle,
   Archive,
@@ -25,20 +24,20 @@ export type NotificationMeta = {
   id: string;
   dismissed: boolean;
   data:
-  | {
-    type: "catalyst.friend-request" | "catalyst.friend-added";
-    user: string;
-  }
-  | {
-    type: "catalyst.schedule.add-date";
-  }
-  | {
-    type: "canvas.grade-change";
-    course: number;
-    assignment: number;
-    old: number;
-    new: number;
-  };
+    | {
+        type: "catalyst.friend-request" | "catalyst.friend-added";
+        user: string;
+      }
+    | {
+        type: "catalyst.schedule.add-date";
+      }
+    | {
+        type: "canvas.grade-change";
+        course: number;
+        assignment: number;
+        old: number;
+        new: number;
+      };
 };
 
 export type ToastData = {
@@ -166,7 +165,9 @@ function AddScheduleDateNotification({
         <div className="flex flex-1 flex-col items-start">
           <span className="font-bold">Missing Schedule Data</span>
           <span className="text-xs text-muted-foreground">
-            We are missing schedule data, please ensure that you are keeping up to date with the schedules, otherwise, we may transer your role to someone else.
+            We are missing schedule data, please ensure that you are keeping up
+            to date with the schedules, otherwise, we may transer your role to
+            someone else.
           </span>
         </div>
       </div>

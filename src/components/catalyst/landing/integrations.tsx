@@ -8,7 +8,7 @@ import {
   MoreVertical,
   AppWindowMac,
 } from "lucide-react";
-import { forwardRef, useRef } from "react";
+import { forwardRef, type RefObject, useRef } from "react";
 import { AnimatedBeam } from "../../magicui/animated-beam";
 import { Tooltip, TooltipTrigger, TooltipContent } from "../../ui/tooltip";
 
@@ -38,16 +38,22 @@ const Circle = forwardRef<
 Circle.displayName = "Circle";
 
 export function Integrations({ className }: { className?: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const driveRef = useRef<HTMLDivElement>(null);
-  const outlookRef = useRef<HTMLDivElement>(null);
-  const geminiRef = useRef<HTMLDivElement>(null);
-  const catalystInpRef = useRef<HTMLDivElement>(null);
-  const catalystRef = useRef<HTMLDivElement>(null);
-  const notificationRef = useRef<HTMLDivElement>(null);
-  const userRef = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<HTMLDivElement>(null);
+  const containerRef: RefObject<HTMLDivElement> = useRef<HTMLDivElement>(
+    null,
+  ) as RefObject<HTMLDivElement>;
+  const canvasRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
+  const driveRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
+  const outlookRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
+  const geminiRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
+  const catalystInpRef = useRef<HTMLDivElement>(
+    null,
+  ) as RefObject<HTMLDivElement>;
+  const catalystRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
+  const notificationRef = useRef<HTMLDivElement>(
+    null,
+  ) as RefObject<HTMLDivElement>;
+  const userRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
+  const apiRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
 
   return (
     <div

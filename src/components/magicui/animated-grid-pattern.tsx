@@ -15,7 +15,7 @@ interface GridPatternProps {
   className?: string;
   maxOpacity?: number;
   duration?: number;
-  repeatDelay?: number;
+  repeatdelay?: number;
 }
 
 export function GridPattern({

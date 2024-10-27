@@ -5,11 +5,17 @@ import { prettyBody } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { Album, ChevronRight, Info } from "lucide-react";
 
-export default async function CourseHomePage({
-  params: { course },
-}: {
-  params: { course: string };
-}) {
+export default async function CourseHomePage(
+  props: {
+    params: Promise<{ course: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    course
+  } = params;
+
   const courseDetails = await api.catalyst.user.canvas.courses.get({
     courseId: Number(course),
   });

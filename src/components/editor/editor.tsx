@@ -79,6 +79,7 @@ import React, {
   useRef,
   useState,
   useMemo,
+  type JSX,
 } from "react";
 import { Toggle } from "../ui/toggle";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "../ui/select";

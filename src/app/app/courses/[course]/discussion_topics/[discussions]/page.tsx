@@ -22,16 +22,23 @@ import {
   SortDesc,
 } from "lucide-react";
 import { notFound } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useState, use } from "react";
 
-export default function DiscussionPage({
-  params: { course, discussions },
-}: {
-  params: {
-    course: string;
-    discussions: string;
-  };
-}) {
+export default function DiscussionPage(
+  props: {
+    params: Promise<{
+      course: string;
+      discussions: string;
+    }>;
+  }
+) {
+  const params = use(props.params);
+
+  const {
+    course,
+    discussions
+  } = params;
+
   const [self] = api.canvas.users.self.useSuspenseQuery();
   const [discussion] = api.canvas.courses.get.discussions.get.useSuspenseQuery({
     courseId: Number(course),

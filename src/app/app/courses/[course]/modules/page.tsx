@@ -13,12 +13,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Button } from "@/components/ui/button";
 
-export default async function ModulePreRender({
-  params,
-  params: { course },
-}: {
-  params: { course: string };
-}) {
+export default async function ModulePreRender(
+  props: {
+    params: Promise<{ course: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    course
+  } = params;
+
   const courseDetails = await api.catalyst.user.canvas.courses.get({
     courseId: Number(course),
   });

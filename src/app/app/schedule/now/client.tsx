@@ -4,8 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-import { differenceInSeconds, format, formatDistanceStrict, isAfter, isBefore, isEqual } from "date-fns";
-import { type MotionValue, motion, useSpring, useTransform } from "framer-motion";
+import {
+  differenceInSeconds,
+  format,
+  formatDistanceStrict,
+  isAfter,
+  isBefore,
+  isEqual,
+} from "date-fns";
+import {
+  type MotionValue,
+  motion,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
 export function TimerClientPage() {
@@ -22,51 +34,65 @@ export function TimerClientPage() {
   }, []);
 
   const currentClass = useMemo(() => {
-    let currentPeriods = schedule.times.filter((period) => typeof period.schedule_value.value != "boolean" || period.schedule_value.value != false).filter((period) => isAfter(
-      now,
-      new Date(
-        new Date(
-          format(now, "yyyy-MM-dd ") +
-          period?.period_time?.start +
-          " UTC",
-        ),
-      ),
-    ) &&
-      isBefore(
-        now,
-        new Date(
-          new Date(
-            format(now, "yyyy-MM-dd ") +
-            period?.period_time?.end +
-            " UTC",
+    let currentPeriods = schedule.times
+      .filter(
+        (period) =>
+          typeof period.schedule_value.value != "boolean" ||
+          period.schedule_value.value != false,
+      )
+      .filter(
+        (period) =>
+          isAfter(
+            now,
+            new Date(
+              new Date(
+                format(now, "yyyy-MM-dd ") +
+                  period?.period_time?.start +
+                  " UTC",
+              ),
+            ),
+          ) &&
+          isBefore(
+            now,
+            new Date(
+              new Date(
+                format(now, "yyyy-MM-dd ") + period?.period_time?.end + " UTC",
+              ),
+            ),
           ),
-        ),
-      ));
+      );
     if (currentPeriods.length == 0) {
-      currentPeriods = schedule.times.filter((period) => typeof period.schedule_value.value != "boolean" || period.schedule_value.value != false).filter((period) => isBefore(
-        now,
-        new Date(
-          new Date(
-            format(now, "yyyy-MM-dd ") +
-            period?.period_time?.start +
-            " UTC",
+      currentPeriods = schedule.times
+        .filter(
+          (period) =>
+            typeof period.schedule_value.value != "boolean" ||
+            period.schedule_value.value != false,
+        )
+        .filter((period) =>
+          isBefore(
+            now,
+            new Date(
+              new Date(
+                format(now, "yyyy-MM-dd ") +
+                  period?.period_time?.start +
+                  " UTC",
+              ),
+            ),
           ),
-        ),
-      ))
-    };
+        );
+    }
     if (currentPeriods.length == 0) {
       return null;
     }
     const currentPeriod = currentPeriods.reduce((a, b) => {
-      if (Number(new Date(
-        format(now, "yyyy-MM-dd ") +
-        a?.period_time?.end +
-        " UTC",
-      )) < Number(new Date(
-        format(now, "yyyy-MM-dd ") +
-        b?.period_time?.end +
-        " UTC",
-      ))) {
+      if (
+        Number(
+          new Date(format(now, "yyyy-MM-dd ") + a?.period_time?.end + " UTC"),
+        ) <
+        Number(
+          new Date(format(now, "yyyy-MM-dd ") + b?.period_time?.end + " UTC"),
+        )
+      ) {
         return a;
       } else {
         return b;
@@ -77,14 +103,10 @@ export function TimerClientPage() {
 
   const dateToCompare = useMemo(() => {
     const startDate = new Date(
-      format(now, "yyyy-MM-dd ") +
-      currentClass?.period_time?.start +
-      " UTC",
+      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.start + " UTC",
     );
     const endDate = new Date(
-      format(now, "yyyy-MM-dd ") +
-      currentClass?.period_time?.end +
-      " UTC",
+      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC",
     );
 
     if (isBefore(now, startDate)) {
@@ -95,79 +117,86 @@ export function TimerClientPage() {
   }, [currentClass?.period_time, now]);
 
   const hours = useMemo(() => {
-    return Math.floor(differenceInSeconds(dateToCompare, now) / 3600)
+    return Math.floor(differenceInSeconds(dateToCompare, now) / 3600);
   }, [dateToCompare, now]);
 
   const minutes = useMemo(() => {
-    return Math.floor(differenceInSeconds(dateToCompare, now) % 3600 / 60)
+    return Math.floor((differenceInSeconds(dateToCompare, now) % 3600) / 60);
   }, [dateToCompare, now]);
 
   const seconds = useMemo(() => {
-    return Math.floor(differenceInSeconds(dateToCompare, now) % 60)
+    return Math.floor(differenceInSeconds(dateToCompare, now) % 60);
   }, [dateToCompare, now]);
 
   const hoursTens = useMemo(() => {
-    return Math.floor(hours / 10)
+    return Math.floor(hours / 10);
   }, [hours]);
 
   const hoursOnes = useMemo(() => {
-    return hours % 10
+    return hours % 10;
   }, [hours]);
 
   const minutesTens = useMemo(() => {
-    return Math.floor(minutes / 10)
+    return Math.floor(minutes / 10);
   }, [minutes]);
 
   const minutesOnes = useMemo(() => {
-    return minutes % 10
+    return minutes % 10;
   }, [minutes]);
 
   const secondsTens = useMemo(() => {
-    return Math.floor(seconds / 10)
+    return Math.floor(seconds / 10);
   }, [seconds]);
 
   const secondsOnes = useMemo(() => {
-    return seconds % 10
+    return seconds % 10;
   }, [seconds]);
 
-  const diffPct = useMemo(() => isBefore(
-    new Date(),
-    new Date(
-      format(now, "yyyy-MM-dd ") +
-      currentClass?.period_time?.start +
-      " UTC",
-    ),
-  )
-    ? 0
-    : differenceInSeconds(
-      new Date(),
-      new Date(
-        format(now, "yyyy-MM-dd ") +
-        currentClass?.period_time?.start +
-        " UTC",
-      ),
-    ) /
-    differenceInSeconds(
-      new Date(
-        format(now, "yyyy-MM-dd ") +
-        currentClass?.period_time?.end +
-        " UTC",
-      ),
-      new Date(
-        format(now, "yyyy-MM-dd ") +
-        currentClass?.period_time?.start +
-        " UTC",
-      ),
-    ), [currentClass, now]);
+  const diffPct = useMemo(
+    () =>
+      isBefore(
+        new Date(),
+        new Date(
+          format(now, "yyyy-MM-dd ") +
+            currentClass?.period_time?.start +
+            " UTC",
+        ),
+      )
+        ? 0
+        : differenceInSeconds(
+            new Date(),
+            new Date(
+              format(now, "yyyy-MM-dd ") +
+                currentClass?.period_time?.start +
+                " UTC",
+            ),
+          ) /
+          differenceInSeconds(
+            new Date(
+              format(now, "yyyy-MM-dd ") +
+                currentClass?.period_time?.end +
+                " UTC",
+            ),
+            new Date(
+              format(now, "yyyy-MM-dd ") +
+                currentClass?.period_time?.start +
+                " UTC",
+            ),
+          ),
+    [currentClass, now],
+  );
 
   if (currentClass == null) {
     return (
-      <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">
+      <div className="grid min-h-[calc(100vh-4.5rem-1px)] w-full place-items-center">
         <div className="flex flex-col">
           <div className="text-lg sm:text-2xl">
             <h1>No active class</h1>
           </div>
-          <div className="flex gap-2 leading-none overflow-hidden text-6xl sm:text-8xl items-center" suppressHydrationWarning>
+          <div
+            className="flex items-center gap-2 overflow-hidden text-6xl leading-none sm:text-8xl"
+            suppressHydrationWarning
+          >
             00
             <span className="text-3xl text-muted">:</span>
             00
@@ -176,44 +205,126 @@ export function TimerClientPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="w-full min-h-[calc(100vh-4.5rem-1px)] grid place-items-center">
+    <div className="grid min-h-[calc(100vh-4.5rem-1px)] w-full place-items-center">
       <div className="flex flex-col">
         <div className="flex items-center justify-start text-lg font-bold text-muted">
-          <span>{currentClass?.period?.periodName} {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "ends" : "starts"} in</span>
+          <span>
+            {currentClass?.period?.periodName}{" "}
+            {isEqual(
+              dateToCompare,
+              new Date(
+                format(now, "yyyy-MM-dd ") +
+                  currentClass?.period_time?.end +
+                  " UTC",
+              ),
+            )
+              ? "ends"
+              : "starts"}{" "}
+            in
+          </span>
         </div>
-        <div className="flex gap-2 leading-none overflow-hidden text-6xl sm:text-8xl items-center" suppressHydrationWarning>
-          <Digit value={hoursTens} className={[hoursTens].every((v) => v == 0) ? "text-muted" : ""} />
-          <Digit value={hoursOnes} className={[hoursTens, hoursOnes,].every((v) => v == 0) ? "text-muted" : ""} />
+        <div
+          className="flex items-center gap-2 overflow-hidden text-6xl leading-none sm:text-8xl"
+          suppressHydrationWarning
+        >
+          <Digit
+            value={hoursTens}
+            className={[hoursTens].every((v) => v == 0) ? "text-muted" : ""}
+          />
+          <Digit
+            value={hoursOnes}
+            className={
+              [hoursTens, hoursOnes].every((v) => v == 0) ? "text-muted" : ""
+            }
+          />
           <span className="text-3xl text-muted">:</span>
-          <Digit value={minutesTens} className={[hoursTens, hoursOnes, minutesTens].every((v) => v == 0) ? "text-muted" : ""} />
-          <Digit value={minutesOnes} className={[hoursTens, hoursOnes, minutesTens, minutesOnes].every((v) => v == 0) ? "text-muted" : ""} />
+          <Digit
+            value={minutesTens}
+            className={
+              [hoursTens, hoursOnes, minutesTens].every((v) => v == 0)
+                ? "text-muted"
+                : ""
+            }
+          />
+          <Digit
+            value={minutesOnes}
+            className={
+              [hoursTens, hoursOnes, minutesTens, minutesOnes].every(
+                (v) => v == 0,
+              )
+                ? "text-muted"
+                : ""
+            }
+          />
           <span className="text-3xl text-muted">:</span>
-          <Digit value={secondsTens} className={[hoursTens, hoursOnes, minutesTens, minutesOnes, secondsTens].every((v) => v == 0) ? "text-muted" : ""} />
-          <Digit value={secondsOnes} className={[hoursTens, hoursOnes, minutesTens, minutesOnes, secondsTens, secondsOnes].every((v) => v == 0) ? "text-muted" : ""} />
+          <Digit
+            value={secondsTens}
+            className={
+              [
+                hoursTens,
+                hoursOnes,
+                minutesTens,
+                minutesOnes,
+                secondsTens,
+              ].every((v) => v == 0)
+                ? "text-muted"
+                : ""
+            }
+          />
+          <Digit
+            value={secondsOnes}
+            className={
+              [
+                hoursTens,
+                hoursOnes,
+                minutesTens,
+                minutesOnes,
+                secondsTens,
+                secondsOnes,
+              ].every((v) => v == 0)
+                ? "text-muted"
+                : ""
+            }
+          />
         </div>
-        <div className="flex items-center justify-around text-xs text-muted mb-4">
+        <div className="mb-4 flex items-center justify-around text-xs text-muted">
           <span>hours</span>
           <span>minutes</span>
           <span>seconds</span>
         </div>
-        <Button variant="outline" href={typeof currentClass?.schedule_value?.value == "boolean" ? undefined : `/app/courses/${currentClass?.schedule_value?.value?.id}`} className="items-start h-auto flex-col gap-0">
-          <h1 className="text-2xl font-bold">{currentClass?.period?.periodName}{typeof currentClass?.schedule_value?.value == "boolean" ? "" : ": " + currentClass?.schedule_value?.value?.classification}</h1>
-          <h2 className="text-base text-muted-foreground">{typeof currentClass?.schedule_value?.value == "boolean" ? currentClass?.period?.optionName : currentClass?.schedule_value?.value?.original_name}</h2>
-          <div
-            className="flex flex-col border-t -mx-4 mt-2 pt-1 w-[calc(100%+2rem)]"
-          >
+        <Button
+          variant="outline"
+          href={
+            typeof currentClass?.schedule_value?.value == "boolean"
+              ? undefined
+              : `/app/courses/${currentClass?.schedule_value?.value?.id}`
+          }
+          className="h-auto flex-col items-start gap-0"
+        >
+          <h1 className="text-2xl font-bold">
+            {currentClass?.period?.periodName}
+            {typeof currentClass?.schedule_value?.value == "boolean"
+              ? ""
+              : ": " + currentClass?.schedule_value?.value?.classification}
+          </h1>
+          <h2 className="text-base text-muted-foreground">
+            {typeof currentClass?.schedule_value?.value == "boolean"
+              ? currentClass?.period?.optionName
+              : currentClass?.schedule_value?.value?.original_name}
+          </h2>
+          <div className="-mx-4 mt-2 flex w-[calc(100%+2rem)] flex-col border-t pt-1">
             <div className="flex items-center gap-4 px-4 py-2 text-xs">
               <div className="-mr-2 size-2 rounded-full bg-green-500" />
               <span>
                 {format(
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.start +
-                    " UTC",
+                      currentClass?.period_time?.start +
+                      " UTC",
                   ),
                   "hh:mm a",
                 )}
@@ -226,8 +337,8 @@ export function TimerClientPage() {
                     new Date(
                       new Date(
                         format(now, "yyyy-MM-dd ") +
-                        currentClass?.period_time?.start +
-                        " UTC",
+                          currentClass?.period_time?.start +
+                          " UTC",
                       ),
                     ),
                   )
@@ -239,8 +350,8 @@ export function TimerClientPage() {
                 {format(
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.end +
-                    " UTC",
+                      currentClass?.period_time?.end +
+                      " UTC",
                   ),
                   "hh:mm a",
                 )}
@@ -252,8 +363,8 @@ export function TimerClientPage() {
                   new Date(),
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.start +
-                    " UTC",
+                      currentClass?.period_time?.start +
+                      " UTC",
                   ),
                 )
                   ? "Starts "
@@ -261,8 +372,8 @@ export function TimerClientPage() {
                 {formatDistanceStrict(
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.start +
-                    " UTC",
+                      currentClass?.period_time?.start +
+                      " UTC",
                   ),
                   new Date(),
                   {
@@ -275,8 +386,8 @@ export function TimerClientPage() {
                   new Date(),
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.end +
-                    " UTC",
+                      currentClass?.period_time?.end +
+                      " UTC",
                   ),
                 )
                   ? "Ends "
@@ -284,8 +395,8 @@ export function TimerClientPage() {
                 {formatDistanceStrict(
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.end +
-                    " UTC",
+                      currentClass?.period_time?.end +
+                      " UTC",
                   ),
                   new Date(),
                   {
@@ -305,7 +416,7 @@ const fontSize = 80;
 const padding = 15;
 const height = fontSize + padding;
 
-function Digit({ value, className }: { value: number, className?: string }) {
+function Digit({ value, className }: { value: number; className?: string }) {
   const animatedValue = useSpring(value, {
     stiffness: 300,
     damping: 50,
@@ -317,7 +428,10 @@ function Digit({ value, className }: { value: number, className?: string }) {
   }, [animatedValue, value]);
 
   return (
-    <div style={{ height }} className={cn("relative w-[1ch] tabular-nums", className)}>
+    <div
+      style={{ height }}
+      className={cn("relative w-[1ch] tabular-nums", className)}
+    >
       {[...Array(10).keys()].map((i) => (
         <MovingNumber key={i} mv={animatedValue} number={i} />
       ))}
@@ -341,8 +455,13 @@ function MovingNumber({ mv, number }: { mv: MotionValue; number: number }) {
 
   return (
     <motion.span
-      style={{ y }}
-      className="absolute inset-0 flex items-center justify-center"
+      style={{
+        y,
+        position: "absolute",
+        inset: "0",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
       {number}
     </motion.span>

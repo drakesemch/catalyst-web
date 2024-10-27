@@ -560,7 +560,11 @@ function AddSchool() {
                         axis="y"
                         values={periods}
                         onReorder={setPeriods}
-                        className="flex flex-col gap-4"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "1rem",
+                        }}
                       >
                         {periods.map((item) => (
                           <Period
@@ -624,7 +628,11 @@ function AddSchool() {
                         axis="y"
                         values={schedules}
                         onReorder={setSchedules}
-                        className="flex flex-col gap-4"
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "1rem",
+                        }}
                       >
                         {schedules.map((item) => (
                           <Schedule
@@ -860,7 +868,11 @@ function Period({
                     }),
                   );
                 }}
-                className="flex flex-col gap-4"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                }}
               >
                 {item.options?.map((option) => (
                   <PeriodOption
@@ -1159,7 +1171,11 @@ function Schedule({
                 }),
               );
             }}
-            className="flex flex-col gap-4"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
           >
             {item.periods.map((period) => (
               <AddedPeriod

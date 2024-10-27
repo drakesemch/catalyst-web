@@ -5,11 +5,17 @@ import { prettyEnrollmentType } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { Album, UsersRound } from "lucide-react";
 
-export default async function CourseHomePage({
-  params: { course },
-}: {
-  params: { course: string };
-}) {
+export default async function CourseHomePage(
+  props: {
+    params: Promise<{ course: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    course
+  } = params;
+
   const people = await api.canvas.courses.get.people({
     courseId: Number(course),
   });

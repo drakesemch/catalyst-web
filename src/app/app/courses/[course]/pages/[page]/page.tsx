@@ -6,11 +6,18 @@ import { api } from "@/trpc/server";
 import { format } from "date-fns";
 import { Album, FileText, Plus, Calendar } from "lucide-react";
 
-export default async function CourseHomePage({
-  params: { course, page },
-}: {
-  params: { course: string; page: string };
-}) {
+export default async function CourseHomePage(
+  props: {
+    params: Promise<{ course: string; page: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    course,
+    page
+  } = params;
+
   const pageDetail = await api.canvas.courses.get.pages.get({
     courseId: Number(course),
     pageId: page,

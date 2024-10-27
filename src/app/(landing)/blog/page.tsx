@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export const revalidate = 60 * 60 * 24; // 24 hours
+export const revalidate = 86400; // 24 hours
 
 export default async function Blogs() {
   const { data } = await api.catalyst.blog.list({});

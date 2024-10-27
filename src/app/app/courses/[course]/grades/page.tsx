@@ -3,11 +3,17 @@ import { GradesClient } from "./client";
 import { notFound } from "next/navigation";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 
-export default async function GradesPage({
-  params: { course },
-}: {
-  params: { course: string };
-}) {
+export default async function GradesPage(
+  props: {
+    params: Promise<{ course: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    course
+  } = params;
+
   const courseDetails = await api.catalyst.user.canvas.courses.get({
     courseId: Number(course),
   });

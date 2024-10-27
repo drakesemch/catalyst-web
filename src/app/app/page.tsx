@@ -1,9 +1,6 @@
 import { TimeOfDay } from "@/components/catalyst/app/time-of-day";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Plus } from "lucide-react";
 import { HomePageCards, NewTodo, Todos } from "./client";
 import { api } from "@/trpc/server";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { SquigglySeparator } from "@/components/catalyst/squiggly-separator";
 
 export default async function AppPage() {
@@ -25,7 +22,10 @@ export default async function AppPage() {
           </span>
         </h1>
         <HomePageCards />
-        <h3 className="h1 mt-4 animate-fade-in text-4xl opacity-0 animate-delay-1200" id="todo">
+        <h3
+          className="h1 mt-4 animate-fade-in text-4xl opacity-0 animate-delay-1200"
+          id="todo"
+        >
           Todo
         </h3>
         <p className="animate-fade-in text-lg text-muted-foreground opacity-0 animate-delay-1200">
@@ -33,7 +33,7 @@ export default async function AppPage() {
         </p>
         <div className="flex animate-fade-in flex-col gap-4 opacity-0 animate-delay-1400">
           <Todos />
-          <div className="flex justify-center text-xs text-muted-foreground py-8">
+          <div className="flex justify-center py-8 text-xs text-muted-foreground">
             Only showing the last 14 days.
           </div>
           {/* <Button
@@ -44,13 +44,21 @@ export default async function AppPage() {
           </Button> */}
         </div>
         <div className="mt-8" />
-        <div className="w-full fixed bottom-[4.5rem] md:bottom-0 left-0 bg-background flex items-center justify-center">
-          <SquigglySeparator fillColor="hsl(var(--ui-background))" waveColor="hsl(var(--ui-secondary))" className="absolute -top-4 left-0 w-full rotate-180" />
-          <div className="max-w-[100ch] w-full flex items-center justify-between pt-4 pb-5 p-6">
+        <div className="fixed bottom-[4.5rem] left-0 flex w-full items-center justify-center bg-background md:bottom-0">
+          <SquigglySeparator
+            fillColor="hsl(var(--ui-background))"
+            waveColor="hsl(var(--ui-secondary))"
+            className="absolute -top-4 left-0 w-full rotate-180"
+          />
+          <div className="flex w-full max-w-[100ch] items-center justify-between p-6 pb-5 pt-4">
             <div className="flex flex-col gap-1">
               <span className="font-bold">Catalyst</span>
-              <span className="text-xs text-muted-foreground sm:block hidden">Created with ❤️ by Drake Semchyshyn and the Blue Flame Team</span>
-              <span className="text-xs text-muted-foreground sm:hidden block">Created with ❤️</span>
+              <span className="hidden text-xs text-muted-foreground sm:block">
+                Created with ❤️ by Drake Semchyshyn and the Blue Flame Team
+              </span>
+              <span className="block text-xs text-muted-foreground sm:hidden">
+                Created with ❤️
+              </span>
             </div>
             <NewTodo />
           </div>

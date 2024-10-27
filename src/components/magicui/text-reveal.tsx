@@ -1,6 +1,6 @@
 "use client";
 
-import { type FC, type ReactNode, useRef } from "react";
+import { type FC, type ReactNode, type RefObject, useRef } from "react";
 import {
   motion,
   useScroll,
@@ -19,7 +19,7 @@ export const TextRevealByWord: FC<TextRevealByWordProps> = ({
   text,
   className,
 }) => {
-  const targetRef = useRef<HTMLDivElement | null>(null);
+  const targetRef = useRef<HTMLDivElement>(null) as RefObject<HTMLDivElement>;
 
   const { scrollYProgress } = useScroll({
     target: targetRef,
@@ -65,12 +65,7 @@ const Word: FC<WordProps> = ({ children, progress, range }) => {
   return (
     <span className="xl:lg-3 relative mx-1 lg:mx-2.5">
       <span className={"absolute opacity-30"}>{children}</span>
-      <motion.span
-        style={{ opacity: opacity }}
-        className={"text-black dark:text-white"}
-      >
-        {children}
-      </motion.span>
+      <motion.span style={{ opacity: opacity }}>{children}</motion.span>
     </span>
   );
 };

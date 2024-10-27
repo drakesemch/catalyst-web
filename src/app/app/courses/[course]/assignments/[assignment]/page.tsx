@@ -39,11 +39,18 @@ import {
 import { SubmissionButtons } from "./submission";
 import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
 
-export default async function AssignmentPage({
-  params: { course, assignment },
-}: {
-  params: { course: string; assignment: string };
-}) {
+export default async function AssignmentPage(
+  props: {
+    params: Promise<{ course: string; assignment: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    course,
+    assignment
+  } = params;
+
   const courseDetails = await api.catalyst.user.canvas.courses.get({
     courseId: Number(course),
   });

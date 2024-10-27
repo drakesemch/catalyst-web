@@ -3,7 +3,13 @@ import { api } from "@/trpc/server";
 import { format } from "date-fns";
 import { CircleUserRound, MapPin, Pencil, School } from "lucide-react";
 
-export default async function SchoolPage({ params: { school: schoolId } }: { params: { school: string } }) {
+export default async function SchoolPage(props: { params: Promise<{ school: string }> }) {
+  const params = await props.params;
+
+  const {
+    school: schoolId
+  } = params;
+
   const school = await api.catalyst.school.get.draft.details({
     id: schoolId,
   });

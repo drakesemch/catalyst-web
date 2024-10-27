@@ -7,11 +7,17 @@ import { format, formatDistanceStrict } from "date-fns";
 import { Converter } from "showdown";
 import { ComposeNew } from "../client";
 
-export default async function MessageItem({
-  params: { message },
-}: {
-  params: { message: string };
-}) {
+export default async function MessageItem(
+  props: {
+    params: Promise<{ message: string }>;
+  }
+) {
+  const params = await props.params;
+
+  const {
+    message
+  } = params;
+
   const you = await api.canvas.users.self();
   const messageDetails = await api.canvas.inbox.get({
     conversationId: Number(message),
