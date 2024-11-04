@@ -2,7 +2,7 @@
 
 import { type ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import { useRef, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import {
   Label,
@@ -18,6 +18,7 @@ function pickColor(score: number) {
   if (score >= 80) return "hsl(83.7 80.5% 44.3%)";
   if (score >= 70) return "hsl(37.7 92.1% 50.2%)";
   if (score >= 0) return "hsl(0 84.2% 60.2%)";
+  return "hsl(0 0% 45%)"; // Default color for invalid scores
 }
 
 export function PercentageChart({
@@ -27,43 +28,48 @@ export function PercentageChart({
   pct?: number;
   className?: string;
 }) {
-  const score = useRef(pct ?? 0);
-  const chartData = useRef([
-    { metric: "score", pct: score.current, fill: "var(--color-score)" },
-  ]);
-  const chartConfig = useRef({
-    pct: {
-      label: "pct",
-    },
-    score: {
-      label: "Score",
-      color: pickColor(score.current),
-    },
-  } satisfies ChartConfig);
+  const [score, setScore] = useState(pct ?? 0);
 
   useEffect(() => {
-    chartData.current[0]!.pct = score.current;
-    chartConfig.current.score.color = pickColor(score.current);
+    setScore(pct ?? 0);
   }, [pct]);
+
+  const chartData = useMemo(
+    () => [{ metric: "score", pct: score, fill: "var(--color-score)" }],
+    [score],
+  );
+
+  const chartConfig = useMemo<ChartConfig>(
+    () => ({
+      pct: {
+        label: "pct",
+      },
+      score: {
+        label: "Score",
+        color: pickColor(score),
+      },
+    }),
+    [score],
+  );
 
   return (
     <ChartContainer
-      config={chartConfig.current}
+      config={chartConfig}
       className={cn("aspect-square h-10", className)}
     >
       <RadialBarChart
-        data={chartData.current}
+        data={chartData}
         startAngle={90}
-        endAngle={-(score.current * 3.6 - 90)}
+        endAngle={-(score * 3.6 - 90)}
         innerRadius={15}
-        outerRadius={15 + 10}
+        outerRadius={25}
       >
         <PolarGrid
           gridType="circle"
           radialLines={false}
           stroke="none"
           className="first:fill-muted last:fill-background"
-          polarRadius={[15 + 3, 15 - 3]}
+          polarRadius={[18, 12]}
         />
         <RadialBar
           dataKey="pct"
@@ -87,7 +93,7 @@ export function PercentageChart({
                       y={viewBox.cy}
                       className="fill-foreground text-[0.65rem] font-bold"
                     >
-                      {score.current == -1 ? "N/A" : score.current.toFixed(0)}
+                      {score === -1 ? "N/A" : score.toFixed(0)}
                     </tspan>
                   </text>
                 );

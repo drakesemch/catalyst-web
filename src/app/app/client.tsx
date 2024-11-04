@@ -12,13 +12,41 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowRight, Calendar as CalendarIcon, CircleSlash, Loader, Plus, Save, SquareArrowOutUpRight } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowRight,
+  Calendar as CalendarIcon,
+  CircleSlash,
+  Loader,
+  Plus,
+  Save,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { format, formatDistanceStrict, isAfter, isBefore, isEqual } from "date-fns";
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  format,
+  formatDistanceStrict,
+  isAfter,
+  isBefore,
+  isEqual,
+} from "date-fns";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function Todos() {
   const { data, isPending } = api.canvas.todo.upcoming.useQuery();
@@ -26,8 +54,10 @@ export function Todos() {
   if (isPending) {
     return (
       <>
-        <div className="flex flex-col gap-2 bg-background px-4 py-2 -mb-32 mt-16 z-10 mx-auto rounded-lg sticky top-12 md:top-24 text-xs text-muted-foreground">
-          <h3 className="flex items-center gap-2"><Loader className="animate-spin" /> Loading Todo Items...</h3>
+        <div className="sticky top-12 z-10 mx-auto -mb-32 mt-16 flex flex-col gap-2 rounded-lg bg-background px-4 py-2 text-xs text-muted-foreground md:top-24">
+          <h3 className="flex items-center gap-2">
+            <Loader className="animate-spin" /> Loading Todo Items...
+          </h3>
         </div>
         <div className="flex flex-col gap-4 blur-xl">
           {Array(10)
@@ -44,8 +74,8 @@ export function Todos() {
     <>
       {data
         ?.sort((a, b) =>
-          Number(new Date(a?.plannable.todo_date ?? 0)) >
-            Number(new Date(b?.plannable.todo_date ?? 0))
+          Number(new Date(a?.todo_date ?? a?.plannable.todo_date ?? 0)) >
+          Number(new Date(b?.todo_date ?? b?.plannable.todo_date ?? 0))
             ? -1
             : 1,
         )
@@ -68,50 +98,64 @@ export function HomePageCards() {
   }, []);
 
   const currentClass = useMemo(() => {
-    let currentPeriods = schedule.times.filter((period) => typeof period.schedule_value.value != "boolean" || period.schedule_value.value != false).filter((period) => isAfter(
-      now,
-      new Date(
-        new Date(
-          format(now, "yyyy-MM-dd ") +
-          period?.period_time?.start +
-          " UTC",
-        ),
-      ),
-    ) &&
-      isBefore(
-        now,
-        new Date(
-          new Date(
-            format(now, "yyyy-MM-dd ") +
-            period?.period_time?.end +
-            " UTC",
+    let currentPeriods = schedule.times
+      .filter(
+        (period) =>
+          typeof period.schedule_value.value != "boolean" ||
+          period.schedule_value.value != false,
+      )
+      .filter(
+        (period) =>
+          isAfter(
+            now,
+            new Date(
+              new Date(
+                format(now, "yyyy-MM-dd ") +
+                  period?.period_time?.start +
+                  " UTC",
+              ),
+            ),
+          ) &&
+          isBefore(
+            now,
+            new Date(
+              new Date(
+                format(now, "yyyy-MM-dd ") + period?.period_time?.end + " UTC",
+              ),
+            ),
           ),
-        ),
-      ));
+      );
     if (currentPeriods.length == 0) {
-      currentPeriods = schedule.times.filter((period) => typeof period.schedule_value.value != "boolean" || period.schedule_value.value != false).filter((period) => isBefore(
-        now,
-        new Date(
-          new Date(
-            format(now, "yyyy-MM-dd ") +
-            period?.period_time?.start +
-            " UTC",
+      currentPeriods = schedule.times
+        .filter(
+          (period) =>
+            typeof period.schedule_value.value != "boolean" ||
+            period.schedule_value.value != false,
+        )
+        .filter((period) =>
+          isBefore(
+            now,
+            new Date(
+              new Date(
+                format(now, "yyyy-MM-dd ") +
+                  period?.period_time?.start +
+                  " UTC",
+              ),
+            ),
           ),
-        ),
-      ))
-    };
+        );
+    }
     let currentPeriod = null;
     if (currentPeriods.length > 0) {
       currentPeriod = currentPeriods.reduce((a, b) => {
-        if (Number(new Date(
-          format(now, "yyyy-MM-dd ") +
-          a?.period_time?.end +
-          " UTC",
-        )) < Number(new Date(
-          format(now, "yyyy-MM-dd ") +
-          b?.period_time?.end +
-          " UTC",
-        ))) {
+        if (
+          Number(
+            new Date(format(now, "yyyy-MM-dd ") + a?.period_time?.end + " UTC"),
+          ) <
+          Number(
+            new Date(format(now, "yyyy-MM-dd ") + b?.period_time?.end + " UTC"),
+          )
+        ) {
           return a;
         } else {
           return b;
@@ -123,14 +167,10 @@ export function HomePageCards() {
 
   const dateToCompare = useMemo(() => {
     const startDate = new Date(
-      format(now, "yyyy-MM-dd ") +
-      currentClass?.period_time?.start +
-      " UTC",
+      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.start + " UTC",
     );
     const endDate = new Date(
-      format(now, "yyyy-MM-dd ") +
-      currentClass?.period_time?.end +
-      " UTC",
+      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC",
     );
 
     if (isBefore(now, startDate)) {
@@ -141,22 +181,31 @@ export function HomePageCards() {
   }, [currentClass?.period_time, now]);
 
   return (
-    <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex items-stretch animate-fade-in items-center gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
+    <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex animate-fade-in items-center items-stretch gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
       {currentClass != null ? (
         <>
           <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
             <CardHeader>
               <CardTitle>Current Class</CardTitle>
               <CardDescription>
-                {typeof currentClass?.schedule_value.value == "boolean" && currentClass?.schedule_value.value == true ? (
-                  <>{currentClass?.period?.periodName} ({currentClass?.period?.optionName})</>
+                {typeof currentClass?.schedule_value.value == "boolean" &&
+                currentClass?.schedule_value.value == true ? (
+                  <>
+                    {currentClass?.period?.periodName} (
+                    {currentClass?.period?.optionName})
+                  </>
                 ) : (
-                  <>{currentClass?.schedule_value.value.classification} ({currentClass?.schedule_value.value.original_name})</>
+                  <>
+                    {currentClass?.schedule_value.value.classification} (
+                    {currentClass?.schedule_value.value.original_name})
+                  </>
                 )}
               </CardDescription>
             </CardHeader>
             <CardFooter>
-              <Button href={`/app/courses/${currentClass?.schedule_value.value?.id ?? ""}`}>
+              <Button
+                href={`/app/courses/${currentClass?.schedule_value.value?.id ?? ""}`}
+              >
                 Open Course <ArrowRight />
               </Button>
             </CardFooter>
@@ -165,8 +214,17 @@ export function HomePageCards() {
             <CardHeader>
               <CardTitle>Time Remaining</CardTitle>
               <CardDescription>
-                {isEqual(dateToCompare, new Date(format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC")) ? "Ends" : "Starts"}
-                {" "}{formatDistanceStrict(dateToCompare, now, { addSuffix: true })}
+                {isEqual(
+                  dateToCompare,
+                  new Date(
+                    format(now, "yyyy-MM-dd ") +
+                      currentClass?.period_time?.end +
+                      " UTC",
+                  ),
+                )
+                  ? "Ends"
+                  : "Starts"}{" "}
+                {formatDistanceStrict(dateToCompare, now, { addSuffix: true })}
               </CardDescription>
             </CardHeader>
             <CardFooter>
@@ -197,9 +255,7 @@ export function HomePageCards() {
           <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
             <CardHeader>
               <CardTitle>Schedule</CardTitle>
-              <CardDescription>
-                View your upcoming schedule
-              </CardDescription>
+              <CardDescription>View your upcoming schedule</CardDescription>
             </CardHeader>
             <CardFooter>
               <Button variant="outline" href="/app/schedule/">
@@ -212,9 +268,7 @@ export function HomePageCards() {
       <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
         <CardHeader>
           <CardTitle>Assignments</CardTitle>
-          <CardDescription>
-            View your upcoming assignments
-          </CardDescription>
+          <CardDescription>View your upcoming assignments</CardDescription>
         </CardHeader>
         <CardFooter>
           <Button variant="outline" href="#todo">
@@ -238,7 +292,8 @@ export function HomePageCards() {
 }
 
 export function NewTodo() {
-  const { mutate: createTodo, isPending } = api.canvas.todo.create.useMutation();
+  const { mutate: createTodo, isPending } =
+    api.canvas.todo.create.useMutation();
 
   const [title, setTitle] = useState("");
   const [date, setDate] = useState<Date | undefined>();
@@ -252,23 +307,27 @@ export function NewTodo() {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>
-            Add Todo Item
-          </DrawerTitle>
-          <DrawerDescription>
-            Add an item to your todo list
-          </DrawerDescription>
+          <DrawerTitle>Add Todo Item</DrawerTitle>
+          <DrawerDescription>Add an item to your todo list</DrawerDescription>
         </DrawerHeader>
         <div className="flex flex-col gap-2 p-4">
-          <div className="flex gap-2 flex-col sm:flex-row items-start sm:items-center justify-between">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <span className="font-bold">Title</span>
-            <Input placeholder="New Todo Item" className="w-full sm:w-[31ch]" value={title} onChange={evt => setTitle(evt.target.value)} />
+            <Input
+              placeholder="New Todo Item"
+              className="w-full sm:w-[31ch]"
+              value={title}
+              onChange={(evt) => setTitle(evt.target.value)}
+            />
           </div>
-          <div className="flex gap-2 flex-col sm:flex-row items-start sm:items-center justify-between">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
             <span className="font-bold">Due Date</span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full sm:w-[30ch] justify-start">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start sm:w-[30ch]"
+                >
                   <CalendarIcon />
                   {date ? format(date, "PPP") : <span>Pick a date</span>}
                 </Button>
@@ -279,12 +338,30 @@ export function NewTodo() {
             </Popover>
           </div>
         </div>
-        <DrawerFooter className="flex flex-row justify-end items-center gap-2">
+        <DrawerFooter className="flex flex-row items-center justify-end gap-2">
           <DrawerClose asChild>
-            <Button variant="outline">Cancel <CircleSlash /></Button>
+            <Button variant="outline">
+              Cancel <CircleSlash />
+            </Button>
           </DrawerClose>
-          <Button onClick={() => createTodo({ title, due_at: date ? format(date, "yyyy-MM-dd") : undefined })} disabled={isPending}>
-            {isPending ? (<>Saving <Loader className="animate-spin" /></>) : (<>Save <Save /></>)}
+          <Button
+            onClick={() =>
+              createTodo({
+                title,
+                due_at: date ? format(date, "yyyy-MM-dd") : undefined,
+              })
+            }
+            disabled={isPending}
+          >
+            {isPending ? (
+              <>
+                Saving <Loader className="animate-spin" />
+              </>
+            ) : (
+              <>
+                Save <Save />
+              </>
+            )}
           </Button>
         </DrawerFooter>
       </DrawerContent>

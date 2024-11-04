@@ -325,29 +325,30 @@ function CourseLoading() {
         .fill(0)
         .map((_, idx) => {
           return (
-            <>
-              <div key={idx} className="flex flex-col rounded border">
-                <div className="flex items-stretch">
-                  <Button
-                    className="flex h-auto flex-1 flex-col items-start justify-center gap-1 overflow-hidden rounded-none hover:bg-secondary/70"
-                    variant="ghost"
-                  >
-                    <span className="font-bold">
-                      <Skeleton className="h-[1em] w-[20ch]" />
-                    </span>
-                    <span className="max-w-full truncate text-xs text-muted-foreground">
-                      <Skeleton className="h-[1em] w-[30ch]" />
-                    </span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="aspect-square h-auto flex-shrink-0 rounded-none border-l hover:bg-secondary/70"
-                  >
-                    <Skeleton className="size-8 rounded-full" />
-                  </Button>
-                </div>
+            <div
+              key={`course-load${idx}`}
+              className="flex flex-col rounded border"
+            >
+              <div className="flex items-stretch">
+                <Button
+                  className="flex h-auto flex-1 flex-col items-start justify-center gap-1 overflow-hidden rounded-none hover:bg-secondary/70"
+                  variant="ghost"
+                >
+                  <span className="font-bold">
+                    <Skeleton className="h-[1em] w-[20ch]" />
+                  </span>
+                  <span className="max-w-full truncate text-xs text-muted-foreground">
+                    <Skeleton className="h-[1em] w-[30ch]" />
+                  </span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="aspect-square h-auto flex-shrink-0 rounded-none border-l hover:bg-secondary/70"
+                >
+                  <Skeleton className="size-8 rounded-full" />
+                </Button>
               </div>
-            </>
+            </div>
           );
         })}
     </div>

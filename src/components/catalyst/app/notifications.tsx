@@ -64,19 +64,26 @@ export function newPopupNotification({
 export function Notification({
   notification,
   toast,
+  onUpdate,
 }: {
   notification: NotificationMeta;
   toast: ToastData | undefined;
+  onUpdate?: (updatedNotification: NotificationMeta) => void;
 }) {
   const { mutate: archiveMutation } =
     api.catalyst.user.notifications.archive.useMutation();
   let NotificationComponent = UnsupportedNotification;
 
   const archive = () => {
+    const updatedNotification = {
+      ...notification,
+      dismissed: !(notification.dismissed ?? false),
+    };
     archiveMutation({
       id: notification.id,
-      dismissed: !(notification.dismissed ?? false),
+      dismissed: updatedNotification.dismissed,
     });
+    onUpdate?.(updatedNotification);
   };
 
   switch (notification.data.type) {

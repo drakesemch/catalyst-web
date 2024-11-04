@@ -5,45 +5,11 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
-const DrawerContext = React.createContext<true | null>(null);
-
 const Drawer = ({
-  shouldScaleBackground = true,
-  defaultOpen = false,
-  open = false,
-  onOpenChange = () => {
-    /**/
-  },
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root> & {
-  defaultOpen?: boolean;
-}) => {
-  // const context = React.useContext(DrawerContext);
-  // return context == null ? (
-  //   <DrawerPrimitive.Root
-  //     shouldScaleBackground={shouldScaleBackground}
-  //     {...props}
-  //   />
-  // ) : (
-  //   <DrawerPrimitive.NestedRoot
-  //     shouldScaleBackground={shouldScaleBackground}
-  //     {...props}
-  //   />
-  // );
-  const [stateOpen, setStateOpened] = React.useState(open ?? defaultOpen);
-
-  return (
-    <DrawerPrimitive.NestedRoot
-      shouldScaleBackground={shouldScaleBackground}
-      open={stateOpen}
-      onOpenChange={(val) => {
-        setStateOpened(val);
-        onOpenChange(val);
-      }}
-      {...props}
-    />
-  );
-};
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
+  <DrawerPrimitive.Root shouldScaleBackground={true} {...props} />
+);
 Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
@@ -73,15 +39,13 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed bottom-0 left-1/2 z-50 mt-24 flex h-auto max-h-[80vh] w-[min(60ch,100%)] flex-col rounded-t-lg border bg-background [translate:-50%_0%]",
+        "fixed inset-x-0 bottom-0 z-50 mx-auto mt-24 flex h-auto max-w-[80ch] flex-col rounded-t-[10px] border bg-background",
         className,
       )}
       {...props}
     >
-      <DrawerContext.Provider value={true}>
-        <div className="mx-auto my-4 h-1 w-32 flex-shrink-0 rounded-full bg-muted" />
-        {children}
-      </DrawerContext.Provider>
+      <div className="mx-auto mt-4 h-1 w-[100px] rounded-full bg-muted" />
+      {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
@@ -116,7 +80,7 @@ const DrawerTitle = React.forwardRef<
   <DrawerPrimitive.Title
     ref={ref}
     className={cn(
-      "flex items-center gap-2 text-lg font-semibold leading-none tracking-tight",
+      "text-lg font-semibold leading-none tracking-tight",
       className,
     )}
     {...props}

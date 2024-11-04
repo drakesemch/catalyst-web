@@ -309,11 +309,17 @@ export function Courses() {
 }
 
 export function Notifications() {
+  const utils = api.useUtils();
+
   const { data: activeNotifications, isPending: activePending } =
-    api.catalyst.user.notifications.list.active.useQuery();
+    api.catalyst.user.notifications.list.active.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+    });
 
   const { data: archivedNotifications, isPending: archivedPending } =
-    api.catalyst.user.notifications.list.archived.useQuery();
+    api.catalyst.user.notifications.list.archived.useQuery(undefined, {
+      refetchOnWindowFocus: false,
+    });
 
   function TabContent({
     value,
@@ -349,7 +355,35 @@ export function Notifications() {
                 className="overflow-hidden rounded-lg border"
                 key={notification.id}
               >
-                <Notification toast={undefined} notification={notification} />
+                <Notification
+                  toast={undefined}
+                  notification={notification}
+                  onUpdate={(updatedNotification: NotificationMeta) => {
+                    // Remove from active list if currently active
+                    utils.catalyst.user.notifications.list.active.setData(
+                      undefined,
+                      (prev) => {
+                        if (!prev) return prev;
+                        if (notification.dismissed) {
+                          return [...prev, updatedNotification];
+                        }
+                        return prev.filter((n) => n.id !== notification.id);
+                      },
+                    );
+
+                    // Remove from archived list if currently archived
+                    utils.catalyst.user.notifications.list.archived.setData(
+                      undefined,
+                      (prev) => {
+                        if (!prev) return prev;
+                        if (!notification.dismissed) {
+                          return [...prev, updatedNotification];
+                        }
+                        return prev.filter((n) => n.id !== notification.id);
+                      },
+                    );
+                  }}
+                />
               </div>
             ));
           }
