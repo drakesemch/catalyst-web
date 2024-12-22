@@ -88,10 +88,10 @@ export function Courses() {
             .includes(courseSearch.toLowerCase())
         );
       }).length == 0 && (
-        <div className="w-84 flex items-center justify-center p-2 text-xs text-muted-foreground">
-          No courses found.
-        </div>
-      )}
+          <div className="w-84 flex items-center justify-center p-2 text-xs text-muted-foreground">
+            No courses found.
+          </div>
+        )}
       {courses
         .filter((course) => {
           if (courseSearch == "") return true;
@@ -115,19 +115,19 @@ export function Courses() {
           )
             ? 0
             : differenceInSeconds(
-                new Date(),
-                new Date(
-                  format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
-                ),
-              ) /
-              differenceInSeconds(
-                new Date(
-                  format(now, "yyyy-MM-dd ") + course.time?.end + " UTC",
-                ),
-                new Date(
-                  format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
-                ),
-              );
+              new Date(),
+              new Date(
+                format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
+              ),
+            ) /
+            differenceInSeconds(
+              new Date(
+                format(now, "yyyy-MM-dd ") + course.time?.end + " UTC",
+              ),
+              new Date(
+                format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
+              ),
+            );
           const isCurrent =
             isAfter(
               now,
@@ -223,8 +223,8 @@ export function Courses() {
                       {format(
                         new Date(
                           format(now, "yyyy-MM-dd ") +
-                            course.time.start +
-                            " UTC",
+                          course.time.start +
+                          " UTC",
                         ),
                         "hh:mm a",
                       )}
@@ -237,8 +237,8 @@ export function Courses() {
                           new Date(
                             new Date(
                               format(now, "yyyy-MM-dd ") +
-                                course.time.start +
-                                " UTC",
+                              course.time.start +
+                              " UTC",
                             ),
                           ),
                         )
@@ -261,8 +261,8 @@ export function Courses() {
                         new Date(),
                         new Date(
                           format(now, "yyyy-MM-dd ") +
-                            course.time.start +
-                            " UTC",
+                          course.time.start +
+                          " UTC",
                         ),
                       )
                         ? "Starts "
@@ -270,8 +270,8 @@ export function Courses() {
                       {formatDistanceStrict(
                         new Date(
                           format(now, "yyyy-MM-dd ") +
-                            course.time.start +
-                            " UTC",
+                          course.time.start +
+                          " UTC",
                         ),
                         new Date(),
                         {
@@ -359,13 +359,14 @@ export function Notifications() {
                   toast={undefined}
                   notification={notification}
                   onUpdate={(updatedNotification: NotificationMeta) => {
+                    type NotificationType = { data: unknown, id: string, userId: string, sentAt: Date, dismissed: boolean };
                     // Remove from active list if currently active
                     utils.catalyst.user.notifications.list.active.setData(
                       undefined,
                       (prev) => {
                         if (!prev) return prev;
                         if (notification.dismissed) {
-                          return [...prev, updatedNotification];
+                          return [...prev, updatedNotification as NotificationType];
                         }
                         return prev.filter((n) => n.id !== notification.id);
                       },
@@ -377,7 +378,7 @@ export function Notifications() {
                       (prev) => {
                         if (!prev) return prev;
                         if (!notification.dismissed) {
-                          return [...prev, updatedNotification];
+                          return [...prev, updatedNotification as NotificationType];
                         }
                         return prev.filter((n) => n.id !== notification.id);
                       },

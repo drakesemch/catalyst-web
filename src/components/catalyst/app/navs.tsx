@@ -17,6 +17,13 @@ import {
   Bell,
   School,
   Home,
+  Calculator,
+  ChartLine,
+  Gamepad2,
+  Percent,
+  Table,
+  File,
+  Text,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -48,7 +55,8 @@ import {
 } from "@/components/ui/hover-card";
 // import { OpenCmdK } from "../cmd-k";
 import { SignOutButton } from "./dynamic-nav";
-import { expNotifications } from "@/app/flags";
+import { expNotifications, expFriends, expTools } from "@/app/flags";
+import { Badge } from "@/components/ui/badge";
 
 export async function AppNav() {
   await api.catalyst.user.canvas.courses.list
@@ -453,100 +461,99 @@ function Social() {
   );
 }
 
-function Tools() {
+async function Tools() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
-      <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
-        No tools available.
-        <br /> Check back later for updates.
-      </div>
-      {/* <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Calculator />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Calculator</span>
-          <span className="text-xs text-muted-foreground">
-            Perform calculations with ease
-          </span>
+      {!await expTools() ? (
+        <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
+          No tools available.
+          <br /> Check back later for updates.
         </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <ChartLine />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Graphing Calculator</span>
-          <span className="text-xs text-muted-foreground">
-            Plot graphs and functions
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Table />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Periodic Table</span>
-          <span className="text-xs text-muted-foreground">
-            Explore the elements.
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Percent />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Grade Calculator</span>
-          <span className="text-xs text-muted-foreground">
-            Enter what-if grades and what-if percentages
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Gamepad2 />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Games</span>
-          <span className="text-xs text-muted-foreground">
-            Take a break to refocus
-          </span>
-        </div>
-        <Badge variant="secondary">Pre Release</Badge>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Text />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Assignment Summarizer</span>
-          <span className="text-xs text-muted-foreground">
-            Understand your assignment better
-          </span>
-        </div>
-        <Badge>Pro</Badge>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <File />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Paper Proof-reader</span>
-          <span className="text-xs text-muted-foreground">
-            Improve your writing
-          </span>
-        </div>
-        <Badge>Pro</Badge>
-      </Button> */}
+      ) : (
+        <>
+          <Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <Calculator />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Calculator</span>
+              <span className="text-xs text-muted-foreground">
+                Perform calculations with ease
+              </span>
+            </div>
+          </Button><Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <ChartLine />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Graphing Calculator</span>
+              <span className="text-xs text-muted-foreground">
+                Plot graphs and functions
+              </span>
+            </div>
+          </Button><Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <Table />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Periodic Table</span>
+              <span className="text-xs text-muted-foreground">
+                Explore the elements.
+              </span>
+            </div>
+          </Button><Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <Percent />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Grade Calculator</span>
+              <span className="text-xs text-muted-foreground">
+                Enter what-if grades and what-if percentages
+              </span>
+            </div>
+          </Button><Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <Gamepad2 />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Games</span>
+              <span className="text-xs text-muted-foreground">
+                Take a break to refocus
+              </span>
+            </div>
+            <Badge variant="secondary">Pre Release</Badge>
+          </Button><Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <Text />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Assignment Summarizer</span>
+              <span className="text-xs text-muted-foreground">
+                Understand your assignment better
+              </span>
+            </div>
+            <Badge>Pro</Badge>
+          </Button><Button
+            variant="outline"
+            className="flex h-auto w-full flex-1 items-center gap-3"
+          >
+            <File />
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <span className="font-bold">Paper Proof-reader</span>
+              <span className="text-xs text-muted-foreground">
+                Improve your writing
+              </span>
+            </div>
+            <Badge>Pro</Badge>
+          </Button>
+        </>
+      )}
     </div>
   );
 }
