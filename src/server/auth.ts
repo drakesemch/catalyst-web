@@ -71,6 +71,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
     signOut: "/auth",
   },
+  debug: env.NODE_ENV === "development",
 };
 
 /**

@@ -70,15 +70,22 @@ export function Todos() {
     );
   }
 
+  if (data?.length == 0) {
+    return (
+      <h3 className="flex items-center gap-2 p-16 text-muted-foreground w-full justify-center text-xs border-dashed border rounded">
+        No Todo Items Found <CircleSlash />
+      </h3>
+    );
+  }
+
   return (
     <>
       {data
-        ?.sort((a, b) =>
-          Number(new Date(a?.todo_date ?? a?.plannable.todo_date ?? 0)) >
-          Number(new Date(b?.todo_date ?? b?.plannable.todo_date ?? 0))
-            ? -1
-            : 1,
-        )
+        ?.sort((a, b) => {
+          const dateA = new Date(a?.plannable?.todo_date ?? 0);
+          const dateB = new Date(b?.plannable?.todo_date ?? 0);
+          return dateA > dateB ? -1 : 1;
+        })
         .map((todo) => <TodoCard key={todo.plannable_id} todo={todo} />)}
     </>
   );
@@ -111,8 +118,8 @@ export function HomePageCards() {
             new Date(
               new Date(
                 format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
+                period?.period_time?.start +
+                " UTC",
               ),
             ),
           ) &&
@@ -138,8 +145,8 @@ export function HomePageCards() {
             new Date(
               new Date(
                 format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
+                period?.period_time?.start +
+                " UTC",
               ),
             ),
           ),
@@ -189,7 +196,7 @@ export function HomePageCards() {
               <CardTitle>Current Class</CardTitle>
               <CardDescription>
                 {typeof currentClass?.schedule_value.value == "boolean" &&
-                currentClass?.schedule_value.value == true ? (
+                  currentClass?.schedule_value.value == true ? (
                   <>
                     {currentClass?.period?.periodName} (
                     {currentClass?.period?.optionName})
@@ -218,8 +225,8 @@ export function HomePageCards() {
                   dateToCompare,
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                      currentClass?.period_time?.end +
-                      " UTC",
+                    currentClass?.period_time?.end +
+                    " UTC",
                   ),
                 )
                   ? "Ends"

@@ -2,7 +2,7 @@ import { unstable_flag as flag } from "@vercel/flags/next";
 
 export const expNotifications = flag({
   key: "notifications",
-  decide: () => false,
+  decide: () => true,
 });
 
 export const expFriends = flag({
