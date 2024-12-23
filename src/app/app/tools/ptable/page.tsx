@@ -3,14 +3,13 @@
 import { cn } from "@/lib/utils";
 import { elements } from "./elements.json";
 import { useEffect, useRef, useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Input } from "@/components/ui/input";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
-import Image from "next/image";
 
 const categoryColors = {
   "diatomic nonmetal": "bg-green-100 dark:bg-green-900",
@@ -173,7 +172,7 @@ function ElementRenderer({ el }: { el: typeof elements[0] }) {
     }, undefined, function (error) {
       console.error(error);
     });
-  }, []);
+  }, [el.bohr_model_3d]);
 
   return (<div ref={renderEl} className="w-16 aspect-square" />);
 }

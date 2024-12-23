@@ -18,7 +18,6 @@ import {
   School,
   Home,
   Calculator,
-  ChartLine,
   Gamepad2,
   Percent,
   Table,
