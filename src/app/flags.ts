@@ -12,5 +12,5 @@ export const expFriends = flag({
 
 export const expTools = flag({
   key: "tools",
-  decide: () => false,
+  decide: () => true,
 });
