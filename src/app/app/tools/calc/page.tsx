@@ -286,93 +286,95 @@ function Expression({
   }, [value, idx, open]);
 
   return (
-    <div className="flex gap-2 items-center">
-      <DropdownMenu>
-        <DropdownMenuTrigger><MoreVertical /></DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => {
-            setExpressions((prev) => {
-              if (idx === 0) return prev;
-              const newExpressions = [...prev];
-              newExpressions[idx - 1] = newExpressions[idx - 1]!;
-              newExpressions[idx] = newExpressions[idx]!;
-              [newExpressions[idx - 1], newExpressions[idx]] = [newExpressions[idx], newExpressions[idx - 1]!];
-              return newExpressions;
-            });
-            setPrecisionModes((prev) => {
-              if (idx === 0) return prev;
-              const newModes = [...prev];
-              [newModes[idx - 1], newModes[idx]] = [newModes[idx]!, newModes[idx - 1]!];
-              [newModes[idx - 1], newModes[idx]] = [newModes[idx], newModes[idx - 1]!];
-              return newModes;
-            });
-            setFractionsModes((prev) => {
-              if (idx === 0) return prev;
-              const newModes = [...prev];
-              [newModes[idx - 1], newModes[idx]] = [newModes[idx]!, newModes[idx - 1]!];
-              [newModes[idx - 1], newModes[idx]] = [newModes[idx], newModes[idx - 1]!];
-              return newModes;
-            });
-          }}><ArrowUp /> Move Up</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => {
-            setExpressions((prev) => {
-              if (idx === prev.length - 1) return prev;
-              const newExpressions = [...prev];
-              newExpressions[idx + 1] = newExpressions[idx + 1]!;
-              newExpressions[idx] = newExpressions[idx]!;
-              [newExpressions[idx + 1], newExpressions[idx]] = [newExpressions[idx], newExpressions[idx + 1]!];
-              return newExpressions;
-            });
-            setPrecisionModes((prev) => {
-              if (idx === prev.length - 1) return prev;
-              const newModes = [...prev];
-              newModes[idx + 1] = newModes[idx + 1]!;
-              newModes[idx] = newModes[idx]!;
-              [newModes[idx + 1], newModes[idx]] = [newModes[idx], newModes[idx + 1]!];
-              return newModes;
-            });
-            setFractionsModes((prev) => {
-              if (idx === prev.length - 1) return prev;
-              const newModes = [...prev];
-              newModes[idx + 1] = newModes[idx + 1]!;
-              newModes[idx] = newModes[idx]!;
-              [newModes[idx + 1], newModes[idx]] = [newModes[idx], newModes[idx + 1]!];
-              return newModes;
-            });
-          }}><ArrowDown /> Move Down</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => {
-            setExpressions((prev) => {
-              const newExpressions = [...prev];
-              newExpressions.splice(idx, 1);
-              return newExpressions;
-            });
-            setPrecisionModes((prev) => {
-              const newModes = [...prev];
-              newModes.splice(idx, 1);
-              return newModes;
-            });
-            setFractionsModes((prev) => {
-              const newModes = [...prev];
-              newModes.splice(idx, 1);
-              return newModes;
-            });
-          }}><Trash /> Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <label className="group relative h-12 w-full text-2xl ml-4">
-        <Input value={value} onChange={handleChange} key={`expr-inp-${idx}`} className="flex-1 font-serif absolute inset-0 opacity-0 group-active:opacity-100 group-focus-within:opacity-100 h-10 border-0 text-2xl px-4 py-6" />
-        {value == "" ? (
-          <div className="group-active:opacity-0 group-focus-within:opacity-0 relative top-0 left-0 h-10 flex px-4 py-2 cursor-text font-serif text-muted-foreground">
-            Enter an expression
-          </div>
-        ) : (
-          <div className="group-active:opacity-0 group-focus-within:opacity-0 relative top-0 left-0 h-10 flex px-4 py-2 cursor-text">
-            <InlineMath>{value.replaceAll("*", "\\cdot ")}</InlineMath>
-          </div>
-        )}
-      </label>
-      <div className="flex gap-4">
+    <div className="flex gap-2 items-center md:flex-row flex-col border-b pb-4 md:border-0">
+      <div className="flex flex-row gap-2 flex-1 w-full">
+        <DropdownMenu>
+          <DropdownMenuTrigger><MoreVertical /></DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => {
+              setExpressions((prev) => {
+                if (idx === 0) return prev;
+                const newExpressions = [...prev];
+                newExpressions[idx - 1] = newExpressions[idx - 1]!;
+                newExpressions[idx] = newExpressions[idx]!;
+                [newExpressions[idx - 1], newExpressions[idx]] = [newExpressions[idx], newExpressions[idx - 1]!];
+                return newExpressions;
+              });
+              setPrecisionModes((prev) => {
+                if (idx === 0) return prev;
+                const newModes = [...prev];
+                [newModes[idx - 1], newModes[idx]] = [newModes[idx]!, newModes[idx - 1]!];
+                [newModes[idx - 1], newModes[idx]] = [newModes[idx], newModes[idx - 1]!];
+                return newModes;
+              });
+              setFractionsModes((prev) => {
+                if (idx === 0) return prev;
+                const newModes = [...prev];
+                [newModes[idx - 1], newModes[idx]] = [newModes[idx]!, newModes[idx - 1]!];
+                [newModes[idx - 1], newModes[idx]] = [newModes[idx], newModes[idx - 1]!];
+                return newModes;
+              });
+            }}><ArrowUp /> Move Up</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              setExpressions((prev) => {
+                if (idx === prev.length - 1) return prev;
+                const newExpressions = [...prev];
+                newExpressions[idx + 1] = newExpressions[idx + 1]!;
+                newExpressions[idx] = newExpressions[idx]!;
+                [newExpressions[idx + 1], newExpressions[idx]] = [newExpressions[idx], newExpressions[idx + 1]!];
+                return newExpressions;
+              });
+              setPrecisionModes((prev) => {
+                if (idx === prev.length - 1) return prev;
+                const newModes = [...prev];
+                newModes[idx + 1] = newModes[idx + 1]!;
+                newModes[idx] = newModes[idx]!;
+                [newModes[idx + 1], newModes[idx]] = [newModes[idx], newModes[idx + 1]!];
+                return newModes;
+              });
+              setFractionsModes((prev) => {
+                if (idx === prev.length - 1) return prev;
+                const newModes = [...prev];
+                newModes[idx + 1] = newModes[idx + 1]!;
+                newModes[idx] = newModes[idx]!;
+                [newModes[idx + 1], newModes[idx]] = [newModes[idx], newModes[idx + 1]!];
+                return newModes;
+              });
+            }}><ArrowDown /> Move Down</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => {
+              setExpressions((prev) => {
+                const newExpressions = [...prev];
+                newExpressions.splice(idx, 1);
+                return newExpressions;
+              });
+              setPrecisionModes((prev) => {
+                const newModes = [...prev];
+                newModes.splice(idx, 1);
+                return newModes;
+              });
+              setFractionsModes((prev) => {
+                const newModes = [...prev];
+                newModes.splice(idx, 1);
+                return newModes;
+              });
+            }}><Trash /> Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <label className="group relative h-12 w-full text-2xl ml-4 flex-1">
+          <Input value={value} onChange={handleChange} key={`expr-inp-${idx}`} className="flex-1 font-serif absolute inset-0 opacity-0 group-active:opacity-100 group-focus-within:opacity-100 h-10 border-0 text-2xl px-4 py-6" />
+          {value == "" ? (
+            <div className="group-active:opacity-0 group-focus-within:opacity-0 relative top-0 left-0 h-10 flex px-4 py-2 cursor-text font-serif text-muted-foreground">
+              Enter an expression
+            </div>
+          ) : (
+            <div className="group-active:opacity-0 group-focus-within:opacity-0 relative top-0 left-0 h-10 flex px-4 py-2 cursor-text">
+              <InlineMath>{value.replaceAll("*", "\\cdot ")}</InlineMath>
+            </div>
+          )}
+        </label>
+      </div>
+      <div className="flex gap-4 ml-auto">
         {result && (
           <span className="text-2xl font-serif text-accent-foreground text-end w-full flex justify-end px-2">
             <InlineMath>

@@ -12,8 +12,8 @@ export default async function InboxPage({
 
   return (
     <HydrateClient>
-      <div className="mx-auto flex h-[calc((100vh-4.5rem-1px))] w-full flex-row justify-center">
-        <div className="flex w-[40ch] max-w-[40ch] flex-col gap-2 overflow-auto border-r p-4">
+      <div className="mx-auto flex h-[calc((100vh-4.5rem-1px))] w-full flex-col md:flex-row md:justify-center overflow-auto">
+        <div className="flex w-full md:w-[40ch] md:max-w-[40ch] flex-col gap-2 overflow-auto border-b md:border-r p-4 flex-1 md:flex-[0] min-h-96">
           <Messages />
         </div>
         <main className="max-w-[100ch] flex-1">{children}</main>

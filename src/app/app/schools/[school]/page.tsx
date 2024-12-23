@@ -29,7 +29,7 @@ export default async function SchoolPage(props: { params: Promise<{ school: stri
           <h2 className="text-lg font-medium text-muted-foreground">{school?.district ?? "No District"}</h2>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-auto">
         <Button variant="outline" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8" href={`https://www.google.com/maps/place/${school?.address} ${school?.city} ${school?.state}`} target="_blank"><MapPin /> {school?.address}, {school?.city}, {school?.state}</Button>
         <Button variant="outline" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8" href={school?.canvasURL ?? ""} target="_blank"><CircleUserRound /> {school?.canvasURL}</Button>
         <Button variant="outline" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8 pointer-events-none"><School /> {school?.name?.split(" ").slice(-2).join(" ")}</Button>

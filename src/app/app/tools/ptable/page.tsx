@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 const categoryColors = {
   "diatomic nonmetal": "bg-green-100 dark:bg-green-900",
@@ -35,11 +36,20 @@ export default function PTable() {
 
   return (
     <div className="w-screen">
-      <div className="pt-4 flex items-center gap-2 px-16">
-        <h1 className="h1">Periodic Table</h1>
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="ml-auto w-[40ch]" />
-        <Tabs value={wide ? "wide" : "trunc"} onClick={() => setWide(!wide)} className="w-auto">
-          <TabsList>
+      <div className="pt-4 flex lg:flex-row flex-col items-center gap-2 px-16">
+        <h1 className="h1 text-left w-full md:w-auto">Periodic Table</h1>
+        <label className="flex cursor-text bg-background items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline lg:ml-auto w-full lg:w-auto">
+          <Search />
+          <input
+            type="search"
+            placeholder="Search elements..."
+            className="flex-1 outline-none bg-background"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+        <Tabs value={wide ? "wide" : "trunc"} onClick={() => setWide(!wide)} className="w-full lg:w-auto">
+          <TabsList className="w-full">
             <TabsTrigger value="trunc">Truncated</TabsTrigger>
             <TabsTrigger value="wide">Wide</TabsTrigger>
           </TabsList>
@@ -50,17 +60,31 @@ export default function PTable() {
           const matches = search.length == 0 || el.name.toLowerCase().includes(search.toLowerCase()) || el.symbol.toLowerCase().includes(search.toLowerCase()) || el.number.toString() == search || el.category.toLowerCase().includes(search.toLowerCase());
           return (
             <HoverCard key={el.number}>
-              <HoverCardTrigger asChild>
-                <div style={{ gridRow: wide ? el.wypos : el.ypos, gridColumn: wide ? el.wxpos : el.xpos }}>
-                  <div className={cn("relative p-2 rounded-sm w-16 h-16 transition-opacity", categoryColors[el.category], !matches && "opacity-10")}>
-                    <div className="text-xs absolute right-1 top-1">{el.number}</div>
-                    <div className="text-lg font-bold">{el.symbol}</div>
-                    <div className="text-[.5rem] truncate">{el.name}</div>
-                    <div className="text-[.5rem]">{el.atomic_mass.toFixed(2)}</div>
+              <Drawer>
+                <HoverCardTrigger asChild>
+                  <DrawerTrigger asChild>
+                    <button style={{ gridRow: wide ? el.wypos : el.ypos, gridColumn: wide ? el.wxpos : el.xpos }} className="text-left">
+                      <div className={cn("relative p-2 rounded-sm w-16 h-16 transition-opacity", categoryColors[el.category], !matches && "opacity-10")}>
+                        <div className="text-xs absolute right-1 top-1">{el.number}</div>
+                        <div className="text-lg font-bold">{el.symbol}</div>
+                        <div className="text-[.5rem] truncate">{el.name}</div>
+                        <div className="text-[.5rem]">{el.atomic_mass.toFixed(2)}</div>
+                      </div>
+                    </button>
+                  </DrawerTrigger>
+                </HoverCardTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>
+                      {el.name}
+                    </DrawerTitle>
+                  </DrawerHeader>
+                  <div className="overflow-auto">
+                    <ElementInfo el={el} />
                   </div>
-                </div>
-              </HoverCardTrigger>
-              <HoverCardContent className="border-0 p-0 w-96">
+                </DrawerContent>
+              </Drawer>
+              <HoverCardContent className="border-0 p-0 w-96 max-h-[var(--radix-hover-card-content-available-height)] overflow-auto">
                 <ElementInfo el={el} />
               </HoverCardContent>
             </HoverCard>
@@ -138,13 +162,13 @@ function ElementRenderer({ el }: { el: typeof elements[0] }) {
   useEffect(() => {
     if (!el.bohr_model_3d) return;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    let scene: THREE.Scene | null = new THREE.Scene();
+    let camera: THREE.PerspectiveCamera | null = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     camera.position.z = 0.5;
     camera.position.y = -0.1;
     scene.add(camera);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    let renderer: THREE.WebGLRenderer | null = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(400, 400);
     if (renderEl.current) {
       renderEl.current.innerHTML = "";
@@ -153,25 +177,34 @@ function ElementRenderer({ el }: { el: typeof elements[0] }) {
       renderEl.current.appendChild(renderer.domElement);
     }
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
+    let light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(0, 0, 5);
     scene.add(light);
 
-    const loader = new GLTFLoader();
+    let loader = new GLTFLoader();
     console.log("loading");
 
     loader.load(el.bohr_model_3d, function (gltf) {
-      scene.add(gltf.scene);
+      scene?.add(gltf.scene);
       gltf.scene.rotation.x = Math.PI / 4;
       function animate() {
         gltf.scene.rotation.y += 0.01;
-        renderer.render(scene, camera);
+        if (scene && camera)
+          renderer?.render(scene, camera);
       }
-      renderer.setAnimationLoop(animate);
-      renderer.render(scene, camera);
+      renderer?.setAnimationLoop(animate);
+      if (scene && camera)
+        renderer?.render(scene, camera);
     }, undefined, function (error) {
       console.error(error);
     });
+
+    return () => {
+      renderer?.setAnimationLoop(null);
+      renderer = null;
+      scene = null;
+      camera = null;
+    };
   }, [el.bohr_model_3d]);
 
   return (<div ref={renderEl} className="w-16 aspect-square" />);
