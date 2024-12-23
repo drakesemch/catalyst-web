@@ -474,6 +474,7 @@ async function Tools() {
           <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
+            href="/app/tools/calc"
           >
             <Calculator />
             <div className="flex flex-1 flex-col items-start gap-1">
@@ -482,7 +483,8 @@ async function Tools() {
                 Perform calculations with ease
               </span>
             </div>
-          </Button><Button
+          </Button>
+          {/* <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
           >
@@ -493,7 +495,8 @@ async function Tools() {
                 Plot graphs and functions
               </span>
             </div>
-          </Button><Button
+          </Button> */}
+          <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
           >

@@ -62,17 +62,17 @@ export function Courses() {
   }, []);
 
   return (
-    <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
-      <div className="flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
+    <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 w-[40ch] md:pr-2">
+      <label className="flex cursor-text bg-background items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
         <Search />
         <input
           type="search"
           placeholder="Search courses..."
-          className="flex-1 bg-background outline-none"
+          className="flex-1 outline-none bg-background"
           value={courseSearch}
           onChange={(e) => setCourseSearch(e.target.value)}
         />
-      </div>
+      </label>
       {courses.filter((course) => {
         if (courseSearch == "") return true;
         return (

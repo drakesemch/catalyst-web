@@ -7,20 +7,20 @@
   --ui-foreground: 120 84% 4.9%;
   --ui-card: 120 0% 100%;
   --ui-card-foreground: 120 84% 4.9%;
-  --ui-popover: 120 0% 100%;
+  --ui-popover: 120 10% 95%;
   --ui-popover-foreground: 120 84% 4.9%;
   --ui-primary: 120 47.4% 11.2%;
   --ui-primary-foreground: 120 40% 98%;
-  --ui-secondary: 120 40% 96.1%;
+  --ui-secondary: 120 40% 90%;
   --ui-secondary-foreground: 120 47.4% 11.2%;
   --ui-muted: 120 40% 85.1%;
-  --ui-muted-foreground: 120 16.3% 40.9%;
-  --ui-accent: 120 40% 96.1%;
+  --ui-muted-foreground: 120 16.3% 60.9%;
+  --ui-accent: 120 40% 90%;
   --ui-accent-foreground: 120 47.4% 11.2%;
   --ui-destructive: 0 84.2% 60.2%;
   --ui-destructive-foreground: 120 40% 98%;
   --ui-border: 120 31.8% 91.4%;
-  --ui-input: 120 31.8% 91.4%;
+  --ui-input: 120 31.8% 85%;
   --ui-ring: 120 84% 4.9%;
   --ui-radius: 0.5rem;
   --ui-chart-1: 120 76% 61%;
@@ -31,24 +31,24 @@
 }
 
 .dark {
-  --ui-background: 120 84% 4.9%;
+  --ui-background: 120 84% 2.9%;
   --ui-foreground: 120 40% 98%;
   --ui-card: 120 84% 4.9%;
   --ui-card-foreground: 120 40% 98%;
-  --ui-popover: 120 84% 4.9%;
+  --ui-popover: 120 84% 2.9%;
   --ui-popover-foreground: 120 40% 98%;
   --ui-primary: 120 40% 98%;
   --ui-primary-foreground: 120 47.4% 11.2%;
-  --ui-secondary: 120 32.6% 17.5%;
+  --ui-secondary: 120 32.6% 10.5%;
   --ui-secondary-foreground: 120 40% 98%;
   --ui-muted: 120 32.6% 27.5%;
-  --ui-muted-foreground: 120 20.2% 65.1%;
+  --ui-muted-foreground: 120 10.2% 40.1%;
   --ui-accent: 120 32.6% 17.5%;
-  --ui-accent-foreground: 120 40% 98%;
+  --ui-accent-foreground: 120 40% 80%;
   --ui-destructive: 0 84.2% 60.2%;
   --ui-destructive-foreground: 120 40% 98%;
-  --ui-border: 120 32.6% 12.5%;
-  --ui-input: 120 32.6% 17.5%;
+  --ui-border: 120 32.6% 20%;
+  --ui-input: 120 84% 10%;
   --ui-ring: 120 26.8% 83.9%;
   --ui-chart-1: 120 83.2% 53.3%;
   --ui-chart-2: 120 95% 68%;
@@ -131,4 +131,36 @@ body {
 
 .render-white-content {
   @apply rounded bg-background text-foreground dark:bg-[hsl(120,20%,80%)] dark:text-black dark:hue-rotate-180 dark:invert;
+}
+
+.katex-html {
+  display: none;
+}
+
+math-field {
+  --caret-color: hsl(var(--ui-primary));
+  --selection-background-color: hsl(var(--ui-secondary));
+  --selection-background-color-focused: hsl(var(--ui-secondary-foreground));
+  --contains-highlight-background-color: hsl(var(--ui-accent));
+  --placeholder-color: hsl(var(--ui-muted-foreground));
+  --placeholder-opacity: 0.5;
+  --primary: hsl(var(--ui-primary));
+  --smart-fence-color: hsl(var(--ui-muted));
+  --smart-fence-opacity: 0.7;
+  --text-font-family: "Inter", sans-serif;
+  --correct-color: hsl(var(--ui-chart-1));
+  --incorrect-color: hsl(var(--ui-destructive));
+  @apply w-full rounded border border-input bg-background px-4 py-2;
+}
+
+math-field::part(virtual-keyboard-toggle) {
+  @apply hidden;
+}
+
+math-field::part(menu-toggle) {
+  @apply hidden;
+}
+
+math-field::part(prompt) {
+  @apply bg-muted;
 }
