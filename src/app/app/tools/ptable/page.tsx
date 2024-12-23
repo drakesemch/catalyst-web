@@ -5,7 +5,6 @@ import { elements } from "./elements.json";
 import { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import { Input } from "@/components/ui/input";
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Button } from "@/components/ui/button";
@@ -177,11 +176,11 @@ function ElementRenderer({ el }: { el: typeof elements[0] }) {
       renderEl.current.appendChild(renderer.domElement);
     }
 
-    let light = new THREE.DirectionalLight(0xffffff, 1);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(0, 0, 5);
     scene.add(light);
 
-    let loader = new GLTFLoader();
+    const loader = new GLTFLoader();
     console.log("loading");
 
     loader.load(el.bohr_model_3d, function (gltf) {

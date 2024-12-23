@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import Fraction from 'fraction.js';
 import { ArrowDown, ArrowUp, ChartLine, MoreVertical, Trash } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import functionPlot from 'function-plot';
 import {
   Popover,
