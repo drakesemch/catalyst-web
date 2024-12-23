@@ -499,6 +499,7 @@ async function Tools() {
           <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
+            href="/app/tools/ptable"
           >
             <Table />
             <div className="flex flex-1 flex-col items-start gap-1">
