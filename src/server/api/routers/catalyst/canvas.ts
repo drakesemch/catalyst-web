@@ -319,15 +319,25 @@ export const canvasCatalystRouter = createTRPCRouter({
             if (!query.ok) return null;
             const course = (await query.json()) as Course;
             const classification = (await unstable_cache(async () => {
-              const classificationRedis = createClient({
-                url: env.CLASSIFICATION_REST_API_URL,
-                token: env.CLASSIFICATION_REST_API_TOKEN,
-              });
+              let classificationRedis;
+              try {
+                classificationRedis = createClient({
+                  url: env.CLASSIFICATION_REST_API_URL,
+                  token: env.CLASSIFICATION_REST_API_TOKEN,
+                });
+              } catch (err) {
+                // oops
+              }
 
               try {
-                const classification = await classificationRedis.get(
-                  String(course.id),
-                );
+                let classification;
+                try {
+                  classification = await classificationRedis?.get(
+                    String(course.id),
+                  );
+                } catch (err) {
+                  // oops
+                }
 
                 if (classification) {
                   return classification;
@@ -343,12 +353,12 @@ export const canvasCatalystRouter = createTRPCRouter({
 
               if (classificationFromDB.length > 0) {
                 try {
-                  await classificationRedis.set(
+                  await classificationRedis?.set(
                     String(course.id),
                     classificationFromDB[0]!.value,
                   );
                 } catch (err) {
-                  console.error(err);
+                  // oops
                 }
                 return classificationFromDB[0]!.value;
               }
@@ -378,26 +388,38 @@ export const canvasCatalystRouter = createTRPCRouter({
                   text: "output: ",
                 },
               ];
-
-              const result = await model
-                .generateContent({
-                  contents: [{ role: "user", parts: input }],
-                  generationConfig,
-                })
-                .catch((err) => {
-                  console.error(err);
-                  return undefined;
-                });
+              let result;
+              try {
+                result = await model
+                  .generateContent({
+                    contents: [{ role: "user", parts: input }],
+                    generationConfig,
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                    return undefined;
+                  });
+              } catch (err) {
+                // oops
+              }
 
               const value = result?.response?.text() ?? "Not Available";
 
               if (value != "Not Available") {
                 try {
-                  await classificationRedis.set(String(course.id), value);
-                  await ctx.db.insert(courseClassification).values({
-                    key: String(course.id),
-                    value,
-                  });
+                  try {
+                    await classificationRedis?.set(String(course.id), value);
+                  } catch (err) {
+                    // oops
+                  }
+                  try {
+                    await ctx.db.insert(courseClassification).values({
+                      key: String(course.id),
+                      value,
+                    });
+                  } catch (err) {
+                    // oops
+                  }
                 } catch (err) {
                   console.error(err);
                 }
@@ -485,16 +507,20 @@ export const canvasCatalystRouter = createTRPCRouter({
                 text: "output: ",
               },
             ];
-
-            const result = await model
-              .generateContent({
-                contents: [{ role: "user", parts: input }],
-                generationConfig,
-              })
-              .catch((err) => {
-                console.error(err);
-                return undefined;
-              });
+            let result;
+            try {
+              result = await model
+                .generateContent({
+                  contents: [{ role: "user", parts: input }],
+                  generationConfig,
+                })
+                .catch((err) => {
+                  console.error(err);
+                  return undefined;
+                });
+            } catch (err) {
+              // oops
+            }
 
             const value = result?.response?.text() ?? "Not Available";
 
@@ -764,20 +790,29 @@ export const canvasCatalystRouter = createTRPCRouter({
                       },
                     ];
 
-                    const result = await model
-                      .generateContent({
-                        contents: [{ role: "user", parts: input }],
-                        generationConfig,
-                      })
-                      .catch((err) => {
-                        console.error(err);
-                        return undefined;
-                      });
+                    let result;
+                    try {
+                      result = await model
+                        .generateContent({
+                          contents: [{ role: "user", parts: input }],
+                          generationConfig,
+                        })
+                        .catch((err) => {
+                          console.error(err);
+                          return undefined;
+                        });
+                    } catch (err) {
+                      // oops
+                    }
 
                     const value = result?.response?.text() ?? "Not Available";
 
                     if (value != "Not Available") {
-                      await classificationRedis.set(String(course.id), value);
+                      try {
+                        await classificationRedis.set(String(course.id), value);
+                      } catch (err) {
+                        // oops
+                      }
                     }
 
                     return value;

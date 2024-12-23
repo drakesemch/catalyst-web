@@ -2,9 +2,9 @@
   "name": "Catalyst",
   "short_name": "Catalyst",
   "theme_color": "#FFFFFF",
-  "background_color": "#020817",
-  "start_url": "/app/",
-  "scope": "/app/",
+  "background_color": "#010e01",
+  "start_url": "/app",
+  "scope": "/app",
   "display": "standalone",
   "orientation": "portrait"
 }
