@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/trpc/react";
 import { Reorder, useDragControls } from "framer-motion";
+import { signOut } from "next-auth/react";
 import { randomBytes } from "crypto";
 import {
   ArrowDown,
@@ -100,6 +101,7 @@ export default function OnboardingPage() {
   const [settings] = api.catalyst.user.settings.get.useSuspenseQuery();
   const [schools] = api.catalyst.school.list.useSuspenseQuery();
   const { mutate, isPending } = api.catalyst.user.settings.draft.useMutation();
+  const { mutate: deleteAccount } = api.catalyst.user.delete.useMutation();
 
   function getKey(key: string) {
     return settings?.find((setting) => setting.key === key);
@@ -121,10 +123,10 @@ export default function OnboardingPage() {
             <Button href="/home" variant="outline" size="sm">
               <ArrowLeft /> Home
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={async () => await signOut()}>
               <LogOut /> Sign Out
             </Button>
-            <Button variant="destructive" size="sm">
+            <Button variant="destructive" size="sm" onClick={async () => { deleteAccount(); await signOut() }}>
               <Trash /> Delete Account
             </Button>
           </div>
@@ -353,16 +355,16 @@ export default function OnboardingPage() {
 
 type Period =
   | {
-      id: string;
-      name: string;
-      type: "course" | "filler";
-    }
+    id: string;
+    name: string;
+    type: "course" | "filler";
+  }
   | {
-      id: string;
-      name: string;
-      type: "single";
-      options: PeriodOption[];
-    };
+    id: string;
+    name: string;
+    type: "single";
+    options: PeriodOption[];
+  };
 
 type PeriodOption = {
   id: string;
@@ -382,6 +384,21 @@ type Schedule = {
 const debounceController = new Map();
 
 function AddSchool() {
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button className="ml-auto h-auto text-xs" variant="outline">
+          <MapPinPlus /> Add Your School
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <SchoolDrawerContent />
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+function SchoolDrawerContent() {
   const { mutate, isPending } = api.catalyst.school.draft.useMutation({
     onMutate: async (data) => {
       const [key, value] = [Object.keys(data).join(","), Math.random()];
@@ -421,295 +438,288 @@ function AddSchool() {
   }, [schedules, mutate]);
 
   return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <Button className="ml-auto h-auto text-xs" variant="outline">
-          <MapPinPlus /> Add Your School
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Add School</DrawerTitle>
-        </DrawerHeader>
-        <div className="flex flex-col gap-4 overflow-auto p-4">
-          <div className="flex items-center gap-2 font-bold">
-            <Info /> General and Locational Information
-          </div>
-          <div className="flex gap-4">
-            <label className="flex-1">
-              <Input
-                className="h-auto w-full px-4 py-2 text-sm"
-                maxLength={32}
-                defaultValue={details?.name ?? ""}
-                onChange={(evt) => {
-                  mutate({
-                    name: evt.target.value,
-                  });
-                }}
-                placeholder="East High School"
-              />
-              <span className="text-xs text-muted-foreground">School Name</span>
-            </label>
-            <label className="flex-1">
-              <Input
-                maxLength={32}
-                className="h-auto w-full px-4 py-2 text-sm"
-                defaultValue={details?.district ?? ""}
-                onChange={(evt) => {
-                  mutate({
-                    district: evt.target.value,
-                  });
-                }}
-                placeholder="Salt Lake City School District"
-              />
-              <span className="text-xs text-muted-foreground">
-                School District
-              </span>
-            </label>
-          </div>
-          <div className="flex gap-4">
-            <label className="flex-1">
-              <Input
-                className="h-auto w-full px-4 py-2 text-sm"
-                defaultValue={details?.address ?? ""}
-                onChange={(evt) => {
-                  mutate({
-                    address: evt.target.value,
-                  });
-                }}
-                placeholder="840 S 1300 E"
-              />
-              <span className="text-xs text-muted-foreground">
-                School Address
-              </span>
-            </label>
-            <label className="flex-1">
-              <Input
-                className="h-auto w-full px-4 py-2 text-sm"
-                defaultValue={details?.city ?? ""}
-                onChange={(evt) => {
-                  mutate({
-                    city: evt.target.value,
-                  });
-                }}
-                placeholder="Salt Lake City"
-              />
-              <span className="text-xs text-muted-foreground">City</span>
-            </label>
-            <label className="flex-1">
-              <Combobox
-                className="h-auto w-full px-4 py-2 text-sm"
-                defaultValue={details?.state ?? undefined}
-                onSelect={(value) => {
-                  mutate({
-                    state: value,
-                  });
-                }}
-                groups={[
-                  {
-                    id: "states",
-                    header: "States",
-                    values: Object.entries(states).map(([id, render]) => ({
-                      id,
-                      render,
-                    })),
-                  },
-                ]}
-              />
-              <span className="text-xs text-muted-foreground">State</span>
-            </label>
-          </div>
-          <div className="flex gap-4">
-            <label className="flex-1">
-              <Input
-                className="h-auto w-full px-4 py-2 text-sm"
-                defaultValue={details?.canvasURL ?? ""}
-                onChange={(evt) => {
-                  mutate({
-                    url: evt.target.value,
-                  });
-                }}
-                placeholder="https://canvas.instructure.com"
-              />
-              <span className="text-xs text-muted-foreground">Canvas URL</span>
-            </label>
-          </div>
-          <div className="mt-4 flex items-center gap-2 font-bold">
-            <Clock /> Scheduling Information
-          </div>
-          <div className="flex gap-4 [&>div]:flex-1">
-            <div className="flex flex-col gap-2">
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" className="justify-start">
-                    <List /> View and Add Periods
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle>Periods</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="flex flex-col gap-4 overflow-auto p-4">
-                    {periods.length == 0 && (
-                      <p className="py-8 text-center text-xs text-muted-foreground">
-                        No periods added yet.
-                      </p>
-                    )}
-                    {periods.length > 0 && (
-                      <Reorder.Group
-                        axis="y"
-                        values={periods}
-                        onReorder={setPeriods}
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "1rem",
-                        }}
-                      >
-                        {periods.map((item) => (
-                          <Period
-                            key={item.id}
-                            item={item}
-                            setPeriods={setPeriods}
-                          />
-                        ))}
-                      </Reorder.Group>
-                    )}
-                  </div>
-                  <DrawerFooter className="flex flex-row gap-4 [&>button]:flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setPeriods((periods) => [
-                          ...periods,
-                          {
-                            id: randomBytes(20).toString("hex"),
-                            name: `Period ${(periods.length ?? 0) + 1}`,
-                            type: "course",
-                          },
-                        ]);
+    <>
+      <DrawerHeader>
+        <DrawerTitle>Add School</DrawerTitle>
+      </DrawerHeader>
+      <div className="flex flex-col gap-4 overflow-auto p-4">
+        <div className="flex items-center gap-2 font-bold">
+          <Info /> General and Locational Information
+        </div>
+        <div className="flex gap-4">
+          <label className="flex-1">
+            <Input
+              className="h-auto w-full px-4 py-2 text-sm"
+              maxLength={32}
+              defaultValue={details?.name ?? ""}
+              onChange={(evt) => {
+                mutate({
+                  name: evt.target.value,
+                });
+              }}
+              placeholder="East High School"
+            />
+            <span className="text-xs text-muted-foreground">School Name</span>
+          </label>
+          <label className="flex-1">
+            <Input
+              maxLength={32}
+              className="h-auto w-full px-4 py-2 text-sm"
+              defaultValue={details?.district ?? ""}
+              onChange={(evt) => {
+                mutate({
+                  district: evt.target.value,
+                });
+              }}
+              placeholder="Salt Lake City School District"
+            />
+            <span className="text-xs text-muted-foreground">
+              School District
+            </span>
+          </label>
+        </div>
+        <div className="flex gap-4">
+          <label className="flex-1">
+            <Input
+              className="h-auto w-full px-4 py-2 text-sm"
+              defaultValue={details?.address ?? ""}
+              onChange={(evt) => {
+                mutate({
+                  address: evt.target.value,
+                });
+              }}
+              placeholder="840 S 1300 E"
+            />
+            <span className="text-xs text-muted-foreground">
+              School Address
+            </span>
+          </label>
+          <label className="flex-1">
+            <Input
+              className="h-auto w-full px-4 py-2 text-sm"
+              defaultValue={details?.city ?? ""}
+              onChange={(evt) => {
+                mutate({
+                  city: evt.target.value,
+                });
+              }}
+              placeholder="Salt Lake City"
+            />
+            <span className="text-xs text-muted-foreground">City</span>
+          </label>
+          <label className="flex-1">
+            <Combobox
+              className="h-auto w-full px-4 py-2 text-sm"
+              defaultValue={details?.state ?? undefined}
+              onSelect={(value) => {
+                mutate({
+                  state: value,
+                });
+              }}
+              groups={[
+                {
+                  id: "states",
+                  header: "States",
+                  values: Object.entries(states).map(([id, render]) => ({
+                    id,
+                    render,
+                  })),
+                },
+              ]}
+            />
+            <span className="text-xs text-muted-foreground">State</span>
+          </label>
+        </div>
+        <div className="flex gap-4">
+          <label className="flex-1">
+            <Input
+              className="h-auto w-full px-4 py-2 text-sm"
+              defaultValue={details?.canvasURL ?? ""}
+              onChange={(evt) => {
+                mutate({
+                  url: evt.target.value,
+                });
+              }}
+              placeholder="https://canvas.instructure.com"
+            />
+            <span className="text-xs text-muted-foreground">Canvas URL</span>
+          </label>
+        </div>
+        <div className="mt-4 flex items-center gap-2 font-bold">
+          <Clock /> Scheduling Information
+        </div>
+        <div className="flex gap-4 [&>div]:flex-1">
+          <div className="flex flex-col gap-2">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="outline" className="justify-start">
+                  <List /> View and Add Periods
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Periods</DrawerTitle>
+                </DrawerHeader>
+                <div className="flex flex-col gap-4 overflow-auto p-4">
+                  {periods.length == 0 && (
+                    <p className="py-8 text-center text-xs text-muted-foreground">
+                      No periods added yet.
+                    </p>
+                  )}
+                  {periods.length > 0 && (
+                    <Reorder.Group
+                      axis="y"
+                      values={periods}
+                      onReorder={setPeriods}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
                       }}
                     >
-                      Add Period <Plus />
-                    </Button>
-                    <DrawerClose asChild>
-                      <Button size="sm">
-                        Save <Save />
-                      </Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
-              <div className="text-xs text-muted-foreground">Periods</div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" className="justify-start">
-                    <Clock /> View and Add Schedules
+                      {periods.map((item) => (
+                        <Period
+                          key={item.id}
+                          item={item}
+                          setPeriods={setPeriods}
+                        />
+                      ))}
+                    </Reorder.Group>
+                  )}
+                </div>
+                <DrawerFooter className="flex flex-row gap-4 [&>button]:flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setPeriods((periods) => [
+                        ...periods,
+                        {
+                          id: randomBytes(20).toString("hex"),
+                          name: `Period ${(periods.length ?? 0) + 1}`,
+                          type: "course",
+                        },
+                      ]);
+                    }}
+                  >
+                    Add Period <Plus />
                   </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle>Add Schedule</DrawerTitle>
-                    <DrawerDescription>
-                      Please enter start and end times in your current timezone.
-                    </DrawerDescription>
-                  </DrawerHeader>
-                  <div className="flex flex-col gap-4 overflow-auto p-4">
-                    {schedules.length == 0 && (
-                      <p className="py-8 text-center text-xs text-muted-foreground">
-                        No schedules added yet.
-                      </p>
-                    )}
-                    {schedules.length > 0 && (
-                      <Reorder.Group
-                        axis="y"
-                        values={schedules}
-                        onReorder={setSchedules}
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "1rem",
-                        }}
-                      >
-                        {schedules.map((item) => (
-                          <Schedule
-                            key={item.id}
-                            periods={periods}
-                            item={item}
-                            setSchedules={setSchedules}
-                          />
-                        ))}
-                      </Reorder.Group>
-                    )}
-                  </div>
-                  <DrawerFooter className="flex flex-row gap-4 [&>button]:flex-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSchedules((schedules) => [
-                          ...schedules,
-                          {
-                            id: randomBytes(20).toString("hex"),
-                            name: `Schedule ${schedules.length + 1}`,
-                            periods: [
-                              {
-                                id: randomBytes(20).toString("hex"),
-                                start: "",
-                                end: "",
-                              },
-                            ],
-                          },
-                        ]);
+                  <DrawerClose asChild>
+                    <Button size="sm">
+                      Save <Save />
+                    </Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+            <div className="text-xs text-muted-foreground">Periods</div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button variant="outline" className="justify-start">
+                  <Clock /> View and Add Schedules
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Add Schedule</DrawerTitle>
+                  <DrawerDescription>
+                    Please enter start and end times in your current timezone.
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="flex flex-col gap-4 overflow-auto p-4">
+                  {schedules.length == 0 && (
+                    <p className="py-8 text-center text-xs text-muted-foreground">
+                      No schedules added yet.
+                    </p>
+                  )}
+                  {schedules.length > 0 && (
+                    <Reorder.Group
+                      axis="y"
+                      values={schedules}
+                      onReorder={setSchedules}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
                       }}
                     >
-                      Add Schedule <Plus />
+                      {schedules.map((item) => (
+                        <Schedule
+                          key={item.id}
+                          periods={periods}
+                          item={item}
+                          setSchedules={setSchedules}
+                        />
+                      ))}
+                    </Reorder.Group>
+                  )}
+                </div>
+                <DrawerFooter className="flex flex-row gap-4 [&>button]:flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSchedules((schedules) => [
+                        ...schedules,
+                        {
+                          id: randomBytes(20).toString("hex"),
+                          name: `Schedule ${schedules.length + 1}`,
+                          periods: [
+                            {
+                              id: randomBytes(20).toString("hex"),
+                              start: "",
+                              end: "",
+                            },
+                          ],
+                        },
+                      ]);
+                    }}
+                  >
+                    Add Schedule <Plus />
+                  </Button>
+                  <DrawerClose asChild>
+                    <Button size="sm">
+                      Save <Save />
                     </Button>
-                    <DrawerClose asChild>
-                      <Button size="sm">
-                        Save <Save />
-                      </Button>
-                    </DrawerClose>
-                  </DrawerFooter>
-                </DrawerContent>
-              </Drawer>
-              <div className="text-xs text-muted-foreground">Schedules</div>
-            </div>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+            <div className="text-xs text-muted-foreground">Schedules</div>
           </div>
         </div>
-        <DrawerFooter className="flex flex-row items-center justify-end">
-          <span className="mr-6 flex items-center gap-2 text-xs text-muted-foreground">
-            {!isPending ? (
-              <>
-                <Save />
-                Saved
-              </>
-            ) : (
-              <>
-                <Loader className="animate-spin" />
-                Saving...
-              </>
-            )}
-          </span>
-          <DrawerClose asChild>
-            <Button size="sm" variant="outline">
-              Save as Draft
+      </div>
+      <DrawerFooter className="flex flex-row items-center justify-end">
+        <span className="mr-6 flex items-center gap-2 text-xs text-muted-foreground">
+          {!isPending ? (
+            <>
               <Save />
-            </Button>
-          </DrawerClose>
-          <DrawerClose asChild>
-            <Button size="sm" onClick={() => saveToPending()}>
-              Publish and Continue
-              <Check />
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  );
+              Saved
+            </>
+          ) : (
+            <>
+              <Loader className="animate-spin" />
+              Saving...
+            </>
+          )}
+        </span>
+        <DrawerClose asChild>
+          <Button size="sm" variant="outline">
+            Save as Draft
+            <Save />
+          </Button>
+        </DrawerClose>
+        <DrawerClose asChild>
+          <Button size="sm" onClick={() => saveToPending()}>
+            Publish and Continue
+            <Check />
+          </Button>
+        </DrawerClose>
+      </DrawerFooter>
+    </>
+  )
 }
 
 function Period({
@@ -1295,21 +1305,21 @@ function AddedPeriod({
                     .flatMap((period) =>
                       period.type == "single"
                         ? period.options.map((option) => ({
-                            id: option.id,
-                            render: (
-                              <div className="flex flex-col gap-1">
-                                <span>{option.name}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {period.name}
-                                </span>
-                              </div>
-                            ),
-                            selectionRender: (
-                              <div className="flex flex-col gap-1">
-                                {option.name} ({period.name})
-                              </div>
-                            ),
-                          }))
+                          id: option.id,
+                          render: (
+                            <div className="flex flex-col gap-1">
+                              <span>{option.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {period.name}
+                              </span>
+                            </div>
+                          ),
+                          selectionRender: (
+                            <div className="flex flex-col gap-1">
+                              {option.name} ({period.name})
+                            </div>
+                          ),
+                        }))
                         : [],
                     ),
                 },

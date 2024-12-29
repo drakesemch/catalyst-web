@@ -42,7 +42,7 @@ export const proUsers = createTable("pro_user", {
     .$defaultFn(() => crypto.randomUUID()),
   userId: varchar("user_id", { length: 255 })
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", {
     mode: "date",
   }).notNull(),
@@ -57,7 +57,7 @@ export const accounts = createTable(
   {
     userId: varchar("user_id", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     type: varchar("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
@@ -93,7 +93,7 @@ export const sessions = createTable(
       .primaryKey(),
     userId: varchar("user_id", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     expires: timestamp("expires", {
       mode: "date",
       withTimezone: true,
@@ -193,7 +193,7 @@ export const schoolPermissions = createTable(
       .$defaultFn(() => crypto.randomUUID()),
     schoolId: varchar("school_id", { length: 255 })
       .notNull()
-      .references(() => schools.id),
+      .references(() => schools.id, { onDelete: "cascade" }),
     userId: varchar("user_id", { length: 255 }).notNull(),
     role: varchar("role", { length: 32 }).notNull(),
   },

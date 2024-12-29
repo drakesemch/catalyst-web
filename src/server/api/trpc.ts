@@ -81,7 +81,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
       decipher.update(encryptedToken, "base64", "utf8") +
       decipher.final("utf8");
   } catch (err) {
-    console.warn(err);
+    // do nothing
   }
 
   const isPro =

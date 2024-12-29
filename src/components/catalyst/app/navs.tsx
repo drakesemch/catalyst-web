@@ -23,6 +23,9 @@ import {
   Table,
   File,
   Text,
+  Sparkles,
+  Command,
+  Settings,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -56,6 +59,7 @@ import {
 import { SignOutButton } from "./dynamic-nav";
 import { expNotifications, expFriends, expTools } from "@/app/flags";
 import { Badge } from "@/components/ui/badge";
+import { OpenCmdK } from "../cmd-k";
 
 export async function AppNav() {
   await api.catalyst.user.canvas.courses.list
@@ -483,18 +487,6 @@ async function Tools() {
               </span>
             </div>
           </Button>
-          {/* <Button
-            variant="outline"
-            className="flex h-auto w-full flex-1 items-center gap-3"
-          >
-            <ChartLine />
-            <div className="flex flex-1 flex-col items-start gap-1">
-              <span className="font-bold">Graphing Calculator</span>
-              <span className="text-xs text-muted-foreground">
-                Plot graphs and functions
-              </span>
-            </div>
-          </Button> */}
           <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
@@ -518,7 +510,8 @@ async function Tools() {
                 Enter what-if grades and what-if percentages
               </span>
             </div>
-          </Button><Button
+          </Button>
+          {/* <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
           >
@@ -554,7 +547,7 @@ async function Tools() {
               </span>
             </div>
             <Badge>Pro</Badge>
-          </Button>
+          </Button> */}
         </>
       )}
     </div>
@@ -589,7 +582,7 @@ async function SettingCards() {
           </span>
         </div>
       </Button>
-      {/* <Button
+      <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
       >
@@ -600,7 +593,7 @@ async function SettingCards() {
             View your friends and social feed
           </span>
         </div>
-      </Button> */}
+      </Button>
       <Drawer>
         <DrawerTrigger asChild>
           <Button
@@ -645,19 +638,6 @@ async function SettingCards() {
       </Button>
       <Button
         variant="outline"
-        href="/home"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Home />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Exit App</span>
-          <span className="text-xs text-muted-foreground">
-            View the landing page of Catalyst
-          </span>
-        </div>
-      </Button>
-      {/* <Button
-        variant="outline"
         className="hidden h-auto w-full flex-1 items-center gap-3 md:flex"
       >
         <UsersRound />
@@ -666,7 +646,7 @@ async function SettingCards() {
           <span className="text-xs text-muted-foreground">Manage Friends</span>
         </div>
       </Button>
-      <Button
+      {/* <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
       >
@@ -677,8 +657,8 @@ async function SettingCards() {
             Send feedback to the Catalyst team
           </span>
         </div>
-      </Button>
-      <Button
+      </Button> */}
+      {/* <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
       >
@@ -689,7 +669,7 @@ async function SettingCards() {
             Resolve an issue
           </span>
         </div>
-      </Button>
+      </Button> */}
       <OpenCmdK
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
@@ -717,6 +697,7 @@ async function SettingCards() {
       <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
+        href="/app/settings"
       >
         <Settings />
         <div className="flex flex-1 flex-col items-start gap-1">
@@ -725,7 +706,20 @@ async function SettingCards() {
             Access all your settings
           </span>
         </div>
-      </Button> */}
+      </Button>
+      <Button
+        variant="outline"
+        href="/home"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Home />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Exit App</span>
+          <span className="text-xs text-muted-foreground">
+            View the landing page of Catalyst
+          </span>
+        </div>
+      </Button>
       <SignOutButton />
     </div>
   );

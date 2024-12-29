@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Album,
   ArrowLeft,
   ArrowRight,
   Bug,
@@ -12,6 +13,7 @@ import {
   HelpCircle,
   House,
   Info,
+  LayoutDashboard,
   Monitor,
   Moon,
   Newspaper,
@@ -46,68 +48,86 @@ export function AppCmdK({ is404 }: { is404?: boolean }) {
               </>
             ),
             items: [
-              pathname != "/home"
+              pathname != "/app"
                 ? {
-                    id: "smart action home",
-                    type: "item",
-                    label: (
-                      <>
-                        <House /> Go to Home page
-                      </>
-                    ),
-                    onSelect: () => {
-                      router.push("/home");
-                    },
+                  id: "smart action dashboard",
+                  type: "item",
+                  label: (
+                    <>
+                      <LayoutDashboard /> Go to Dashboard
+                    </>
+                  ),
+                  onSelect: () => {
+                    router.push("/app");
+                  },
+                  keyboard: {
+                    ctrl: true,
+                    key: "Enter",
                   }
-                : null,
-              pathname.startsWith("/blog") && pathname != "/blog" && !is404
-                ? {
-                    id: "smart action blog",
-                    type: "item",
-                    label: (
-                      <>
-                        <Newspaper /> Go to Blog page
-                      </>
-                    ),
-                    onSelect: () => {
-                      router.push("/blog");
-                    },
-                  }
-                : null,
-              is404
-                ? {
-                    id: "smart action back",
-                    type: "item",
-                    label: (
-                      <>
-                        <ArrowLeft /> Back
-                      </>
-                    ),
-                    onSelect: () => {
-                      history.back();
-                    },
-                  }
-                : null,
-              pathname != "/home" || is404
-                ? {
-                    type: "separator",
-                  }
+                }
                 : null,
               {
-                id: "smart action get started",
-                type: "item",
+                id: "smart action courses",
+                type: "list",
+                breadcrumb: "Courses",
                 label: (
                   <>
-                    <UserCircle /> Get Started
+                    <Album /> Courses
                   </>
                 ),
-                onSelect: () => {
-                  router.push("/auth");
-                },
-                keyboard: {
-                  key: "Enter",
-                  ctrl: true,
-                },
+                // keyboard: {
+                //   key: "T",
+                // },
+                groups: [
+                  {
+                    heading: (
+                      <>
+                        <Album /> Courses
+                      </>
+                    ),
+                    items: [
+                      {
+                        id: "theme-system",
+                        type: "item",
+                        label: (
+                          <>
+                            <Monitor /> System
+                          </>
+                        ),
+                        onSelect: () => {
+                          setTheme("system");
+                        },
+                        shouldCleanUp: false,
+                      },
+                      {
+                        id: "theme-light",
+                        type: "item",
+                        label: (
+                          <>
+                            <Sun /> Light
+                          </>
+                        ),
+                        onSelect: () => {
+                          setTheme("light");
+                        },
+                        shouldCleanUp: false,
+                      },
+                      {
+                        id: "theme-dark",
+                        type: "item",
+                        label: (
+                          <>
+                            <Moon /> Dark
+                          </>
+                        ),
+                        onSelect: () => {
+                          setTheme("dark");
+                        },
+                        shouldCleanUp: false,
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },

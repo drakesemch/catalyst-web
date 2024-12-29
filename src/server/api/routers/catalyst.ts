@@ -70,6 +70,15 @@ export const catalystRouter = createTRPCRouter({
       }),
   },
   user: {
+    delete: protectedProcedure.mutation(async ({ ctx }) => {
+      const user = ctx.user.get;
+      if (!user)
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found",
+        });
+      await ctx.db.delete(users).where(eq(users.id, user.id));
+    }),
     authState: publicProcedure.query(({ ctx }) => {
       return !!ctx.session?.user;
     }),
@@ -352,6 +361,47 @@ export const catalystRouter = createTRPCRouter({
       return schoolsList;
     }),
     get: {
+      permissions: protectedProcedure
+        .input(z.object({ id: z.string() }))
+        .query(async ({ input, ctx }) => {
+          const user = ctx.user.get;
+          if (!user)
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "User not found",
+            });
+
+          return await ctx.db
+            .select()
+            .from(schoolPermissions)
+            .where(
+              and(
+                eq(schoolPermissions.userId, user.id),
+                eq(schoolPermissions.schoolId, input.id),
+              ),
+            );
+        }),
+      currentSchool: protectedProcedure.query(async ({ ctx }) => {
+        const user = ctx.user.get;
+        if (!user)
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "User not found",
+          });
+
+        return (
+          await ctx.db
+            .select()
+            .from(schools)
+            .where(
+              eq(
+                schools.id,
+                ctx.user.settings.find((val) => val.key == "school_id")
+                  ?.value ?? "",
+              ),
+            )
+        )[0];
+      }),
       draft: {
         details: protectedProcedure
           .input(z.object({ id: z.string() }).optional())
@@ -758,7 +808,6 @@ export const catalystRouter = createTRPCRouter({
             code: "UNAUTHORIZED",
             message: "User not found",
           });
-
         let school = (
           await ctx.db
             .select()

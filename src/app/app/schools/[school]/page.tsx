@@ -10,13 +10,17 @@ export default async function SchoolPage(props: { params: Promise<{ school: stri
     school: schoolId
   } = params;
 
-  const school = await api.catalyst.school.get.draft.details({
-    id: schoolId,
-  });
+  const school = await api.catalyst.school.get.currentSchool();
 
   const schedules = await api.catalyst.school.get.saved.schedules({
     id: schoolId,
   });
+
+  const permissions = await api.catalyst.school.get.permissions({
+    id: schoolId,
+  });
+
+  console.log(permissions);
 
   const now = new Date();
 
@@ -33,7 +37,7 @@ export default async function SchoolPage(props: { params: Promise<{ school: stri
         <Button variant="outline" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8" href={`https://www.google.com/maps/place/${school?.address} ${school?.city} ${school?.state}`} target="_blank"><MapPin /> {school?.address}, {school?.city}, {school?.state}</Button>
         <Button variant="outline" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8" href={school?.canvasURL ?? ""} target="_blank"><CircleUserRound /> {school?.canvasURL}</Button>
         <Button variant="outline" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8 pointer-events-none"><School /> {school?.name?.split(" ").slice(-2).join(" ")}</Button>
-        <Button variant="secondary" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8"><Pencil /> Modify Schedule</Button>
+        {permissions.find((p) => p.role == "owner" || p.role == "admin" || p.role == "helper") && (<Button variant="secondary" className="text-xs text-muted-foreground rounded-full px-4 py-1 h-8"><Pencil /> Modify Schedule</Button>)}
       </div>
       <h3 className="h2">Schedules</h3>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
