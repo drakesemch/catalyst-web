@@ -1,0 +1,225 @@
+.user {
+  animation: user 50s forwards infinite;
+}
+
+@keyframes user {
+  0%,
+  13.75% {
+    background-color: transparent;
+  }
+  14.25%,
+  100% {
+    background-color: hsl(var(--secondary));
+  }
+}
+
+.dashboard {
+  animation: dashboard 50s forwards infinite;
+}
+
+@keyframes dashboard {
+  0%,
+  13.75% {
+    background-color: hsl(var(--secondary));
+  }
+  14.25%,
+  100% {
+    background-color: transparent;
+  }
+}
+
+.drawer {
+  animation: drawer 50s forwards infinite;
+}
+
+@keyframes drawer {
+  0%,
+  13.75%,
+  21%,
+  100% {
+    width: 0;
+  }
+  14.25%,
+  19% {
+    width: 30ch;
+  }
+}
+
+.home {
+  animation: home 50s forwards infinite;
+}
+
+@keyframes home {
+  0%,
+  19% {
+    opacity: 1;
+  }
+  21%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.settings {
+  animation: settings 50s forwards infinite;
+}
+
+@keyframes settings {
+  0%,
+  19% {
+    opacity: 0;
+  }
+  21%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.modal {
+  animation: modal 50s forwards infinite;
+}
+
+@keyframes modal {
+  0%,
+  22.75%,
+  39.5%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  38.75% {
+    opacity: 1;
+  }
+}
+
+.token {
+  animation: token 50s forwards infinite;
+}
+
+@keyframes token {
+  0%,
+  38.75% {
+    opacity: 0;
+  }
+  39.75% {
+    opacity: 1;
+  }
+}
+
+.cursor {
+  animation: cursor-move 50s forwards infinite;
+}
+
+@keyframes cursor-move {
+  0%,
+  10% {
+    top: 50%;
+    left: 50%;
+    rotate: 0deg;
+  }
+  13.75% {
+    top: 2rem;
+    left: 2rem;
+    scale: 1;
+    rotate: 10deg;
+  }
+  14% {
+    scale: 0.8;
+  }
+  14.25% {
+    top: 2rem;
+    left: 2rem;
+    scale: 1;
+    rotate: 10deg;
+  }
+  18% {
+    top: 15rem;
+    left: 10rem;
+    rotate: 20deg;
+  }
+  18.75% {
+    top: 15rem;
+    left: 10rem;
+    scale: 1;
+  }
+  19% {
+    top: 15rem;
+    left: 10rem;
+    scale: 0.8;
+  }
+  19.25%,
+  20% {
+    top: 15rem;
+    left: 10rem;
+    scale: 1;
+    rotate: 20deg;
+    color: hsl(var(--foreground));
+  }
+  22% {
+    top: 21.5rem;
+    left: 14rem;
+    rotate: 0deg;
+    color: hsl(var(--background));
+  }
+  22.75% {
+    top: 21.5rem;
+    left: 14rem;
+    scale: 1;
+  }
+  23% {
+    top: 21.5rem;
+    left: 14rem;
+    scale: 0.8;
+  }
+  23.25% {
+    top: 21.5rem;
+    left: 14rem;
+    scale: 1;
+    color: hsl(var(--background));
+  }
+  27% {
+    top: calc(50% - 2rem);
+    left: 50%;
+    scale: 1;
+    color: hsl(var(--foreground));
+  }
+  27.75% {
+    top: calc(50% - 2rem);
+    left: 50%;
+    scale: 0.8;
+  }
+  28%,
+  32% {
+    top: calc(50% - 2rem);
+    left: 50%;
+    scale: 1;
+    color: hsl(var(--foreground));
+  }
+  38% {
+    top: calc(50% + 2rem);
+    left: calc(50% + 2rem);
+    color: hsl(var(--background));
+  }
+  38.75% {
+    top: calc(50% + 2rem);
+    left: calc(50% + 2rem);
+    scale: 1;
+  }
+  39% {
+    top: calc(50% + 2rem);
+    left: calc(50% + 2rem);
+    scale: 0.8;
+  }
+  39.25% {
+    top: calc(50% + 2rem);
+    left: calc(50% + 2rem);
+    scale: 1;
+    color: hsl(var(--background));
+  }
+  43%,
+  100% {
+    top: 50%;
+    left: 50%;
+    color: hsl(var(--foreground));
+  }
+}

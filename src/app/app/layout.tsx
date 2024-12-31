@@ -3,6 +3,7 @@ import { AppNav } from "@/components/catalyst/app/navs";
 import { hasFinishedOnboarding } from "@/lib/onboarding";
 import { HydrateClient, api } from "@/trpc/server";
 import { redirect } from "next/navigation";
+import { CanvasWarningPopup } from "./clientLayout";
 
 export default async function AppLayout({
   children,
@@ -14,12 +15,15 @@ export default async function AppLayout({
 
   await api.catalyst.user.canvas.courses.list.prefetch();
 
+  const needsAttention = await api.catalyst.user.canvas.needsAttention();
+
   return (
     <HydrateClient>
       <AppNav />
       <AppCmdK />
       {children}
       <div className="mt-20 w-full md:mt-0" />
+      {needsAttention && <CanvasWarningPopup />}
     </HydrateClient>
   );
 }

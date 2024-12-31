@@ -48,23 +48,23 @@ export function AppCmdK({ is404 }: { is404?: boolean }) {
               </>
             ),
             items: [
-              pathname != "/app"
+              pathname != "/app" || is404
                 ? {
-                  id: "smart action dashboard",
-                  type: "item",
-                  label: (
-                    <>
-                      <LayoutDashboard /> Go to Dashboard
-                    </>
-                  ),
-                  onSelect: () => {
-                    router.push("/app");
-                  },
-                  keyboard: {
-                    ctrl: true,
-                    key: "Enter",
+                    id: "smart action dashboard",
+                    type: "item",
+                    label: (
+                      <>
+                        <LayoutDashboard /> Go to Dashboard
+                      </>
+                    ),
+                    onSelect: () => {
+                      router.push("/app");
+                    },
+                    keyboard: {
+                      ctrl: true,
+                      key: "Enter",
+                    },
                   }
-                }
                 : null,
               {
                 id: "smart action courses",

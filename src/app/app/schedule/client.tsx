@@ -13,8 +13,6 @@ import {
 } from "date-fns";
 import { useEffect, useState } from "react";
 
-
-
 export function ScheduleClientPage() {
   const [schedule] =
     api.catalyst.user.canvas.schedule.current.useSuspenseQuery();
@@ -43,47 +41,53 @@ export function ScheduleClientPage() {
               const diffPct = isBefore(
                 new Date(),
                 new Date(
-                  format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
+                  format(now, "yyyy-MM-dd") +
+                    "T" +
+                    period?.period_time?.start +
+                    "Z",
                 ),
               )
                 ? 0
                 : differenceInSeconds(
-                  new Date(),
-                  new Date(
-                    format(now, "yyyy-MM-dd ") +
-                    period?.period_time?.start +
-                    " UTC",
-                  ),
-                ) /
-                differenceInSeconds(
-                  new Date(
-                    format(now, "yyyy-MM-dd ") +
-                    period?.period_time?.end +
-                    " UTC",
-                  ),
-                  new Date(
-                    format(now, "yyyy-MM-dd ") +
-                    period?.period_time?.start +
-                    " UTC",
-                  ),
-                );
+                    new Date(),
+                    new Date(
+                      format(now, "yyyy-MM-dd") +
+                        "T" +
+                        period?.period_time?.start +
+                        "Z",
+                    ),
+                  ) /
+                  differenceInSeconds(
+                    new Date(
+                      format(now, "yyyy-MM-dd") +
+                        "T" +
+                        period?.period_time?.end +
+                        "Z",
+                    ),
+                    new Date(
+                      format(now, "yyyy-MM-dd") +
+                        "T" +
+                        period?.period_time?.start +
+                        "Z",
+                    ),
+                  );
               const isCurrent =
                 isAfter(
                   now,
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
-                    period?.period_time?.start +
-                    " UTC",
+                    format(now, "yyyy-MM-dd") +
+                      "T" +
+                      period?.period_time?.start +
+                      "Z",
                   ),
                 ) &&
                 isBefore(
                   now,
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
-                    period?.period_time?.end +
-                    " UTC",
+                    format(now, "yyyy-MM-dd") +
+                      "T" +
+                      period?.period_time?.end +
+                      "Z",
                   ),
                 );
 
@@ -92,7 +96,9 @@ export function ScheduleClientPage() {
                   key={period?.period?.id ?? -1}
                   className={cn(
                     "flex w-full flex-col rounded border",
-                    typeof period?.schedule_value?.value == "boolean" && period?.schedule_value?.value == false && "opacity-20",
+                    typeof period?.schedule_value?.value == "boolean" &&
+                      period?.schedule_value?.value == false &&
+                      "opacity-20",
                     isCurrent && "bg-secondary",
                   )}
                 >
@@ -130,9 +136,10 @@ export function ScheduleClientPage() {
                         <span>
                           {format(
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              period?.period_time?.start +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                period?.period_time?.start +
+                                "Z",
                             ),
                             "hh:mm a",
                           )}
@@ -144,9 +151,10 @@ export function ScheduleClientPage() {
                               now,
                               new Date(
                                 new Date(
-                                  format(now, "yyyy-MM-dd ") +
-                                  period?.period_time?.start +
-                                  " UTC",
+                                  format(now, "yyyy-MM-dd") +
+                                    "T" +
+                                    period?.period_time?.start +
+                                    "Z",
                                 ),
                               ),
                             )
@@ -157,9 +165,10 @@ export function ScheduleClientPage() {
                         <span>
                           {format(
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              period?.period_time?.end +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                period?.period_time?.end +
+                                "Z",
                             ),
                             "hh:mm a",
                           )}
@@ -170,18 +179,20 @@ export function ScheduleClientPage() {
                           {isBefore(
                             new Date(),
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              period?.period_time?.start +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                period?.period_time?.start +
+                                "Z",
                             ),
                           )
                             ? "Starts "
                             : "Started "}
                           {formatDistanceStrict(
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              period?.period_time?.start +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                period?.period_time?.start +
+                                "Z",
                             ),
                             new Date(),
                             {
@@ -193,18 +204,20 @@ export function ScheduleClientPage() {
                           {isBefore(
                             new Date(),
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              period?.period_time?.end +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                period?.period_time?.end +
+                                "Z",
                             ),
                           )
                             ? "Ends "
                             : "Ended "}
                           {formatDistanceStrict(
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              period?.period_time?.end +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                period?.period_time?.end +
+                                "Z",
                             ),
                             new Date(),
                             {

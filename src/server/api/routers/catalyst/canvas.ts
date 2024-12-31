@@ -250,6 +250,15 @@ export const courseClassificationDataset = [
 ];
 
 export const canvasCatalystRouter = createTRPCRouter({
+  needsAttention: protectedProcedure.query(async ({ ctx }) => {
+    const url = new URL("/api/v1/users/self", ctx.user.canvas.url);
+    const query = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${ctx.user.canvas.token}`,
+      },
+    });
+    return !query.ok;
+  }),
   details: protectedProcedure.query(async ({ ctx }) => {
     return {
       url: ctx.user.canvas.url,

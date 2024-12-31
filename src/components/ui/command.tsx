@@ -79,11 +79,17 @@ const CommandDialog = ({
   loop,
   className,
   drawer,
+  filter,
   ...props
 }: CommandDialogProps & {
   loop?: boolean;
   className?: string;
   drawer?: { className: string };
+  filter?: (
+    value: string,
+    search: string,
+    keywords: string[] | undefined,
+  ) => 0 | 1;
 }) => {
   return (
     <Drawer {...props}>
@@ -97,6 +103,7 @@ const CommandDialog = ({
             className,
           )}
           loop={loop}
+          filter={filter}
         >
           {children}
         </Command>

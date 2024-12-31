@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 export function middleware(req: Request) {
   const { pathname } = new URL(req.url);
+  const response = NextResponse.next();
+  response.headers.set("x-url", pathname);
 
   // Check if the request is for /api/cron/ and if the condition is true
   if (pathname.startsWith("/api/cron/")) {
@@ -12,10 +14,10 @@ export function middleware(req: Request) {
   }
 
   // Continue with the request
-  return NextResponse.next();
+  return response;
 }
 
 // Apply the middleware to the API routes
 export const config = {
-  matcher: ["/api/cron/:path*"],
+  matcher: ["/app","/app/:path*","/api/:path*"],
 };

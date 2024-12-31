@@ -18,11 +18,11 @@ import {
   School,
   Home,
   Calculator,
-  Gamepad2,
+  // Gamepad2,
   Percent,
   Table,
-  File,
-  Text,
+  // File,
+  // Text,
   Sparkles,
   Command,
   Settings,
@@ -57,8 +57,8 @@ import {
 } from "@/components/ui/hover-card";
 // import { OpenCmdK } from "../cmd-k";
 import { SignOutButton } from "./dynamic-nav";
-import { expNotifications, expFriends, expTools } from "@/app/flags";
-import { Badge } from "@/components/ui/badge";
+// import { expNotifications, /* expFriends */, expTools } from "@/app/flags";
+// import { Badge } from "@/components/ui/badge";
 import { OpenCmdK } from "../cmd-k";
 
 export async function AppNav() {
@@ -192,14 +192,7 @@ export async function AppNav() {
                   align="end"
                 >
                   <div className="flex justify-stretch gap-2 p-4">
-                    {(await expNotifications()) ? (
-                      <Notifications />
-                    ) : (
-                      <span className="max-w-[30ch] text-xs text-muted-foreground">
-                        This feature is currently being developed, and will be
-                        available soon.
-                      </span>
-                    )}
+                    <Notifications />
                   </div>
                 </HoverCardContent>
               </HoverCard>
@@ -467,51 +460,45 @@ function Social() {
 async function Tools() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
-      {!await expTools() ? (
-        <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
-          No tools available.
-          <br /> Check back later for updates.
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+        href="/app/tools/calc"
+      >
+        <Calculator />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Calculator</span>
+          <span className="text-xs text-muted-foreground">
+            Perform calculations with ease
+          </span>
         </div>
-      ) : (
-        <>
-          <Button
-            variant="outline"
-            className="flex h-auto w-full flex-1 items-center gap-3"
-            href="/app/tools/calc"
-          >
-            <Calculator />
-            <div className="flex flex-1 flex-col items-start gap-1">
-              <span className="font-bold">Calculator</span>
-              <span className="text-xs text-muted-foreground">
-                Perform calculations with ease
-              </span>
-            </div>
-          </Button>
-          <Button
-            variant="outline"
-            className="flex h-auto w-full flex-1 items-center gap-3"
-            href="/app/tools/ptable"
-          >
-            <Table />
-            <div className="flex flex-1 flex-col items-start gap-1">
-              <span className="font-bold">Periodic Table</span>
-              <span className="text-xs text-muted-foreground">
-                Explore the elements.
-              </span>
-            </div>
-          </Button><Button
-            variant="outline"
-            className="flex h-auto w-full flex-1 items-center gap-3"
-          >
-            <Percent />
-            <div className="flex flex-1 flex-col items-start gap-1">
-              <span className="font-bold">Grade Calculator</span>
-              <span className="text-xs text-muted-foreground">
-                Enter what-if grades and what-if percentages
-              </span>
-            </div>
-          </Button>
-          {/* <Button
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+        href="/app/tools/ptable"
+      >
+        <Table />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Periodic Table</span>
+          <span className="text-xs text-muted-foreground">
+            Explore the elements.
+          </span>
+        </div>
+      </Button>
+      <Button
+        variant="outline"
+        className="flex h-auto w-full flex-1 items-center gap-3"
+      >
+        <Percent />
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <span className="font-bold">Grade Calculator</span>
+          <span className="text-xs text-muted-foreground">
+            Enter what-if grades and what-if percentages
+          </span>
+        </div>
+      </Button>
+      {/* <Button
             variant="outline"
             className="flex h-auto w-full flex-1 items-center gap-3"
           >
@@ -548,8 +535,6 @@ async function Tools() {
             </div>
             <Badge>Pro</Badge>
           </Button> */}
-        </>
-      )}
     </div>
   );
 }
@@ -613,14 +598,7 @@ async function SettingCards() {
           <DrawerHeader>
             <DrawerTitle>Notifications</DrawerTitle>
           </DrawerHeader>
-          {(await expNotifications()) ? (
-            <Notifications />
-          ) : (
-            <span className="max-w-[30ch] text-xs text-muted-foreground">
-              This feature is currently being developed, and will be available
-              soon.
-            </span>
-          )}
+          <Notifications />
         </DrawerContent>
       </Drawer>
       <Button

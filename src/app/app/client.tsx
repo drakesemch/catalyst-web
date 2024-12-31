@@ -72,7 +72,7 @@ export function Todos() {
 
   if (data?.length == 0) {
     return (
-      <h3 className="flex items-center gap-2 p-16 text-muted-foreground w-full justify-center text-xs border-dashed border rounded">
+      <h3 className="flex w-full items-center justify-center gap-2 rounded border border-dashed p-16 text-xs text-muted-foreground">
         No Todo Items Found <CircleSlash />
       </h3>
     );
@@ -108,8 +108,8 @@ export function HomePageCards() {
     let currentPeriods = schedule.times
       .filter(
         (period) =>
-          typeof period.schedule_value.value != "boolean" ||
-          period.schedule_value.value != false,
+          typeof period?.schedule_value?.value != "boolean" ||
+          period?.schedule_value?.value != false,
       )
       .filter(
         (period) =>
@@ -118,8 +118,8 @@ export function HomePageCards() {
             new Date(
               new Date(
                 format(now, "yyyy-MM-dd ") +
-                period?.period_time?.start +
-                " UTC",
+                  period?.period_time?.start +
+                  " UTC",
               ),
             ),
           ) &&
@@ -136,8 +136,8 @@ export function HomePageCards() {
       currentPeriods = schedule.times
         .filter(
           (period) =>
-            typeof period.schedule_value.value != "boolean" ||
-            period.schedule_value.value != false,
+            typeof period?.schedule_value?.value != "boolean" ||
+            period?.schedule_value?.value != false,
         )
         .filter((period) =>
           isBefore(
@@ -145,8 +145,8 @@ export function HomePageCards() {
             new Date(
               new Date(
                 format(now, "yyyy-MM-dd ") +
-                period?.period_time?.start +
-                " UTC",
+                  period?.period_time?.start +
+                  " UTC",
               ),
             ),
           ),
@@ -196,7 +196,7 @@ export function HomePageCards() {
               <CardTitle>Current Class</CardTitle>
               <CardDescription>
                 {typeof currentClass?.schedule_value.value == "boolean" &&
-                  currentClass?.schedule_value.value == true ? (
+                currentClass?.schedule_value.value == true ? (
                   <>
                     {currentClass?.period?.periodName} (
                     {currentClass?.period?.optionName})
@@ -225,8 +225,8 @@ export function HomePageCards() {
                   dateToCompare,
                   new Date(
                     format(now, "yyyy-MM-dd ") +
-                    currentClass?.period_time?.end +
-                    " UTC",
+                      currentClass?.period_time?.end +
+                      " UTC",
                   ),
                 )
                   ? "Ends"

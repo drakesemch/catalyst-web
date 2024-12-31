@@ -304,6 +304,40 @@ export function CmdK({ options: { groups } }: { options: CmdKOptions }) {
         "transition-transform duration-100",
         changing ? "scale-95" : "",
       )}
+      // filter={(value, search) => {
+      //   const searchLower = search.toLowerCase();
+
+      //   const flattenGroups = (groups: CmdKOptions["groups"]) => {
+      //     let items: CmdKOptions["groups"][0]["items"] = [];
+      //     for (const group of groups) {
+      //       for (const item of group.items) {
+      //         if (item?.type === "item" || item?.type === "list") {
+      //           items.push(item);
+      //         }
+      //         if (item?.type === "list") {
+      //           items = items.concat(flattenGroups(item.groups));
+      //         }
+      //       }
+      //     }
+      //     return items;
+      //   };
+
+      //   const allItems = flattenGroups(currentMenu);
+
+      //   for (const item of allItems) {
+      //     if (!item || item.type == "separator") continue;
+      //     const textMatch =
+      //       item.label?.toString().toLowerCase().includes(searchLower) ?? false;
+      //     const keywordMatch = item.keyWords?.some((keyword) =>
+      //       keyword.toLowerCase().includes(searchLower),
+      //     );
+      //     if (textMatch || keywordMatch) {
+      //       return 1;
+      //     }
+      //   }
+
+      //   return 0;
+      // }}
     >
       <div className="flex flex-col gap-2 bg-background">
         <Breadcrumb className="px-4">

@@ -11,6 +11,7 @@ import {
   periodTimes,
   periodType,
   periods,
+  scheduleDates,
   scheduleValues,
   schedules,
   schoolPermissions,
@@ -330,6 +331,127 @@ export const catalystRouter = createTRPCRouter({
     }),
   },
   school: {
+    saveRaw: protectedProcedure
+      .input(
+        z.object({
+          periods: z.array(
+            z.object({
+              periodId: z.string(),
+              optionId: z.string(),
+              periodOrder: z.number(),
+              optionOrder: z.number(),
+              periodName: z.string(),
+              optionName: z.string(),
+              type: z.enum(periodType.enumValues),
+            }),
+          ),
+          schedules: z.array(
+            z.object({
+              name: z.string(),
+              periods: z.array(
+                z.object({
+                  id: z.string(),
+                  start: z.string(),
+                  end: z.string(),
+                }),
+              ),
+            }),
+          ),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const user = ctx.user.get;
+        if (!user) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "User not found",
+          });
+        }
+
+        await ctx.db.transaction(async (trx) => {
+          await trx
+            .delete(periods)
+            .where(
+              eq(
+                periods.schoolId,
+                ctx.user.settings?.find((setting) => setting.key == "school_id")
+                  ?.value ?? "",
+              ),
+            );
+          await trx
+            .delete(schedules)
+            .where(
+              eq(
+                schedules.schoolId,
+                ctx.user.settings?.find((setting) => setting.key == "school_id")
+                  ?.value ?? "",
+              ),
+            );
+          await trx
+            .delete(periodTimes)
+            .where(
+              eq(
+                periodTimes.schoolId,
+                ctx.user.settings?.find((setting) => setting.key == "school_id")
+                  ?.value ?? "",
+              ),
+            );
+
+          for (const period of input.periods) {
+            await trx.insert(periods).values({
+              periodId: period.periodId,
+              optionId: period.optionId,
+              periodOrder: period.periodOrder,
+              optionOrder: period.optionOrder,
+              periodName: period.periodName,
+              optionName: period.optionName,
+              type: period.type,
+              schoolId:
+                ctx.user.settings?.find((setting) => setting.key == "school_id")
+                  ?.value ?? "",
+            });
+          }
+
+          for (const schedule of input.schedules) {
+            const savedSchedule = (
+              await trx
+                .insert(schedules)
+                .values({
+                  name: schedule.name,
+                  schoolId:
+                    ctx.user.settings?.find(
+                      (setting) => setting.key == "school_id",
+                    )?.value ?? "",
+                  draftState: "draft",
+                })
+                .returning()
+            ).at(0);
+
+            if (!savedSchedule) {
+              throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to create schedule",
+              });
+            }
+
+            let idx = 0;
+            for (const period of schedule.periods) {
+              idx++;
+              await trx.insert(periodTimes).values({
+                schoolId:
+                  ctx.user.settings?.find(
+                    (setting) => setting.key == "school_id",
+                  )?.value ?? "",
+                optionId: period.id,
+                scheduleId: savedSchedule.id,
+                order: idx,
+                start: period.start,
+                end: period.end,
+              });
+            }
+          }
+        });
+      }),
     list: protectedProcedure.query(async ({ ctx }) => {
       const user = ctx.user.get;
       if (!user)
@@ -381,6 +503,58 @@ export const catalystRouter = createTRPCRouter({
               ),
             );
         }),
+      scheduleDates: {
+        get: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .query(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+
+            const scheduleDatesList = await ctx.db
+              .select()
+              .from(scheduleDates)
+              .where(eq(scheduleDates.schoolId, input.id));
+
+            return scheduleDatesList;
+          }),
+        set: protectedProcedure
+          .input(
+            z.object({
+              id: z.string(),
+              items: z.array(
+                z.object({
+                  id: z.string(),
+                  date: z.date(),
+                }),
+              ),
+            }),
+          )
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+
+            await ctx.db
+              .delete(scheduleDates)
+              .where(eq(scheduleDates.schoolId, input.id));
+
+            for (const item of input.items) {
+              await ctx.db.insert(scheduleDates).values({
+                date: item.date,
+                scheduleId: item.id,
+                schoolId: input.id,
+                draftState: "saved",
+              });
+            }
+          }),
+      },
       currentSchool: protectedProcedure.query(async ({ ctx }) => {
         const user = ctx.user.get;
         if (!user)
@@ -487,7 +661,7 @@ export const catalystRouter = createTRPCRouter({
                             .limit(1)
                             .then((res) => res.at(0)?.schoolId)) ?? "",
                         ),
-                        eq(schools.draftState, "draft"),
+                        // eq(schools.draftState, "draft"),
                       ),
                     )
                 ).at(0);
@@ -554,6 +728,9 @@ export const catalystRouter = createTRPCRouter({
                   ...period,
                   id: period.periodId,
                   name: period.periodName,
+                  type: period.type!,
+                  periodOrder: period.periodOrder!,
+                  optionOrder: period.optionOrder!,
                   options,
                 };
               })
@@ -585,7 +762,7 @@ export const catalystRouter = createTRPCRouter({
                       .limit(1)
                       .then((res) => res.at(0)?.schoolId)) ?? "",
                   ),
-                  eq(schools.draftState, "draft"),
+                  // eq(schools.draftState, "draft"),
                 ),
               )
           ).at(0);
