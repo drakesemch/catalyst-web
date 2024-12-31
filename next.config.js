@@ -6,6 +6,18 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = ['canvas', ...config.externals];
+    }
+
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      canvas: false,
+    };
+
+    return config;
+  },
   images: {
     remotePatterns: [
       {
