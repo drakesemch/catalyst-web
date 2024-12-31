@@ -337,11 +337,17 @@ export const catalystRouter = createTRPCRouter({
           periods: z.array(
             z.object({
               periodId: z.string(),
-              optionId: z.string(),
               periodOrder: z.number(),
-              optionOrder: z.number(),
               periodName: z.string(),
-              optionName: z.string(),
+              options: z
+                .array(
+                  z.object({
+                    optionId: z.string(),
+                    optionOrder: z.number(),
+                    optionName: z.string(),
+                  }),
+                )
+                .optional(),
               type: z.enum(periodType.enumValues),
             }),
           ),
@@ -398,18 +404,37 @@ export const catalystRouter = createTRPCRouter({
             );
 
           for (const period of input.periods) {
-            await trx.insert(periods).values({
-              periodId: period.periodId,
-              optionId: period.optionId,
-              periodOrder: period.periodOrder,
-              optionOrder: period.optionOrder,
-              periodName: period.periodName,
-              optionName: period.optionName,
-              type: period.type,
-              schoolId:
-                ctx.user.settings?.find((setting) => setting.key == "school_id")
-                  ?.value ?? "",
-            });
+            if (period.options) {
+              for (const option of period.options) {
+                await trx.insert(periods).values({
+                  periodId: period.periodId,
+                  optionId: option.optionId,
+                  periodOrder: period.periodOrder,
+                  optionOrder: option.optionOrder,
+                  periodName: period.periodName,
+                  optionName: option.optionName,
+                  type: period.type,
+                  schoolId:
+                    ctx.user.settings?.find(
+                      (setting) => setting.key == "school_id",
+                    )?.value ?? "",
+                });
+              }
+            } else {
+              await trx.insert(periods).values({
+                periodId: period.periodId,
+                optionId: period.periodId,
+                periodOrder: period.periodOrder,
+                optionOrder: 1,
+                periodName: period.periodName,
+                optionName: period.periodName,
+                type: period.type,
+                schoolId:
+                  ctx.user.settings?.find(
+                    (setting) => setting.key == "school_id",
+                  )?.value ?? "",
+              });
+            }
           }
 
           for (const schedule of input.schedules) {
@@ -736,7 +761,7 @@ export const catalystRouter = createTRPCRouter({
               })
               .filter((p) => p != undefined)
               .sort((a, b) => (a?.periodOrder ?? 0) - (b?.periodOrder ?? 0));
-
+            console.log(finalPeriods);
             return finalPeriods;
           }),
         schedules: protectedProcedure.query(async ({ ctx }) => {

@@ -57,6 +57,8 @@ export default function SchedulesPage() {
     );
   };
 
+  console.log(periods);
+
   return (
     <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
       <div className="flex w-[min(100ch,100%)] flex-col gap-6">
@@ -69,7 +71,13 @@ export default function SchedulesPage() {
               onClick={() => {
                 if (periods && schedules)
                   save({
-                    periods: periods,
+                    periods: periods.map((period) => ({
+                      ...period,
+                      options: period.options?.map((option, idx) => ({
+                        ...option,
+                        optionOrder: idx,
+                      })),
+                    })),
                     schedules: schedules,
                   });
               }}
@@ -123,7 +131,12 @@ export default function SchedulesPage() {
           >
             <div className="flex flex-col gap-2">
               {periods?.map((period) => (
-                <PeriodItem key={period.id} period={period} periods={periods} />
+                <PeriodItem
+                  key={period.id}
+                  period={period}
+                  periods={periods}
+                  schoolId={schoolId}
+                />
               ))}
             </div>
           </Reorder.Group>
@@ -204,75 +217,165 @@ export default function SchedulesPage() {
 function PeriodItem({
   period,
   periods,
+  schoolId,
 }: {
   period: Period;
   periods: Period[];
+  schoolId: string;
 }) {
   const utils = api.useUtils();
   const controls = useDragControls();
 
   return (
     <Reorder.Item value={period} dragControls={controls}>
-      <div className="flex gap-2">
-        <div
-          className="reorder-handle flex size-10 flex-shrink-0 items-center justify-start pl-4"
-          onPointerDown={(evt) => {
-            evt.preventDefault();
-            controls.start(evt);
-          }}
-        >
-          <GripVertical />
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
+          <div
+            className="reorder-handle flex size-10 flex-shrink-0 items-center justify-start pl-4"
+            onPointerDown={(evt) => {
+              evt.preventDefault();
+              controls.start(evt);
+            }}
+          >
+            <GripVertical />
+          </div>
+          <Input
+            className="flex-1"
+            value={period.name}
+            onChange={(e) => {
+              utils.catalyst.school.get.draft.periods.setData(
+                undefined,
+                periods.map((p) =>
+                  p.id === period.id ? { ...p, name: e.target.value } : p,
+                ),
+              );
+            }}
+            placeholder="Period Name"
+          />
+          <Combobox
+            className="flex-1"
+            value={period.type}
+            onSelect={(value) => {
+              utils.catalyst.school.get.draft.periods.setData(
+                undefined,
+                periods.map((p) =>
+                  p.id === period.id
+                    ? { ...p, type: value as "single" | "course" | "filler" }
+                    : p,
+                ),
+              );
+            }}
+            groups={[
+              {
+                id: "period-types",
+                header: "Period Types",
+                values: [
+                  { id: "single", render: "Single Choice" },
+                  { id: "course", render: "Course" },
+                  { id: "filler", render: "Filler" },
+                ],
+              },
+            ]}
+          />
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => {
+              utils.catalyst.school.get.draft.periods.setData(
+                undefined,
+                periods.filter((p) => p.id !== period.id),
+              );
+            }}
+          >
+            <Trash />
+          </Button>
         </div>
-        <Input
-          className="flex-1"
-          value={period.name}
-          onChange={(e) => {
-            utils.catalyst.school.get.draft.periods.setData(
-              undefined,
-              periods.map((p) =>
-                p.id === period.id ? { ...p, name: e.target.value } : p,
-              ),
-            );
-          }}
-          placeholder="Period Name"
-        />
-        <Combobox
-          className="flex-1"
-          value={period.type}
-          onSelect={(value) => {
-            utils.catalyst.school.get.draft.periods.setData(
-              undefined,
-              periods.map((p) =>
-                p.id === period.id
-                  ? { ...p, type: value as "single" | "course" | "filler" }
-                  : p,
-              ),
-            );
-          }}
-          groups={[
-            {
-              id: "period-types",
-              header: "Period Types",
-              values: [
-                { id: "single", render: "Single Choice" },
-                { id: "course", render: "Course" },
-                { id: "filler", render: "Filler" },
-              ],
-            },
-          ]}
-        />
-        <Button
-          variant="destructive"
-          size="icon"
-          onClick={() => {
-            utils.catalyst.school.get.draft.periods.setData(
-              undefined,
-              periods.filter((p) => p.id !== period.id),
-            );
-          }}
-        >
-          <Trash />
-        </Button>
+        {period.type === "single" && (
+          <div className="flex flex-col gap-2 pl-8">
+            {period.options?.map((option) => (
+              <div key={option.id} className="flex items-center gap-2">
+                <Input
+                  className="flex-1"
+                  value={option.optionName}
+                  onChange={(e) => {
+                    utils.catalyst.school.get.draft.periods.setData(
+                      undefined,
+                      periods.map((p) =>
+                        p.id === period.id
+                          ? {
+                              ...p,
+                              options: p.options!.map((o) =>
+                                o.id === option.id
+                                  ? {
+                                      ...o,
+                                      name: e.target.value,
+                                      optionName: e.target.value,
+                                    }
+                                  : o,
+                              ),
+                            }
+                          : p,
+                      ),
+                    );
+                  }}
+                  placeholder="Option Name"
+                />
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => {
+                    utils.catalyst.school.get.draft.periods.setData(
+                      undefined,
+                      periods.map((p) =>
+                        p.id === period.id
+                          ? {
+                              ...p,
+                              options: p.options!.filter(
+                                (o) => o.id !== option.id,
+                              ),
+                            }
+                          : p,
+                      ),
+                    );
+                  }}
+                >
+                  <Trash />
+                </Button>
+              </div>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newOption = {
+                  id: randomBytes(20).toString("hex"),
+                  name: `Option ${(period.options?.length ?? 0) + 1}`,
+                  type: null,
+                  draftState: "saved" as const,
+                  schoolId: schoolId,
+                  periodId: period.id,
+                  optionId: randomBytes(20).toString("hex"),
+                  periodName: period.name,
+                  optionName: `Option ${(period.options?.length ?? 0) + 1}`,
+                  periodOrder: period.periodOrder,
+                  optionOrder: (period.options?.length ?? 0) + 1,
+                };
+                utils.catalyst.school.get.draft.periods.setData(
+                  undefined,
+                  periods.map((p) =>
+                    p.id === period.id
+                      ? {
+                          ...p,
+                          options: [...(p.options ?? []), newOption],
+                        }
+                      : p,
+                  ),
+                );
+              }}
+            >
+              <Plus /> Add Option
+            </Button>
+          </div>
+        )}
       </div>
     </Reorder.Item>
   );
@@ -421,8 +524,6 @@ function SchedulePeriodItem({
     date.setHours(hours ?? 0, minutes ?? 0);
     return `${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}`;
   };
-
-  console.log(period);
 
   return (
     <Reorder.Item value={period} dragControls={controls}>
