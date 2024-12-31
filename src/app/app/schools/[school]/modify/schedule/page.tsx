@@ -121,9 +121,11 @@ export default function SchedulesPage() {
               );
             }}
           >
-            {periods?.map((period) => (
-              <PeriodItem key={period.id} period={period} periods={periods} />
-            ))}
+            <div className="flex flex-col gap-2">
+              {periods?.map((period) => (
+                <PeriodItem key={period.id} period={period} periods={periods} />
+              ))}
+            </div>
           </Reorder.Group>
           <Button
             variant="outline"
@@ -163,14 +165,16 @@ export default function SchedulesPage() {
               );
             }}
           >
-            {schedules?.map((schedule) => (
-              <ScheduleItem
-                key={schedule.id}
-                schedule={schedule}
-                schedules={schedules}
-                periods={periods ?? []}
-              />
-            ))}
+            <div className="flex flex-col gap-8">
+              {schedules?.map((schedule) => (
+                <ScheduleItem
+                  key={schedule.id}
+                  schedule={schedule}
+                  schedules={schedules}
+                  periods={periods ?? []}
+                />
+              ))}
+            </div>
           </Reorder.Group>
           <Button
             variant="outline"
@@ -337,18 +341,21 @@ function ScheduleItem({
           );
         }}
       >
-        {schedule.periods.map((period) => (
-          <SchedulePeriodItem
-            key={period.id}
-            period={period}
-            periods={periods}
-            schedules={schedules}
-            scheduleId={schedule.id}
-          />
-        ))}
+        <div className="mt-2 flex flex-col gap-2 pl-8">
+          {schedule.periods.map((period) => (
+            <SchedulePeriodItem
+              key={period.id}
+              period={period}
+              periods={periods}
+              schedules={schedules}
+              scheduleId={schedule.id}
+            />
+          ))}
+        </div>
       </Reorder.Group>
       <Button
         variant="outline"
+        className="mt-2 w-full"
         onClick={() => {
           const newPeriod = {
             id: randomBytes(20).toString("hex"),
@@ -415,6 +422,8 @@ function SchedulePeriodItem({
     return `${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}`;
   };
 
+  console.log(period);
+
   return (
     <Reorder.Item value={period} dragControls={controls}>
       <div className="flex gap-2">
@@ -450,39 +459,46 @@ function SchedulePeriodItem({
               id: "filler",
               header: "Filler",
               values: periods
-                .filter((p) => p.type === "filler")
-                .map((p) => ({ id: p.id, render: p.name })),
+                .filter((period) => period.type == "filler")
+                .map((period) => ({
+                  id: period.id,
+                  render: period.name,
+                })),
             },
             {
               id: "courses",
               header: "Courses",
               values: periods
-                .filter((p) => p.type === "course")
-                .map((p) => ({ id: p.id, render: p.name })),
+                .filter((period) => period.type == "course")
+                .map((period) => ({
+                  id: period.id,
+                  render: period.name,
+                })),
             },
             {
               id: "single",
               header: "Single Choice",
               values: periods
-                .filter((p) => p.type === "single")
-                .flatMap(
-                  (p) =>
-                    p.options?.map((opt) => ({
-                      id: opt.id,
-                      render: (
-                        <div className="flex flex-col gap-1">
-                          <span>{opt.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {p.name}
-                          </span>
-                        </div>
-                      ),
-                      selectionRender: (
-                        <div className="flex flex-col gap-1">
-                          {opt.name} ({p.name})
-                        </div>
-                      ),
-                    })) ?? [],
+                .filter((period) => period.type == "single")
+                .flatMap((period) =>
+                  period.type == "single"
+                    ? (period.options?.map((option) => ({
+                        id: option.id,
+                        render: (
+                          <div className="flex flex-col gap-1">
+                            <span>{option.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {period.name}
+                            </span>
+                          </div>
+                        ),
+                        selectionRender: (
+                          <div className="flex flex-col gap-1">
+                            {option.name} ({period.name})
+                          </div>
+                        ),
+                      })) ?? [])
+                    : [],
                 ),
             },
           ]}
@@ -507,7 +523,7 @@ function SchedulePeriodItem({
           <Trash />
         </Button>
       </div>
-      <div className="flex gap-4">
+      <div className="mt-2 flex gap-4 px-8">
         <Input
           className="flex-1"
           value={convertToLocalTime(period.start)}
