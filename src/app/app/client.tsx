@@ -154,6 +154,12 @@ export function HomePageCards() {
                   currentPeriod?.period_time?.start +
                   "Z",
               ),
+            ) &&
+            isBefore(
+              new Date(),
+              new Date(
+                format(now, "yyyy-MM-dd'T'") + period?.period_time?.end + "Z",
+              ),
             ),
         ),
       );
