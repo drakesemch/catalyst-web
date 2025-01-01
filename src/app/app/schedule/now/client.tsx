@@ -45,22 +45,49 @@ export function TimerClientPage() {
           isAfter(
             now,
             new Date(
-              new Date(
-                format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
-              ),
+              format(now, "yyyy-MM-dd'T'") + period?.period_time?.start + "Z",
             ),
           ) &&
           isBefore(
             now,
             new Date(
-              new Date(
-                format(now, "yyyy-MM-dd ") + period?.period_time?.end + " UTC",
-              ),
+              format(now, "yyyy-MM-dd'T'") + period?.period_time?.end + "Z",
             ),
           ),
       );
+    const inBetweenPeriods = schedule.times
+      .filter(
+        (period) =>
+          typeof period.schedule_value.value != "boolean" ||
+          period.schedule_value.value != false,
+      )
+      .filter((period) =>
+        currentPeriods.some(
+          (currentPeriod) =>
+            isBefore(
+              new Date(
+                format(now, "yyyy-MM-dd'T'") + period?.period_time?.start + "Z",
+              ),
+              new Date(
+                format(now, "yyyy-MM-dd'T'") +
+                  currentPeriod?.period_time?.end +
+                  "Z",
+              ),
+            ) &&
+            isAfter(
+              new Date(
+                format(now, "yyyy-MM-dd'T'") + period?.period_time?.end + "Z",
+              ),
+              new Date(
+                format(now, "yyyy-MM-dd'T'") +
+                  currentPeriod?.period_time?.start +
+                  "Z",
+              ),
+            ),
+        ),
+      );
+
+    currentPeriods = [...currentPeriods, ...inBetweenPeriods];
     if (currentPeriods.length == 0) {
       currentPeriods = schedule.times
         .filter(
@@ -72,11 +99,7 @@ export function TimerClientPage() {
           isBefore(
             now,
             new Date(
-              new Date(
-                format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
-              ),
+              format(now, "yyyy-MM-dd'T'") + period?.period_time?.start + "Z",
             ),
           ),
         );
@@ -87,10 +110,10 @@ export function TimerClientPage() {
     const currentPeriod = currentPeriods.reduce((a, b) => {
       if (
         Number(
-          new Date(format(now, "yyyy-MM-dd ") + a?.period_time?.end + " UTC"),
+          new Date(format(now, "yyyy-MM-dd'T'") + a?.period_time?.end + "Z"),
         ) <
         Number(
-          new Date(format(now, "yyyy-MM-dd ") + b?.period_time?.end + " UTC"),
+          new Date(format(now, "yyyy-MM-dd'T'") + b?.period_time?.end + "Z"),
         )
       ) {
         return a;
@@ -103,10 +126,10 @@ export function TimerClientPage() {
 
   const dateToCompare = useMemo(() => {
     const startDate = new Date(
-      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.start + " UTC",
+      format(now, "yyyy-MM-dd'T'") + currentClass?.period_time?.start + "Z",
     );
     const endDate = new Date(
-      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC",
+      format(now, "yyyy-MM-dd'T'") + currentClass?.period_time?.end + "Z",
     );
 
     if (isBefore(now, startDate)) {
@@ -157,30 +180,28 @@ export function TimerClientPage() {
       isBefore(
         new Date(),
         new Date(
-          format(now, "yyyy-MM-dd ") +
-            currentClass?.period_time?.start +
-            " UTC",
+          format(now, "yyyy-MM-dd'T'") + currentClass?.period_time?.start + "Z",
         ),
       )
         ? 0
         : differenceInSeconds(
             new Date(),
             new Date(
-              format(now, "yyyy-MM-dd ") +
+              format(now, "yyyy-MM-dd'T'") +
                 currentClass?.period_time?.start +
-                " UTC",
+                "Z",
             ),
           ) /
           differenceInSeconds(
             new Date(
-              format(now, "yyyy-MM-dd ") +
+              format(now, "yyyy-MM-dd'T'") +
                 currentClass?.period_time?.end +
-                " UTC",
+                "Z",
             ),
             new Date(
-              format(now, "yyyy-MM-dd ") +
+              format(now, "yyyy-MM-dd'T'") +
                 currentClass?.period_time?.start +
-                " UTC",
+                "Z",
             ),
           ),
     [currentClass, now],
@@ -217,9 +238,9 @@ export function TimerClientPage() {
             {isEqual(
               dateToCompare,
               new Date(
-                format(now, "yyyy-MM-dd ") +
+                format(now, "yyyy-MM-dd'T'") +
                   currentClass?.period_time?.end +
-                  " UTC",
+                  "Z",
               ),
             )
               ? "ends"
@@ -233,37 +254,44 @@ export function TimerClientPage() {
         >
           <Digit
             value={hoursTens}
-            className={[hoursTens].every((v) => v == 0) ? "text-muted" : ""}
+            className={cn(
+              "transition-colors",
+              [hoursTens].every((v) => v == 0) ? "text-muted" : "",
+            )}
           />
           <Digit
             value={hoursOnes}
-            className={
-              [hoursTens, hoursOnes].every((v) => v == 0) ? "text-muted" : ""
-            }
+            className={cn(
+              "transition-colors",
+              [hoursTens, hoursOnes].every((v) => v == 0) ? "text-muted" : "",
+            )}
           />
           <span className="text-3xl text-muted">:</span>
           <Digit
             value={minutesTens}
-            className={
+            className={cn(
+              "transition-colors",
               [hoursTens, hoursOnes, minutesTens].every((v) => v == 0)
                 ? "text-muted"
-                : ""
-            }
+                : "",
+            )}
           />
           <Digit
             value={minutesOnes}
-            className={
+            className={cn(
+              "transition-colors",
               [hoursTens, hoursOnes, minutesTens, minutesOnes].every(
                 (v) => v == 0,
               )
                 ? "text-muted"
-                : ""
-            }
+                : "",
+            )}
           />
           <span className="text-3xl text-muted">:</span>
           <Digit
             value={secondsTens}
-            className={
+            className={cn(
+              "transition-colors",
               [
                 hoursTens,
                 hoursOnes,
@@ -272,12 +300,13 @@ export function TimerClientPage() {
                 secondsTens,
               ].every((v) => v == 0)
                 ? "text-muted"
-                : ""
-            }
+                : "",
+            )}
           />
           <Digit
             value={secondsOnes}
-            className={
+            className={cn(
+              "transition-colors",
               [
                 hoursTens,
                 hoursOnes,
@@ -287,8 +316,8 @@ export function TimerClientPage() {
                 secondsOnes,
               ].every((v) => v == 0)
                 ? "text-muted"
-                : ""
-            }
+                : "",
+            )}
           />
         </div>
         <div className="mb-4 flex items-center justify-around text-xs text-muted">
@@ -322,9 +351,9 @@ export function TimerClientPage() {
               <span>
                 {format(
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.start +
-                      " UTC",
+                      "Z",
                   ),
                   "hh:mm a",
                 )}
@@ -335,11 +364,9 @@ export function TimerClientPage() {
                   isBefore(
                     now,
                     new Date(
-                      new Date(
-                        format(now, "yyyy-MM-dd ") +
-                          currentClass?.period_time?.start +
-                          " UTC",
-                      ),
+                      format(now, "yyyy-MM-dd'T'") +
+                        currentClass?.period_time?.start +
+                        "Z",
                     ),
                   )
                     ? 0
@@ -349,9 +376,9 @@ export function TimerClientPage() {
               <span>
                 {format(
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.end +
-                      " UTC",
+                      "Z",
                   ),
                   "hh:mm a",
                 )}
@@ -362,18 +389,18 @@ export function TimerClientPage() {
                 {isBefore(
                   new Date(),
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.start +
-                      " UTC",
+                      "Z",
                   ),
                 )
                   ? "Starts "
                   : "Started "}
                 {formatDistanceStrict(
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.start +
-                      " UTC",
+                      "Z",
                   ),
                   new Date(),
                   {
@@ -385,18 +412,18 @@ export function TimerClientPage() {
                 {isBefore(
                   new Date(),
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.end +
-                      " UTC",
+                      "Z",
                   ),
                 )
                   ? "Ends "
                   : "Ended "}
                 {formatDistanceStrict(
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.end +
-                      " UTC",
+                      "Z",
                   ),
                   new Date(),
                   {

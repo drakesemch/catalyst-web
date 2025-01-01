@@ -363,7 +363,7 @@ function Social() {
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
       <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
-        This feature is not available.
+        This feature is in active development.
         <br /> Check back later for updates.
       </div>
       {/* <Button

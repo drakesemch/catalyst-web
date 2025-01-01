@@ -108,8 +108,8 @@ export function HomePageCards() {
     let currentPeriods = schedule.times
       .filter(
         (period) =>
-          typeof period?.schedule_value?.value != "boolean" ||
-          period?.schedule_value?.value != false,
+          typeof period.schedule_value.value != "boolean" ||
+          period.schedule_value.value != false,
       )
       .filter(
         (period) =>
@@ -126,12 +126,45 @@ export function HomePageCards() {
             ),
           ),
       );
+    const inBetweenPeriods = schedule.times
+      .filter(
+        (period) =>
+          typeof period.schedule_value.value != "boolean" ||
+          period.schedule_value.value != false,
+      )
+      .filter((period) =>
+        currentPeriods.some(
+          (currentPeriod) =>
+            isBefore(
+              new Date(
+                format(now, "yyyy-MM-dd'T'") + period?.period_time?.start + "Z",
+              ),
+              new Date(
+                format(now, "yyyy-MM-dd'T'") +
+                  currentPeriod?.period_time?.end +
+                  "Z",
+              ),
+            ) &&
+            isAfter(
+              new Date(
+                format(now, "yyyy-MM-dd'T'") + period?.period_time?.end + "Z",
+              ),
+              new Date(
+                format(now, "yyyy-MM-dd'T'") +
+                  currentPeriod?.period_time?.start +
+                  "Z",
+              ),
+            ),
+        ),
+      );
+
+    currentPeriods = [...currentPeriods, ...inBetweenPeriods];
     if (currentPeriods.length == 0) {
       currentPeriods = schedule.times
         .filter(
           (period) =>
-            typeof period?.schedule_value?.value != "boolean" ||
-            period?.schedule_value?.value != false,
+            typeof period.schedule_value.value != "boolean" ||
+            period.schedule_value.value != false,
         )
         .filter((period) =>
           isBefore(
@@ -142,23 +175,23 @@ export function HomePageCards() {
           ),
         );
     }
-    let currentPeriod = null;
-    if (currentPeriods.length > 0) {
-      currentPeriod = currentPeriods.reduce((a, b) => {
-        if (
-          Number(
-            new Date(format(now, "yyyy-MM-dd'T'") + a?.period_time?.end + "Z"),
-          ) <
-          Number(
-            new Date(format(now, "yyyy-MM-dd'T'") + b?.period_time?.end + "Z"),
-          )
-        ) {
-          return a;
-        } else {
-          return b;
-        }
-      });
+    if (currentPeriods.length == 0) {
+      return null;
     }
+    const currentPeriod = currentPeriods.reduce((a, b) => {
+      if (
+        Number(
+          new Date(format(now, "yyyy-MM-dd'T'") + a?.period_time?.end + "Z"),
+        ) <
+        Number(
+          new Date(format(now, "yyyy-MM-dd'T'") + b?.period_time?.end + "Z"),
+        )
+      ) {
+        return a;
+      } else {
+        return b;
+      }
+    });
     return currentPeriod;
   }, [schedule, now]);
 
