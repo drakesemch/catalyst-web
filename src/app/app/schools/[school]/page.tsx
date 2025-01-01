@@ -8,6 +8,7 @@ import {
   Pencil,
   School,
 } from "lucide-react";
+import { LocalTime } from "./client";
 
 export default async function SchoolPage(props: {
   params: Promise<{ school: string }>;
@@ -112,26 +113,8 @@ export default async function SchoolPage(props: {
                     {period?.period_time && (
                       <div className="flex flex-col border-t">
                         <div className="justfiy-between flex items-center gap-4 px-4 py-2 text-xs">
-                          <span>
-                            {format(
-                              new Date(
-                                format(now, "yyyy-MM-dd ") +
-                                  period?.period_time?.start +
-                                  " UTC",
-                              ),
-                              "hh:mm a",
-                            )}
-                          </span>
-                          <span>
-                            {format(
-                              new Date(
-                                format(now, "yyyy-MM-dd ") +
-                                  period?.period_time?.end +
-                                  " UTC",
-                              ),
-                              "hh:mm a",
-                            )}
-                          </span>
+                          <LocalTime time={period?.period_time?.start} />
+                          <LocalTime time={period?.period_time?.end} />
                         </div>
                       </div>
                     )}
