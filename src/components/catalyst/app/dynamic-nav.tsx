@@ -63,12 +63,12 @@ export function Courses() {
 
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:w-[40ch] md:pr-2">
-      <label className="flex cursor-text bg-background items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
+      <label className="flex cursor-text items-center gap-2 rounded border bg-background px-3 py-2 [&:has(input:focus-visible)]:outline">
         <Search />
         <input
           type="search"
           placeholder="Search courses..."
-          className="flex-1 outline-none bg-background"
+          className="flex-1 bg-background outline-none"
           value={courseSearch}
           onChange={(e) => setCourseSearch(e.target.value)}
         />
@@ -88,10 +88,10 @@ export function Courses() {
             .includes(courseSearch.toLowerCase())
         );
       }).length == 0 && (
-          <div className="w-84 flex items-center justify-center p-2 text-xs text-muted-foreground">
-            No courses found.
-          </div>
-        )}
+        <div className="w-84 flex items-center justify-center p-2 text-xs text-muted-foreground">
+          No courses found.
+        </div>
+      )}
       {courses
         .filter((course) => {
           if (courseSearch == "") return true;
@@ -111,29 +111,31 @@ export function Courses() {
         .map((course) => {
           const diffPct = isBefore(
             new Date(),
-            new Date(format(now, "yyyy-MM-dd ") + course.time?.start + " UTC"),
+            new Date(
+              format(now, "yyyy-MM-dd") + "T" + course.time?.start + "Z",
+            ),
           )
             ? 0
             : differenceInSeconds(
-              new Date(),
-              new Date(
-                format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
-              ),
-            ) /
-            differenceInSeconds(
-              new Date(
-                format(now, "yyyy-MM-dd ") + course.time?.end + " UTC",
-              ),
-              new Date(
-                format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
-              ),
-            );
+                new Date(),
+                new Date(
+                  format(now, "yyyy-MM-dd") + "T" + course.time?.start + "Z",
+                ),
+              ) /
+              differenceInSeconds(
+                new Date(
+                  format(now, "yyyy-MM-dd") + "T" + course.time?.end + "Z",
+                ),
+                new Date(
+                  format(now, "yyyy-MM-dd") + "T" + course.time?.start + "Z",
+                ),
+              );
           const isCurrent =
             isAfter(
               now,
               new Date(
                 new Date(
-                  format(now, "yyyy-MM-dd ") + course.time?.start + " UTC",
+                  format(now, "yyyy-MM-dd") + "T" + course.time?.start + "Z",
                 ),
               ),
             ) &&
@@ -141,7 +143,7 @@ export function Courses() {
               now,
               new Date(
                 new Date(
-                  format(now, "yyyy-MM-dd ") + course.time?.end + " UTC",
+                  format(now, "yyyy-MM-dd") + "T" + course.time?.end + "Z",
                 ),
               ),
             );
@@ -222,9 +224,10 @@ export function Courses() {
                     <span>
                       {format(
                         new Date(
-                          format(now, "yyyy-MM-dd ") +
-                          course.time.start +
-                          " UTC",
+                          format(now, "yyyy-MM-dd") +
+                            "T" +
+                            course.time.start +
+                            "Z",
                         ),
                         "hh:mm a",
                       )}
@@ -236,9 +239,10 @@ export function Courses() {
                           now,
                           new Date(
                             new Date(
-                              format(now, "yyyy-MM-dd ") +
-                              course.time.start +
-                              " UTC",
+                              format(now, "yyyy-MM-dd") +
+                                "T" +
+                                course.time.start +
+                                "Z",
                             ),
                           ),
                         )
@@ -249,7 +253,10 @@ export function Courses() {
                     <span>
                       {format(
                         new Date(
-                          format(now, "yyyy-MM-dd ") + course.time.end + " UTC",
+                          format(now, "yyyy-MM-dd") +
+                            "T" +
+                            course.time.end +
+                            "Z",
                         ),
                         "hh:mm a",
                       )}
@@ -260,18 +267,20 @@ export function Courses() {
                       {isBefore(
                         new Date(),
                         new Date(
-                          format(now, "yyyy-MM-dd ") +
-                          course.time.start +
-                          " UTC",
+                          format(now, "yyyy-MM-dd") +
+                            "T" +
+                            course.time.start +
+                            "Z",
                         ),
                       )
                         ? "Starts "
                         : "Started "}
                       {formatDistanceStrict(
                         new Date(
-                          format(now, "yyyy-MM-dd ") +
-                          course.time.start +
-                          " UTC",
+                          format(now, "yyyy-MM-dd") +
+                            "T" +
+                            course.time.start +
+                            "Z",
                         ),
                         new Date(),
                         {
@@ -283,14 +292,20 @@ export function Courses() {
                       {isBefore(
                         new Date(),
                         new Date(
-                          format(now, "yyyy-MM-dd ") + course.time.end + " UTC",
+                          format(now, "yyyy-MM-dd") +
+                            "T" +
+                            course.time.end +
+                            "Z",
                         ),
                       )
                         ? "Ends "
                         : "Ended "}
                       {formatDistanceStrict(
                         new Date(
-                          format(now, "yyyy-MM-dd ") + course.time.end + " UTC",
+                          format(now, "yyyy-MM-dd") +
+                            "T" +
+                            course.time.end +
+                            "Z",
                         ),
                         new Date(),
                         {
@@ -359,14 +374,23 @@ export function Notifications() {
                   toast={undefined}
                   notification={notification}
                   onUpdate={(updatedNotification: NotificationMeta) => {
-                    type NotificationType = { data: unknown, id: string, userId: string, sentAt: Date, dismissed: boolean };
+                    type NotificationType = {
+                      data: unknown;
+                      id: string;
+                      userId: string;
+                      sentAt: Date;
+                      dismissed: boolean;
+                    };
                     // Remove from active list if currently active
                     utils.catalyst.user.notifications.list.active.setData(
                       undefined,
                       (prev) => {
                         if (!prev) return prev;
                         if (notification.dismissed) {
-                          return [...prev, updatedNotification as NotificationType];
+                          return [
+                            ...prev,
+                            updatedNotification as NotificationType,
+                          ];
                         }
                         return prev.filter((n) => n.id !== notification.id);
                       },
@@ -378,7 +402,10 @@ export function Notifications() {
                       (prev) => {
                         if (!prev) return prev;
                         if (!notification.dismissed) {
-                          return [...prev, updatedNotification as NotificationType];
+                          return [
+                            ...prev,
+                            updatedNotification as NotificationType,
+                          ];
                         }
                         return prev.filter((n) => n.id !== notification.id);
                       },

@@ -116,19 +116,13 @@ export function HomePageCards() {
           isAfter(
             now,
             new Date(
-              new Date(
-                format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
-              ),
+              format(now, "yyyy-MM-dd'T'") + period?.period_time?.start + "Z",
             ),
           ) &&
           isBefore(
             now,
             new Date(
-              new Date(
-                format(now, "yyyy-MM-dd ") + period?.period_time?.end + " UTC",
-              ),
+              format(now, "yyyy-MM-dd'T'") + period?.period_time?.end + "Z",
             ),
           ),
       );
@@ -143,11 +137,7 @@ export function HomePageCards() {
           isBefore(
             now,
             new Date(
-              new Date(
-                format(now, "yyyy-MM-dd ") +
-                  period?.period_time?.start +
-                  " UTC",
-              ),
+              format(now, "yyyy-MM-dd'T'") + period?.period_time?.start + "Z",
             ),
           ),
         );
@@ -157,10 +147,10 @@ export function HomePageCards() {
       currentPeriod = currentPeriods.reduce((a, b) => {
         if (
           Number(
-            new Date(format(now, "yyyy-MM-dd ") + a?.period_time?.end + " UTC"),
+            new Date(format(now, "yyyy-MM-dd'T'") + a?.period_time?.end + "Z"),
           ) <
           Number(
-            new Date(format(now, "yyyy-MM-dd ") + b?.period_time?.end + " UTC"),
+            new Date(format(now, "yyyy-MM-dd'T'") + b?.period_time?.end + "Z"),
           )
         ) {
           return a;
@@ -174,10 +164,10 @@ export function HomePageCards() {
 
   const dateToCompare = useMemo(() => {
     const startDate = new Date(
-      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.start + " UTC",
+      format(now, "yyyy-MM-dd'T'") + currentClass?.period_time?.start + "Z",
     );
     const endDate = new Date(
-      format(now, "yyyy-MM-dd ") + currentClass?.period_time?.end + " UTC",
+      format(now, "yyyy-MM-dd'T'") + currentClass?.period_time?.end + "Z",
     );
 
     if (isBefore(now, startDate)) {
@@ -188,7 +178,7 @@ export function HomePageCards() {
   }, [currentClass?.period_time, now]);
 
   return (
-    <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex animate-fade-in items-center items-stretch gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
+    <div className="-mx-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] mt-4 flex animate-fade-in items-stretch gap-4 overflow-auto px-[max(calc((100vw-100ch+2rem-20px)/2),1rem)] pb-4 opacity-0 animate-delay-1000">
       {currentClass != null ? (
         <>
           <Card className="w-[40ch] max-w-[40ch] flex-shrink-0">
@@ -224,9 +214,9 @@ export function HomePageCards() {
                 {isEqual(
                   dateToCompare,
                   new Date(
-                    format(now, "yyyy-MM-dd ") +
+                    format(now, "yyyy-MM-dd'T'") +
                       currentClass?.period_time?.end +
-                      " UTC",
+                      "Z",
                   ),
                 )
                   ? "Ends"

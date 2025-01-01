@@ -35,10 +35,30 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Combobox } from "@/components/ui/combobox";
 
 export default function SettingsPage() {
   const { mutate, isPending } = api.catalyst.user.settings.draft.useMutation();
   const { mutate: deleteAccount } = api.catalyst.user.delete.useMutation();
+
+  const [settings] = api.catalyst.user.settings.get.useSuspenseQuery();
+  const [periods] = api.catalyst.school.get.draft.periods.useSuspenseQuery({
+    id: settings?.find((s) => s.key == "school_id")?.value ?? "",
+  });
+  const [values] = api.catalyst.user.schedule.values.get.useSuspenseQuery();
+  const [{ pages }] =
+    api.catalyst.user.canvas.courses.list.useSuspenseInfiniteQuery(
+      {
+        limit: 100,
+        enrollment_state: "active",
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
+
+  const { mutate: updateSchedule } =
+    api.catalyst.user.schedule.values.add.useMutation();
 
   return (
     <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
@@ -209,6 +229,110 @@ export default function SettingsPage() {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+        <h2 className="h2 w-full" id="schedule">
+          Schedule
+        </h2>
+        <div className="mt-2 flex w-full flex-col gap-4">
+          {periods?.map(
+            (period) =>
+              period && (
+                <div
+                  key={period.id}
+                  className="flex w-full items-center gap-2 rounded border p-4"
+                >
+                  <h2 className="text-lg font-bold">{period.name}</h2>
+                  {(() => {
+                    switch (period.type) {
+                      case "filler":
+                        return (
+                          <span className="ml-auto text-xs text-muted-foreground">
+                            No Selectable Options
+                          </span>
+                        );
+                      case "single":
+                        return (
+                          <Combobox
+                            className="ml-auto max-w-[20rem] flex-1"
+                            onSelect={(valueId) => {
+                              updateSchedule({
+                                periodId: period.id,
+                                value: valueId,
+                              });
+                            }}
+                            defaultValue={
+                              values?.find(
+                                (value) => value.periodId == period.id,
+                              )?.value
+                            }
+                            groups={[
+                              {
+                                id: period.id,
+                                header: "",
+                                values: period.options!.map((value) => ({
+                                  id: value.id,
+                                  render: value.name,
+                                })),
+                              },
+                            ]}
+                          />
+                        );
+                      case "course":
+                        return (
+                          <Combobox
+                            className="ml-auto max-w-[20rem] flex-1"
+                            placeholders={{
+                              emptyValue: "Select a course",
+                              search: "Search for a course",
+                            }}
+                            onSelect={(courseId) => {
+                              updateSchedule({
+                                periodId: period.id,
+                                value: courseId,
+                              });
+                            }}
+                            defaultValue={
+                              values?.find(
+                                (value) => value.periodId == period.id,
+                              )?.value
+                            }
+                            groups={[
+                              {
+                                id: period.id,
+                                header: "",
+                                values:
+                                  pages
+                                    ?.map((page) =>
+                                      page.data.map((course) => ({
+                                        id: String(course.id),
+                                        render: (
+                                          <div className="flex flex-col gap-2 overflow-hidden">
+                                            <span className="font-bold">
+                                              {course.classification}
+                                            </span>
+                                            <span className="truncate text-xs text-muted-foreground">
+                                              {course.original_name}
+                                            </span>
+                                          </div>
+                                        ),
+                                        selectionRender: (
+                                          <div className="flex flex-col gap-2 truncate">
+                                            {course.classification} (
+                                            {course.original_name})
+                                          </div>
+                                        ),
+                                      })),
+                                    )
+                                    .flat() ?? [],
+                              },
+                            ]}
+                          />
+                        );
+                    }
+                  })()}
+                </div>
+              ),
+          )}
+        </div>
         <h2 className="h2 w-full" id="danger">
           Dangerous Actions
         </h2>
