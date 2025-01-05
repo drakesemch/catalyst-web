@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import type { RouterOutputs } from "@/server/api/root";
 import { api } from "@/trpc/react";
 import {
   AlertCircle,
@@ -20,13 +21,47 @@ import {
 // import { redirect } from "next/navigation";
 import { toast } from "sonner";
 
+type IncomingFriendRequest =
+  RouterOutputs["catalyst"]["user"]["friends"]["request"]["incoming"][number];
+
+export type CatalystMessage = {
+  id: string;
+  type: "catalyst.message";
+  chatId: string;
+  user: {
+    id: string;
+    name: string;
+    image: string;
+  };
+  message: string;
+  reactions: {
+    userId: string;
+    reaction: string;
+  }[];
+  sentAt: Date;
+  attachments: {
+    type: "image" | "file";
+    id: string;
+  }[];
+};
+
 export type NotificationMeta = {
   id: string;
   dismissed: boolean;
   data:
     | {
-        type: "catalyst.friend-request" | "catalyst.friend-added";
-        user: string;
+        type: "catalyst.friend-request";
+        data: IncomingFriendRequest;
+      }
+    | {
+        type: "catalyst.friend-added";
+        data: IncomingFriendRequest & {
+          chat: string;
+        };
+      }
+    | {
+        type: "catalyst.message";
+        data: CatalystMessage;
       }
     | {
         type: "catalyst.schedule.add-date";
@@ -280,12 +315,16 @@ function FriendRequestNotification({
   archive,
 }: {
   toastData: ToastData | undefined;
-  notification: { id: string; dismissed: boolean; data: { user: string } };
+  notification: {
+    id: string;
+    dismissed: boolean;
+    data: {
+      data: IncomingFriendRequest;
+    };
+  };
   archive: () => void;
 }) {
-  const [user] = api.catalyst.user.friends.request.getDetails.useSuspenseQuery({
-    id: notification.data.user,
-  });
+  const user = notification.data.data.user;
   return (
     <div className="flex select-none flex-col gap-2 bg-background p-3 pl-4">
       <div className="flex items-center gap-2">
@@ -308,7 +347,10 @@ function FriendRequestNotification({
                 dismissed: false,
                 data: {
                   type: "catalyst.friend-added",
-                  user: notification.data.user,
+                  data: {
+                    ...notification.data.data,
+                    chat: "",
+                  },
                 },
               },
             });
@@ -348,12 +390,15 @@ function FriendAcceptedNotification({
   archive,
 }: {
   toastData: ToastData | undefined;
-  notification: { id: string; data: { user: string } };
+  notification: {
+    id: string;
+    data: {
+      data: IncomingFriendRequest;
+    };
+  };
   archive: () => void;
 }) {
-  const [user] = api.catalyst.user.friends.request.getDetails.useSuspenseQuery({
-    id: notification.data.user,
-  });
+  const user = notification.data.data.user;
   return (
     <div className="flex select-none flex-col gap-2 bg-background p-3 pl-4">
       <div className="flex items-center gap-2">

@@ -32,6 +32,7 @@ export const users = createTable("user", {
     mode: "date",
     withTimezone: true,
   }).default(sql`CURRENT_TIMESTAMP`),
+  realtimeSecret: varchar("realtime_secret", { length: 256 }),
   image: varchar("image", { length: 255 }),
 });
 
@@ -126,6 +127,12 @@ export const verificationTokens = createTable(
 ////////////////////////////////////////
 
 export const settingState = varenum("setting_state", ["draft", "saved"]);
+export const userRelationState = varenum("relation_state", [
+  "requested",
+  "friends",
+  "denied",
+  "blocked",
+]);
 export const periodType = varenum("period_type", [
   "single",
   "course",
@@ -368,8 +375,8 @@ export const userRelationships = createTable(
       .$defaultFn(() => crypto.randomUUID()),
     userId: varchar("user_id", { length: 255 }).notNull(),
     relatedUserId: varchar("related_user_id", { length: 255 }).notNull(),
-    acceptedFriends: boolean("accepted_friends").notNull().default(false),
-    blocked: boolean("blocked").notNull().default(false),
+    defaultChatId: varchar("default_chat_id", { length: 255 }),
+    state: userRelationState("relation_state").notNull(),
   },
   (userRelationship) => ({
     userIdIdx: index("user_relationship_user_id_idx").on(
@@ -378,5 +385,46 @@ export const userRelationships = createTable(
     relatedUserIdIdx: index("user_relationship_related_user_id_idx").on(
       userRelationship.relatedUserId,
     ),
+  }),
+);
+
+export const chats = createTable(
+  "chat",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name", { length: 255 }),
+    members: jsonb("members").notNull().$type<Array<{ userId: string }>>(),
+  },
+  (chat) => ({
+    nameIdx: index("chat_name_idx").on(chat.name),
+  }),
+);
+
+export const chatMessages = createTable(
+  "chat_message",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    chatId: varchar("chat_id", { length: 255 }).notNull(),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    message: text("message").notNull(),
+    sentAt: timestamp("sent_at", { mode: "date" }).notNull(),
+    attachments: jsonb("attachments")
+      .notNull()
+      .$type<Array<{ type: string; id: string }>>()
+      .default([]),
+    reactions: jsonb("reactions")
+      .notNull()
+      .$type<Array<{ userId: string; reaction: string }>>()
+      .default([]),
+  },
+  (chatMessage) => ({
+    chatIdIdx: index("chat_message_chat_id_idx").on(chatMessage.chatId),
+    userIdIdx: index("chat_message_user_id_idx").on(chatMessage.userId),
   }),
 );

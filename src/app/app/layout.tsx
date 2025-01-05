@@ -4,6 +4,7 @@ import { hasFinishedOnboarding } from "@/lib/onboarding";
 import { HydrateClient, api } from "@/trpc/server";
 import { redirect } from "next/navigation";
 import { CanvasWarningPopup } from "./clientLayout";
+import { RealtimeProvider } from "@/components/catalyst/app/realtime-provider";
 
 export default async function AppLayout({
   children,
@@ -19,11 +20,13 @@ export default async function AppLayout({
 
   return (
     <HydrateClient>
-      <AppNav />
-      <AppCmdK />
-      {children}
-      <div className="mt-20 w-full md:mt-0" />
-      {needsAttention && <CanvasWarningPopup />}
+      <RealtimeProvider>
+        <AppNav />
+        <AppCmdK />
+        {children}
+        <div className="mt-20 w-full md:mt-0" />
+        {needsAttention && <CanvasWarningPopup />}
+      </RealtimeProvider>
     </HydrateClient>
   );
 }

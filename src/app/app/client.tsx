@@ -108,8 +108,9 @@ export function HomePageCards() {
     let currentPeriods = schedule.times
       .filter(
         (period) =>
-          typeof period.schedule_value.value != "boolean" ||
-          period.schedule_value.value != false,
+          period?.schedule_value?.value &&
+          (typeof period.schedule_value.value != "boolean" ||
+            period.schedule_value.value != false),
       )
       .filter(
         (period) =>
@@ -129,8 +130,9 @@ export function HomePageCards() {
     const inBetweenPeriods = schedule.times
       .filter(
         (period) =>
-          typeof period.schedule_value.value != "boolean" ||
-          period.schedule_value.value != false,
+          period?.schedule_value?.value &&
+          (typeof period.schedule_value.value != "boolean" ||
+            period.schedule_value.value != false),
       )
       .filter((period) =>
         currentPeriods.some(
@@ -169,8 +171,9 @@ export function HomePageCards() {
       currentPeriods = schedule.times
         .filter(
           (period) =>
-            typeof period.schedule_value.value != "boolean" ||
-            period.schedule_value.value != false,
+            period?.schedule_value?.value &&
+            (typeof period.schedule_value.value != "boolean" ||
+              period.schedule_value.value != false),
         )
         .filter((period) =>
           isBefore(

@@ -26,6 +26,7 @@ import {
   Sparkles,
   Command,
   Settings,
+  MessageCircle,
 } from "lucide-react";
 import {
   NavigationMenu,
@@ -37,7 +38,12 @@ import {
 } from "../../ui/navigation-menu";
 import { Separator } from "../../ui/separator";
 import { Button } from "@/components/ui/button";
-import { Courses, Notifications } from "./dynamic-nav";
+import {
+  Courses,
+  DesktopNotificationTrigger,
+  Notifications,
+  NotificationUpdater,
+} from "./dynamic-nav";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -57,7 +63,7 @@ import {
 } from "@/components/ui/hover-card";
 // import { OpenCmdK } from "../cmd-k";
 import { SignOutButton } from "./dynamic-nav";
-// import { expNotifications, /* expFriends */, expTools } from "@/app/flags";
+import { expFriends } from "@/app/flags";
 // import { Badge } from "@/components/ui/badge";
 import { OpenCmdK } from "../cmd-k";
 
@@ -73,6 +79,7 @@ export async function AppNav() {
 
   return (
     <HydrateClient>
+      <NotificationUpdater />
       <NavigationMenu
         viewport={{
           className: "left-[calc(max(calc((100%-120ch)/2),1rem)+10ch)]",
@@ -171,33 +178,7 @@ export async function AppNav() {
             <Separator orientation="vertical" className="h-4" />
           </NavigationMenuItem>
           <div className="flex-1" />
-          <NavigationMenuItem>
-            <NavigationMenuLink asChild>
-              <HoverCard>
-                <HoverCardTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="gap-2 !rounded-full px-3 lg:px-4"
-                  >
-                    <span className="hidden lg:inline-block">
-                      Notifications
-                    </span>
-                    <Bell />
-                  </Button>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  className="w-auto p-0"
-                  side="bottom"
-                  sideOffset={24}
-                  align="end"
-                >
-                  <div className="flex justify-stretch gap-2 p-4">
-                    <Notifications />
-                  </div>
-                </HoverCardContent>
-              </HoverCard>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+          <DesktopNotificationTrigger />
           <NavigationMenuItem>
             <NavigationMenuLink asChild>
               <HoverCard>
@@ -359,100 +340,70 @@ function CourseLoading() {
   );
 }
 
-function Social() {
+async function Social() {
+  if (!(await expFriends())) {
+    return (
+      <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
+        <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
+          This feature is in active development.
+          <br /> Check back later for updates.
+        </div>
+      </div>
+    );
+  }
+
+  const friends = await api.catalyst.user.friends.list();
+
   return (
     <div className="flex max-h-96 max-w-full flex-col gap-2 overflow-auto p-4 md:-m-4 md:max-w-[40ch] md:pr-2">
-      <div className="grid h-96 w-[40ch] place-items-center text-center text-xs text-muted-foreground">
-        This feature is in active development.
-        <br /> Check back later for updates.
+      <div className="flex items-center gap-2 rounded border px-3 py-2 [&:has(input:focus-visible)]:outline">
+        <Search />
+        <input
+          type="search"
+          placeholder="Search friends..."
+          className="flex-1 bg-background outline-none"
+        />
       </div>
-      {/* <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Calculator />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Calculator</span>
-          <span className="text-xs text-muted-foreground">
-            Perform calculations with ease
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <ChartLine />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Graphing Calculator</span>
-          <span className="text-xs text-muted-foreground">
-            Plot graphs and functions
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Table />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Periodic Table</span>
-          <span className="text-xs text-muted-foreground">
-            Explore the elements.
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Percent />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Grade Calculator</span>
-          <span className="text-xs text-muted-foreground">
-            Enter what-if grades and what-if percentages
-          </span>
-        </div>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Gamepad2 />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Games</span>
-          <span className="text-xs text-muted-foreground">
-            Take a break to refocus
-          </span>
-        </div>
-        <Badge variant="secondary">Pre Release</Badge>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <Text />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Assignment Summarizer</span>
-          <span className="text-xs text-muted-foreground">
-            Understand your assignment better
-          </span>
-        </div>
-        <Badge>Pro</Badge>
-      </Button>
-      <Button
-        variant="outline"
-        className="flex h-auto w-full flex-1 items-center gap-3"
-      >
-        <File />
-        <div className="flex flex-1 flex-col items-start gap-1">
-          <span className="font-bold">Paper Proof-reader</span>
-          <span className="text-xs text-muted-foreground">
-            Improve your writing
-          </span>
-        </div>
-        <Badge>Pro</Badge>
-      </Button> */}
+      {friends.map((friend) => (
+        <Button
+          key={friend.user.email}
+          className="group relative flex h-auto w-full flex-1 items-center gap-3 bg-background"
+          variant="outline"
+        >
+          <div className="absolute inset-0 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="absolute inset-0 flex flex-row items-stretch justify-stretch gap-2 bg-background/50 p-2 backdrop-blur-lg">
+              <Button
+                variant="ghost"
+                className="h-auto flex-1"
+                href={`/app/social/profile/${friend.relationship.relatedUserId}`}
+              >
+                <UserRound />
+              </Button>
+              <div className="flex items-center">
+                <Separator orientation="vertical" className="h-8" />
+              </div>
+              <Button
+                variant="ghost"
+                className="h-auto flex-1"
+                href={`/app/social/chat/${friend.relationship.defaultChatId}`}
+              >
+                <MessageCircle />
+              </Button>
+            </div>
+          </div>
+          <UserAvatar
+            name={friend.user.name ?? "Friend"}
+            image={friend.user.image ?? "about:blank"}
+            className="size-10"
+          />
+          <div className="flex flex-1 flex-col items-start gap-1">
+            <span className="font-bold">{friend.user.name}</span>
+            <span className="text-xs text-muted-foreground">
+              {friend.user.email}
+            </span>
+          </div>
+        </Button>
+      ))}
     </div>
   );
 }
@@ -664,6 +615,7 @@ async function SettingCards() {
       <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3"
+        href="/app/upgrade"
       >
         <Sparkles />
         <div className="flex flex-1 flex-col items-start gap-1">

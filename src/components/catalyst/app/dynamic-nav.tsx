@@ -15,33 +15,26 @@ import {
   Archive,
   Bell,
   BellDot,
-  // Check,
   CircleAlert,
-  // CircleSlash,
-  // CircleX,
   LogOut,
-  // MoreVertical,
   Search,
-  // UserRound,
-  // UserRoundX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PercentageChart } from "./percentage-chart";
-import {
-  Notification,
-  type NotificationMeta,
-  // newPopupNotification,
-} from "./notifications";
-// import { toast } from "sonner";
-// import {
-//   Popover,
-//   PopoverContent,
-//   PopoverTrigger,
-// } from "@/components/ui/popover";
-// import { Separator } from "@/components/ui/separator";
+import { Notification, type NotificationMeta } from "./notifications";
 import { signOut } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  NavigationMenuItem,
+  NavigationMenuLink,
+} from "@/components/ui/navigation-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Badge } from "@/components/ui/badge";
 
 export function Courses() {
   const [{ data: courses }] =
@@ -321,6 +314,79 @@ export function Courses() {
         })}
     </div>
   );
+}
+
+export function DesktopNotificationTrigger() {
+  const { data: activeNotifications } =
+    api.catalyst.user.notifications.list.active.useQuery();
+
+  return (
+    <NavigationMenuItem>
+      <NavigationMenuLink asChild>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <Button
+              variant="outline"
+              className="gap-2 !rounded-full px-3 lg:px-4"
+            >
+              <span className="hidden lg:inline-block">Notifications</span>
+              <Bell />
+              {(activeNotifications?.length ?? 0) > 0 && (
+                <Badge className="grid size-4 place-items-center p-0">
+                  {activeNotifications?.length}
+                </Badge>
+              )}
+            </Button>
+          </HoverCardTrigger>
+          <HoverCardContent
+            className="w-auto p-0"
+            side="bottom"
+            sideOffset={24}
+            align="end"
+          >
+            <div className="flex justify-stretch gap-2 p-4">
+              <Notifications />
+            </div>
+          </HoverCardContent>
+        </HoverCard>
+      </NavigationMenuLink>
+    </NavigationMenuItem>
+  );
+}
+
+export function NotificationUpdater() {
+  // const utils = api.useUtils();
+  // const { channel } = useContext(RealtimeContext);
+
+  // useEffect(() => {
+  //   if (!channel) return;
+  //   (async () => {
+  //     await channel.subscribe("notification", (message) => {
+  //       const data = message.data as NotificationMeta["data"];
+  //       utils.catalyst.user.notifications.list.active.setData(
+  //         undefined,
+  //         (prev) => {
+  //           if (!prev) return prev;
+  //           return [
+  //             ...prev,
+  //             {
+  //               id: message.id,
+  //               userId: "",
+  //               dismissed: false,
+  //               sentAt: new Date(),
+  //               data: data,
+  //             },
+  //           ];
+  //         },
+  //       );
+  //       newPopupNotification({
+  //         notification: message as unknown as NotificationMeta,
+  //       });
+  //     });
+  //   })().catch(console.error);
+  // }, [channel, utils.catalyst.user.notifications.list.active]);
+
+  return <></>;
 }
 
 export function Notifications() {

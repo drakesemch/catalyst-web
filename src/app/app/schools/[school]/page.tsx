@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/server";
-import { format } from "date-fns";
 import {
   CalendarPlus,
   CircleUserRound,
@@ -26,10 +25,6 @@ export default async function SchoolPage(props: {
   const permissions = await api.catalyst.school.get.permissions({
     id: schoolId,
   });
-
-  console.log(permissions);
-
-  const now = new Date();
 
   return (
     <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">

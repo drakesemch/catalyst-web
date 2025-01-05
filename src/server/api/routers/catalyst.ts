@@ -7,6 +7,8 @@ import {
 import { blogRouter } from "./catalyst/blogs";
 import { z } from "zod";
 import {
+  chatMessages,
+  chats,
   notifications,
   periodTimes,
   periodType,
@@ -17,14 +19,16 @@ import {
   schoolPermissions,
   schools,
   settings,
+  userRelationships,
   users,
 } from "@/server/db/schema";
-import { and, count, eq, or } from "drizzle-orm";
+import { and, count, eq, lt, or, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createCipheriv } from "crypto";
 import { env } from "@/env";
 import { canvasCatalystRouter } from "./catalyst/canvas";
 import { Stripe } from "stripe";
+import * as realtime from "@/lib/realtime-server";
 
 export const catalystRouter = createTRPCRouter({
   pricing: {
@@ -86,8 +90,395 @@ export const catalystRouter = createTRPCRouter({
     isPro: protectedProcedure.query(async ({ ctx }) => {
       return ctx.user.isPro;
     }),
+    social: {
+      messages: {
+        list: protectedProcedure
+          .input(
+            z.object({
+              chatId: z.string(),
+              cursor: z.string().optional(),
+              limit: z.number().optional(),
+            }),
+          )
+          .query(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+
+            const limit = input.limit ?? 10;
+            const cursor = input.cursor ? new Date(input.cursor) : new Date();
+
+            const messages = await ctx.db
+              .select({
+                id: chatMessages.id,
+                user: {
+                  id: users.id,
+                  name: users.name,
+                  image: users.image,
+                },
+                message: chatMessages.message,
+                reactions: chatMessages.reactions,
+                sentAt: chatMessages.sentAt,
+                attachments: chatMessages.attachments,
+              })
+              .from(chatMessages)
+              .innerJoin(users, eq(chatMessages.userId, users.id))
+              .where(
+                and(
+                  eq(chatMessages.chatId, input.chatId),
+                  lt(chatMessages.sentAt, cursor),
+                ),
+              )
+              .orderBy(desc(chatMessages.sentAt))
+              .limit(limit + 1);
+
+            return {
+              messages,
+              nextCursor:
+                messages.length == limit + 1
+                  ? messages[messages.length - 1]?.sentAt.toISOString()
+                  : null,
+            };
+          }),
+        send: protectedProcedure
+          .input(z.object({ id: z.string(), message: z.string() }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const channelMembers = (
+              await ctx.db
+                .select({ members: chats.members })
+                .from(chats)
+                .where(eq(chats.id, input.id))
+            )[0];
+            if (!channelMembers) return;
+            const ids = (
+              await Promise.all(
+                channelMembers.members.map(
+                  async (member) =>
+                    await ctx.db
+                      .select({ realtimeSecret: users.realtimeSecret })
+                      .from(users)
+                      .where(eq(users.id, member.userId)),
+                ),
+              )
+            ).flat();
+            const message = await ctx.db
+              .insert(chatMessages)
+              .values({
+                chatId: input.id,
+                userId: user.id,
+                message: input.message,
+                sentAt: new Date(),
+              })
+              .returning({ id: chatMessages.id, sentAt: chatMessages.sentAt });
+            for (const member of ids) {
+              if (member.realtimeSecret == user.realtimeSecret) continue;
+              await realtime.send({
+                channelId: member.realtimeSecret!,
+                message: {
+                  name: "notification",
+                  data: {
+                    id: message[0]!.id,
+                    type: "catalyst.message",
+                    chatId: input.id,
+                    user: {
+                      id: user.id,
+                      name: user.name,
+                      email: user.email,
+                    },
+                    message: input.message,
+                    sentAt: new Date(),
+                    attachments: [],
+                    reactions: [],
+                  },
+                },
+              });
+            }
+            return [message[0]!.id, message[0]!.sentAt];
+          }),
+      },
+    },
     friends: {
+      list: protectedProcedure.query(async ({ ctx }) => {
+        const user = ctx.user.get;
+        if (!user)
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "User not found",
+          });
+        return await ctx.db
+          .select({
+            user: {
+              id: users.id,
+              image: users.image,
+              name: users.name,
+              email: users.email,
+            },
+            relationship: userRelationships,
+          })
+          .from(userRelationships)
+          .innerJoin(users, eq(users.id, userRelationships.relatedUserId))
+          .where(
+            and(
+              eq(userRelationships.userId, user.id),
+              eq(userRelationships.state, "friends"),
+            ),
+          );
+      }),
       request: {
+        accept: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const friend = (
+              await ctx.db
+                .select({
+                  realtimeSecret: users.realtimeSecret,
+                })
+                .from(users)
+                .where(eq(users.id, input.id))
+            ).at(0);
+            if (!friend) return;
+            const existingRelationship = await ctx.db
+              .select()
+              .from(userRelationships)
+              .where(
+                and(
+                  eq(userRelationships.userId, user.id),
+                  eq(userRelationships.relatedUserId, input.id),
+                ),
+              )
+              .limit(1);
+
+            if (existingRelationship.length == 0) {
+              await ctx.db.insert(userRelationships).values({
+                userId: user.id,
+                relatedUserId: input.id,
+                state: "friends",
+              });
+            }
+            const defaultChat = await ctx.db
+              .insert(chats)
+              .values({
+                members: [
+                  {
+                    userId: user.id,
+                  },
+                  {
+                    userId: input.id,
+                  },
+                ],
+              })
+              .returning({ id: chats.id });
+            await ctx.db
+              .update(userRelationships)
+              .set({ state: "friends", defaultChatId: defaultChat[0]!.id })
+              .where(eq(userRelationships.userId, input.id));
+            await ctx.db.insert(userRelationships).values({
+              userId: user.id,
+              relatedUserId: input.id,
+              state: "friends",
+              defaultChatId: defaultChat[0]!.id,
+            });
+            await realtime.send({
+              channelId: friend.realtimeSecret!,
+              message: {
+                name: "notification",
+                data: {
+                  type: "catalyst.friend-added",
+                  data: {
+                    user: {
+                      id: user.id,
+                      name: user.name,
+                      email: user.email,
+                    },
+                    chatId: defaultChat[0]!.id,
+                  },
+                },
+              },
+            });
+            return defaultChat[0]!.id;
+          }),
+        decline: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const existingRelationships = await ctx.db
+              .select()
+              .from(userRelationships)
+              .where(
+                and(
+                  eq(userRelationships.userId, user.id),
+                  eq(userRelationships.relatedUserId, input.id),
+                ),
+              )
+              .limit(1);
+
+            if (existingRelationships.length == 0) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Relationship not found",
+              });
+            }
+
+            await ctx.db
+              .update(userRelationships)
+              .set({ state: "denied" })
+              .where(
+                and(
+                  eq(userRelationships.userId, user.id),
+                  eq(userRelationships.relatedUserId, input.id),
+                ),
+              );
+          }),
+        block: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const existingUser = await ctx.db
+              .select()
+              .from(users)
+              .where(eq(users.id, input.id))
+              .limit(1);
+
+            if (existingUser.length === 0) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found",
+              });
+            }
+
+            await ctx.db.insert(userRelationships).values({
+              userId: user.id,
+              relatedUserId: input.id,
+              state: "blocked",
+            });
+          }),
+        incoming: protectedProcedure
+          .input(z.object({ limit: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+
+            return await ctx.db
+              .select({
+                user: {
+                  id: users.id,
+                  image: users.image,
+                  name: users.name,
+                  email: users.email,
+                },
+                relationship: userRelationships,
+              })
+              .from(userRelationships)
+              .innerJoin(users, eq(users.id, userRelationships.userId))
+              .where(
+                and(
+                  eq(userRelationships.relatedUserId, user.id),
+                  eq(userRelationships.state, "requested"),
+                ),
+              )
+              .limit(input.limit);
+          }),
+        send: protectedProcedure
+          .input(z.object({ email: z.string() }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const friend = (
+              await ctx.db
+                .select()
+                .from(users)
+                .where(eq(users.email, input.email))
+            ).at(0);
+            if (!friend)
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "User not found",
+              });
+            if (friend.id === user.id) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You cannot send a friend request to yourself",
+              });
+            }
+            const existingRequest = (
+              await ctx.db
+                .select()
+                .from(userRelationships)
+                .where(
+                  or(
+                    and(
+                      eq(userRelationships.userId, user.id),
+                      eq(userRelationships.relatedUserId, friend.id),
+                    ),
+                    and(
+                      eq(userRelationships.userId, friend.id),
+                      eq(userRelationships.relatedUserId, user.id),
+                    ),
+                  ),
+                )
+            ).at(0);
+
+            if (existingRequest) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Friend request already sent or user is blocked",
+              });
+            }
+            await ctx.db.insert(userRelationships).values({
+              userId: user.id,
+              relatedUserId: friend.id,
+              state: "requested",
+            });
+            await realtime.send({
+              channelId: friend.realtimeSecret!,
+              message: {
+                name: "notification",
+                data: {
+                  type: "catalyst.friend-request",
+                  data: {
+                    user: {
+                      id: user.id,
+                      name: user.name,
+                      email: user.email,
+                    },
+                  },
+                },
+              },
+            });
+          }),
         getDetails: protectedProcedure
           .input(z.object({ id: z.string() }))
           .query(async ({ input, ctx }) => {

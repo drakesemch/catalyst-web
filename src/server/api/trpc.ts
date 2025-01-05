@@ -51,6 +51,15 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   const user = (
     await db.select().from(users).where(eq(users.id, session.user.id))
   ).at(0);
+  if (user && !user?.realtimeSecret) {
+    user.realtimeSecret =
+      (Math.random() * 128).toString(36).substring(2) +
+      (Math.random() * 128).toString(36).substring(2);
+    await db
+      .update(users)
+      .set({ realtimeSecret: user.realtimeSecret })
+      .where(eq(users.id, user.id));
+  }
   const userSettings = await db
     .select()
     .from(settings)
