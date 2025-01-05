@@ -1131,6 +1131,7 @@ export const canvasRouter = createTRPCRouter({
           ? url.searchParams.set("enrollment_state", input.enrollment_state)
           : null;
         url.searchParams.set("page", String(input?.cursor ?? 1));
+        url.searchParams.set("include[]", "total_scores");
         url.searchParams.set("per_page", String(input?.limit ?? 100));
         const query = await fetch(url, {
           headers: {

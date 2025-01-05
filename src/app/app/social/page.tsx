@@ -31,7 +31,11 @@ export default async function SocialPage() {
       <div className="flex h-max flex-row gap-2 overflow-auto pb-2">
         <IncomingFriendRequests />
         <Card className="relative h-44 w-96 flex-shrink-0">
-          <Button variant="ghost" className="absolute inset-0 h-auto">
+          <Button
+            variant="ghost"
+            className="absolute inset-0 h-auto"
+            href="/app/social/requests"
+          >
             <ArrowRight />
             <p>View All</p>
           </Button>

@@ -43,6 +43,33 @@ export function Courses() {
       include: ["total_scores"],
     });
 
+  const [classifications, setClassifications] = useState<
+    Record<number, string>
+  >(JSON.parse(localStorage.getItem("classifications") ?? "{}"));
+
+  const { mutate: genClassification, isPending: isGenerating } =
+    api.catalyst.user.canvas.courses.genClassification.useMutation({
+      onSuccess: (data) => {
+        if (!data) return;
+        setClassifications((classifications) => {
+          classifications[data[0]] = data![1];
+          localStorage.setItem(
+            "classifications",
+            JSON.stringify(classifications),
+          );
+          return classifications;
+        });
+      },
+    });
+
+  useEffect(() => {
+    courses?.forEach((course) => {
+      if (classifications[course.id] == undefined) {
+        genClassification({ courseId: course.id });
+      }
+    });
+  }, [courses]);
+
   const [courseSearch, setCourseSearch] = useState("");
 
   const [now, setNow] = useState(new Date());
@@ -73,8 +100,8 @@ export function Courses() {
             ?.toLowerCase()
             .includes(courseSearch.toLowerCase()) ??
             false) ||
-          course.classification
-            .toLowerCase()
+          Object.entries(classifications)
+            .find((c) => Number(c[0]) == course.id)?.[1]
             .includes(courseSearch.toLowerCase()) ||
           course.original_name
             .toLowerCase()
@@ -93,8 +120,8 @@ export function Courses() {
               ?.toLowerCase()
               .includes(courseSearch.toLowerCase()) ??
               false) ||
-            course.classification
-              .toLowerCase()
+            Object.entries(classifications)
+              .find((c) => Number(c[0]) == course.id)?.[1]
               .includes(courseSearch.toLowerCase()) ||
             course.original_name
               .toLowerCase()
@@ -140,6 +167,10 @@ export function Courses() {
                 ),
               ),
             );
+          const classification = Object.entries(classifications).find(
+            (c) => Number(c[0]) == course.id,
+          )?.[1];
+
           return (
             <div
               key={course.id ?? -1}
@@ -164,7 +195,7 @@ export function Courses() {
                       {course.period?.periodName != undefined
                         ? `${course.period?.periodName}: `
                         : undefined}
-                      {course.classification}
+                      {classification ?? "No classification"}
                     </span>
                     <span className="max-w-full truncate text-xs text-muted-foreground">
                       {course.original_name}

@@ -6,23 +6,13 @@ import {
   Inbox,
   UserCircle,
   Search,
-  // Settings,
-  // School,
-  // Sparkles,
-  // Clock,
-  // HelpCircle,
-  // PlusCircle,
-  // Command,
   UserRound,
   Bell,
   School,
   Home,
   Calculator,
-  // Gamepad2,
   Percent,
   Table,
-  // File,
-  // Text,
   Sparkles,
   Command,
   Settings,
@@ -61,10 +51,8 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-// import { OpenCmdK } from "../cmd-k";
 import { SignOutButton } from "./dynamic-nav";
 import { expFriends } from "@/app/flags";
-// import { Badge } from "@/components/ui/badge";
 import { OpenCmdK } from "../cmd-k";
 
 export async function AppNav() {
@@ -569,6 +557,7 @@ async function SettingCards() {
       <Button
         variant="outline"
         className="hidden h-auto w-full flex-1 items-center gap-3 md:flex"
+        href="/app/social"
       >
         <UsersRound />
         <div className="flex flex-1 flex-col items-start gap-1">

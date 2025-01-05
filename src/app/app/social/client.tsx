@@ -59,9 +59,9 @@ export function Friends() {
   }, [channel, utils.catalyst.user.friends]);
 
   return (
-    <div>
+    <div className="flex flex-col gap-2">
       {friends?.length == 0 ? (
-        <div className="flex h-44 w-96 items-center justify-center text-xs text-muted-foreground">
+        <div className="flex h-44 w-full items-center justify-center text-xs text-muted-foreground">
           You have no friends (yet hopefully).
         </div>
       ) : (
@@ -83,7 +83,7 @@ export function Friends() {
             <CardContent className="flex w-48 flex-col justify-center gap-2 p-2">
               <Button
                 variant="outline"
-                href={`/app/social/profile/${friend.relationship.relatedUserId}`}
+                href={`/app/social/profile/${friend.user.id}`}
               >
                 <UserRound />
                 View Profile
@@ -328,7 +328,7 @@ export function FriendRequest() {
         <CardDescription>
           {!isError ? (
             <Button
-              href="/app/social/requests"
+              href="/app/social/requests#outgoing"
               variant="link"
               className="h-auto p-0 pt-2"
             >

@@ -10,6 +10,10 @@ export default async function ProfilePage({
   const id = (await params).id;
   const user = await api.catalyst.user.friends.request.getDetails({ id });
 
+  await api.catalyst.user.friends.list.prefetch();
+  await api.catalyst.user.friends.request.incoming.prefetch({ limit: 100 });
+  await api.catalyst.user.friends.request.outgoing.prefetch({ limit: 100 });
+
   return (
     <main className="flex min-h-[calc((100vh-4.5rem-1px)+2rem)] flex-col items-center p-4 sm:p-16">
       <div className="flex w-[min(100ch,100%)] flex-col gap-6">

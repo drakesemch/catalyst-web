@@ -257,17 +257,22 @@ export const catalystRouter = createTRPCRouter({
               .from(userRelationships)
               .where(
                 and(
-                  eq(userRelationships.userId, user.id),
-                  eq(userRelationships.relatedUserId, input.id),
+                  eq(userRelationships.userId, input.id),
+                  eq(userRelationships.relatedUserId, user.id),
                 ),
               )
               .limit(1);
 
             if (existingRelationship.length == 0) {
-              await ctx.db.insert(userRelationships).values({
-                userId: user.id,
-                relatedUserId: input.id,
-                state: "friends",
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Relationship not found",
+              });
+            }
+            if (existingRelationship[0]!.state === "friends") {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Friend request already accepted",
               });
             }
             const defaultChat = await ctx.db
@@ -305,7 +310,9 @@ export const catalystRouter = createTRPCRouter({
                       name: user.name,
                       email: user.email,
                     },
-                    chatId: defaultChat[0]!.id,
+                    relationship: {
+                      defaultChatId: defaultChat[0]!.id,
+                    },
                   },
                 },
               },
@@ -376,6 +383,80 @@ export const catalystRouter = createTRPCRouter({
               relatedUserId: input.id,
               state: "blocked",
             });
+          }),
+        remove: protectedProcedure
+          .input(z.object({ id: z.string() }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const existingRelationships = await ctx.db
+              .select()
+              .from(userRelationships)
+              .where(
+                and(
+                  eq(userRelationships.userId, user.id),
+                  eq(userRelationships.relatedUserId, input.id),
+                ),
+              )
+              .limit(1);
+
+            if (existingRelationships.length == 0) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Relationship not found",
+              });
+            }
+
+            await ctx.db
+              .delete(userRelationships)
+              .where(
+                and(
+                  eq(userRelationships.userId, user.id),
+                  eq(userRelationships.relatedUserId, input.id),
+                ),
+              );
+            await ctx.db
+              .delete(userRelationships)
+              .where(
+                and(
+                  eq(userRelationships.userId, input.id),
+                  eq(userRelationships.relatedUserId, user.id),
+                ),
+              );
+          }),
+        outgoing: protectedProcedure
+          .input(z.object({ limit: z.number() }))
+          .query(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+
+            return await ctx.db
+              .select({
+                user: {
+                  id: users.id,
+                  image: users.image,
+                  name: users.name,
+                  email: users.email,
+                },
+                relationship: userRelationships,
+              })
+              .from(userRelationships)
+              .innerJoin(users, eq(users.id, userRelationships.relatedUserId))
+              .where(
+                and(
+                  eq(userRelationships.userId, user.id),
+                  eq(userRelationships.state, "requested"),
+                ),
+              )
+              .limit(input.limit);
           }),
         incoming: protectedProcedure
           .input(z.object({ limit: z.number() }))
