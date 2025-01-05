@@ -45,14 +45,19 @@ export function Courses() {
 
   const [classifications, setClassifications] = useState<
     Record<number, string>
-  >(JSON.parse(localStorage.getItem("classifications") ?? "{}"));
+  >(
+    JSON.parse(localStorage.getItem("classifications") ?? "{}") as Record<
+      number,
+      string
+    >,
+  );
 
-  const { mutate: genClassification, isPending: isGenerating } =
+  const { mutate: genClassification } =
     api.catalyst.user.canvas.courses.genClassification.useMutation({
       onSuccess: (data) => {
         if (!data) return;
         setClassifications((classifications) => {
-          classifications[data[0]] = data![1];
+          classifications[data[0]] = data[1];
           localStorage.setItem(
             "classifications",
             JSON.stringify(classifications),
@@ -68,7 +73,7 @@ export function Courses() {
         genClassification({ courseId: course.id });
       }
     });
-  }, [courses]);
+  }, [classifications, courses, genClassification]);
 
   const [courseSearch, setCourseSearch] = useState("");
 
@@ -100,9 +105,10 @@ export function Courses() {
             ?.toLowerCase()
             .includes(courseSearch.toLowerCase()) ??
             false) ||
-          Object.entries(classifications)
+          (Object.entries(classifications)
             .find((c) => Number(c[0]) == course.id)?.[1]
-            .includes(courseSearch.toLowerCase()) ||
+            .includes(courseSearch.toLowerCase()) ??
+            false) ||
           course.original_name
             .toLowerCase()
             .includes(courseSearch.toLowerCase())
@@ -120,9 +126,10 @@ export function Courses() {
               ?.toLowerCase()
               .includes(courseSearch.toLowerCase()) ??
               false) ||
-            Object.entries(classifications)
+            (Object.entries(classifications)
               .find((c) => Number(c[0]) == course.id)?.[1]
-              .includes(courseSearch.toLowerCase()) ||
+              .includes(courseSearch.toLowerCase()) ??
+              false) ||
             course.original_name
               .toLowerCase()
               .includes(courseSearch.toLowerCase())

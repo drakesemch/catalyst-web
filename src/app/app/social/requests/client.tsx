@@ -1,14 +1,14 @@
 "use client";
 
-import { NotificationMeta } from "@/components/catalyst/app/notifications";
+import type { NotificationMeta } from "@/components/catalyst/app/notifications";
 import { RealtimeContext } from "@/components/catalyst/app/realtime-provider";
 import { UserAvatar } from "@/components/catalyst/user-avatar";
 import { Button } from "@/components/ui/button";
-import { RouterOutputs } from "@/server/api/root";
+import type { RouterOutputs } from "@/server/api/root";
 import { api } from "@/trpc/react";
 import { Check, Loader, Shield, X } from "lucide-react";
 import { useMemo, useEffect, useContext, useRef } from "react"; // Import useMemo and useEffect
-import { Friend } from "../client";
+import type { Friend } from "../client";
 
 type IncomingFriendRequest =
   RouterOutputs["catalyst"]["user"]["friends"]["request"]["incoming"][number];
@@ -105,11 +105,15 @@ function IncomingRequest({ request }: { request: IncomingFriendRequest }) {
         }
       });
     })().catch(console.error);
-  }, [channel, utils.catalyst.user.friends.request.incoming]);
+  }, [
+    channel,
+    utils.catalyst.user.friends.list,
+    utils.catalyst.user.friends.request.incoming,
+  ]);
 
   useEffect(() => {
     if (!acceptIsSuccess || !chatId) return;
-    utils.catalyst.user.friends.list.setData(undefined, (friends: any) => [
+    utils.catalyst.user.friends.list.setData(undefined, (friends) => [
       ...(friends ?? []),
       {
         user: request.user,

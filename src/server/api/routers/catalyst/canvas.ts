@@ -785,8 +785,6 @@ export const canvasCatalystRouter = createTRPCRouter({
 
             const updatedCourses = await Promise.all(
               courses?.map(async (course) => {
-                let classification = "Not Available";
-
                 let missingAssignments;
 
                 try {
@@ -823,7 +821,6 @@ export const canvasCatalystRouter = createTRPCRouter({
 
                 return {
                   ...course,
-                  classification,
                   data: {
                     missingAssignments,
                   },
