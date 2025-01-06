@@ -1,17 +1,54 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { PercentageChart } from "@/components/catalyst/app/percentage-chart";
 import { Button } from "@/components/ui/button";
-import { api } from "@/trpc/server";
+import { api } from "@/trpc/react";
 import { CircleAlert } from "lucide-react";
 
-export default async function coursePage() {
-  const { data: courses } = await api.catalyst.user.canvas.courses.list({
+export default function CoursePage() {
+  const [classifications, setClassifications] = useState<
+    Record<number, string>
+  >(
+    JSON.parse(localStorage.getItem("classifications") ?? "{}") as Record<
+      number,
+      string
+    >,
+  );
+
+  const { data: courses } = api.catalyst.user.canvas.courses.list.useQuery({
     enrollment_state: "active",
     include: ["total_scores"],
   });
+
+  const { mutate: genClassification } =
+    api.catalyst.user.canvas.courses.genClassification.useMutation({
+      onSuccess: (data) => {
+        if (!data) return;
+        setClassifications((classifications) => {
+          classifications[data[0]] = data[1];
+          localStorage.setItem(
+            "classifications",
+            JSON.stringify(classifications),
+          );
+          return classifications;
+        });
+      },
+    });
+
+  useEffect(() => {
+    courses?.data.forEach((course) => {
+      if (classifications[course.id] == undefined) {
+        genClassification({ courseId: course.id });
+      }
+    });
+  }, [classifications, courses, genClassification]);
+
   return (
     <main className="mx-auto flex max-w-[100ch] flex-1 flex-shrink flex-col gap-2 overflow-auto p-4">
       <h1 className="h1">Active Course List</h1>
-      {courses.map((course) => {
+      {courses?.data.map((course) => {
+        const classification = classifications[course.id];
         return (
           <div key={course.id} className="flex w-full flex-col rounded border">
             <div className="flex items-stretch">
@@ -25,7 +62,7 @@ export default async function coursePage() {
                     {course.period?.periodName != undefined
                       ? `${course.period?.periodName}: `
                       : undefined}
-                    {course.classification}
+                    {classification ?? "No classification"}
                   </span>
                   <span className="max-w-full truncate text-xs text-muted-foreground">
                     {course.original_name}

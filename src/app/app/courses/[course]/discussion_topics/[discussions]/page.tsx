@@ -12,6 +12,7 @@ import {
   Album,
   ArrowLeft,
   Check,
+  ChevronRight,
   Edit,
   Loader,
   Megaphone,
@@ -23,21 +24,17 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { Suspense, useState, use } from "react";
+import { CourseClassification } from "../../client";
 
-export default function DiscussionPage(
-  props: {
-    params: Promise<{
-      course: string;
-      discussions: string;
-    }>;
-  }
-) {
+export default function DiscussionPage(props: {
+  params: Promise<{
+    course: string;
+    discussions: string;
+  }>;
+}) {
   const params = use(props.params);
 
-  const {
-    course,
-    discussions
-  } = params;
+  const { course, discussions } = params;
 
   const [self] = api.canvas.users.self.useSuspenseQuery();
   const [discussion] = api.canvas.courses.get.discussions.get.useSuspenseQuery({
@@ -64,6 +61,12 @@ export default function DiscussionPage(
 
   const [content, setContent] = useState("");
 
+  const { data: courseDetails } = api.catalyst.user.canvas.courses.get.useQuery(
+    {
+      courseId: Number(course),
+    },
+  );
+
   if (
     typeof (discussion.entries as DiscussionEntry[] & { errors: object })
       .errors != "undefined"
@@ -73,7 +76,23 @@ export default function DiscussionPage(
 
   return (
     <div className="mx-auto flex w-full max-w-full flex-col justify-center gap-2 p-2 lg:flex-row">
-      <aside className="relative h-[calc((100vh-4.5rem-1px)-2rem)] w-auto flex-shrink-0 rounded-lg border p-4 lg:sticky lg:top-[calc(4.5rem+0.5rem)] lg:h-[calc((100vh-4.5rem-1px)-1rem)] lg:w-[35ch]">
+      <aside className="relative h-[calc((100vh-4.5rem-1px)-2rem)] w-auto flex-shrink-0 gap-2 rounded-lg border p-4 lg:sticky lg:top-[calc(4.5rem+0.5rem)] lg:h-[calc((100vh-4.5rem-1px)-1rem)] lg:w-[35ch]">
+        <Button
+          className="h-auto w-full gap-4"
+          variant="outline"
+          href={`/app/courses/${course}`}
+        >
+          <Album className="text-lg" />
+          <div className="flex max-w-full flex-1 flex-shrink flex-col items-start gap-1 overflow-hidden">
+            <span className="h3">
+              <CourseClassification id={Number(course)} />
+            </span>
+            <span className="max-w-full truncate text-xs text-muted-foreground">
+              {courseDetails?.original_name}
+            </span>
+          </div>
+          <ChevronRight />
+        </Button>
         <Tabs defaultValue="grades" className="h-full">
           <TabsList className="w-full">
             <TabsTrigger value="course">

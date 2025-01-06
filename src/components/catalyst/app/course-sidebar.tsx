@@ -1,3 +1,4 @@
+import { CourseClassification } from "@/app/app/courses/[course]/client";
 import { Button } from "@/components/ui/button";
 import { api } from "@/trpc/server";
 import {
@@ -32,7 +33,9 @@ export async function CourseSidebar({ course }: { course: string }) {
       >
         <Album className="text-lg" />
         <div className="flex max-w-full flex-1 flex-shrink flex-col items-start gap-1 overflow-hidden">
-          <span className="h3">{courseDetails.classification}</span>
+          <span className="h3">
+            <CourseClassification id={Number(course)} />
+          </span>
           <span className="max-w-full truncate text-xs text-muted-foreground">
             {courseDetails.original_name}
           </span>

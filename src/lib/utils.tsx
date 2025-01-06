@@ -28,7 +28,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function prettyBody(str?: string) {
-  str = str?.replace(
+  // console.log("input", str, "end");
+  str = str?.replaceAll(
     // new RegExp("(?:<link.*?>|<script.*?><\\/script>)", "g"),
     new RegExp("(?:<script.*?><\\/script>)", "g"),
     "",
@@ -46,8 +47,8 @@ export function replaceCanvasURL(str?: string) {
         : "https://catalyst.bluefla.me"
   }/app/`;
   return str
-    ?.replace(new RegExp("https://.*\\.instructure.com/api/v1/", "g"), baseURL)
-    ?.replace(new RegExp("https://.*\\.instructure.com/", "g"), baseURL);
+    ?.replace(new RegExp("https://.*?\\.instructure.com/api/v1/", "g"), baseURL)
+    ?.replace(new RegExp("https://.*?\\.instructure.com/", "g"), baseURL);
 }
 
 export function moduleType(item: ModuleItem | Assignment) {

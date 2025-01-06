@@ -25,6 +25,7 @@ export default function Chat() {
   const { data: self } = api.catalyst.user.get.useQuery();
   const { chat: chatId } = useParams<{ chat: string }>();
   const [hasSent, setHasSent] = useState(false);
+  const firstLoad = useRef(true);
   const [scrollTop, setScrollTop] = useState(0);
   const {
     data,
@@ -184,6 +185,10 @@ export default function Chat() {
               const isSameUser = lastUserId == message.user?.id;
               lastUserId = message.user?.id;
               const isSending = message.id == "";
+              setTimeout(() => {
+                firstLoad.current = false;
+              });
+              if (firstLoad.current && isSending) return null;
               return (
                 <motion.div
                   key={idx}
@@ -219,6 +224,7 @@ export default function Chat() {
             });
           })()}
         </AnimatePresence>
+        <div className="h-4" />
       </InfiniteScroll>
       <div className="sticky bottom-0 flex items-center gap-2 p-2">
         <Input

@@ -12,17 +12,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Button } from "@/components/ui/button";
+import { CourseClassification } from "../client";
 
-export default async function ModulePreRender(
-  props: {
-    params: Promise<{ course: string }>;
-  }
-) {
+export default async function ModulePreRender(props: {
+  params: Promise<{ course: string }>;
+}) {
   const params = await props.params;
 
-  const {
-    course
-  } = params;
+  const { course } = params;
 
   const courseDetails = await api.catalyst.user.canvas.courses.get({
     courseId: Number(course),
@@ -49,7 +46,9 @@ export default async function ModulePreRender(
           >
             <Album className="text-lg" />
             <div className="flex max-w-full flex-1 flex-shrink flex-col items-start gap-1 overflow-hidden">
-              <span className="h3">{courseDetails?.classification}</span>
+              <span className="h3">
+                <CourseClassification id={Number(course)} />
+              </span>
               <span className="max-w-full truncate text-xs text-muted-foreground">
                 {courseDetails?.original_name}
               </span>

@@ -396,7 +396,9 @@ export const chats = createTable(
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
     name: varchar("name", { length: 255 }),
-    members: jsonb("members").notNull().$type<Array<{ userId: string }>>(),
+    members: jsonb("members")
+      .notNull()
+      .$type<{ data: Array<{ userId: string }> }>(),
   },
   (chat) => ({
     nameIdx: index("chat_name_idx").on(chat.name),

@@ -22,7 +22,7 @@ import {
   userRelationships,
   users,
 } from "@/server/db/schema";
-import { and, count, eq, lt, or, desc } from "drizzle-orm";
+import { and, count, eq, lt, or, desc, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { createCipheriv } from "crypto";
 import { env } from "@/env";
@@ -91,6 +91,162 @@ export const catalystRouter = createTRPCRouter({
       return ctx.user.isPro;
     }),
     social: {
+      groups: {
+        create: protectedProcedure
+          .input(z.object({ members: z.array(z.string()) }))
+          .mutation(async ({ input, ctx }) => {
+            const user = ctx.user.get;
+            if (!user)
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "User not found",
+              });
+            const memberIds = await ctx.db
+              .select({ id: users.id, email: users.email })
+              .from(users)
+              .where(
+                or(...input.members.map((member) => eq(users.email, member))),
+              );
+
+            const isUserInMembers = memberIds.some(
+              (member) => member.id === user.id,
+            );
+            if (isUserInMembers) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "You cannot add yourself to the group",
+              });
+            }
+
+            const existingEmails = memberIds.map((member) => member.email);
+            const nonExistentEmails = input.members.filter(
+              (email) => !existingEmails.includes(email),
+            );
+
+            if (nonExistentEmails.length > 0) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: `The following emails do not have accounts: ${nonExistentEmails.join(", ")}`,
+              });
+            }
+
+            const existingGroup = await ctx.db
+              .select()
+              .from(chats)
+              .where(
+                and(
+                  eq(chats.name, "New Group"),
+                  sql`jsonb_array_length(chats.members->'data') = ${memberIds.length + 1}`,
+                  ...memberIds.map(
+                    (member) =>
+                      sql`EXISTS (SELECT 1 FROM jsonb_array_elements(chats.members->'data') AS mem WHERE mem->>'userId' = ${member.id})`,
+                  ),
+                  sql`EXISTS (SELECT 1 FROM jsonb_array_elements(chats.members->'data') AS mem WHERE mem->>'userId' = ${user.id})`,
+                ),
+              );
+
+            if (existingGroup.length > 0) {
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "A group with the same participants already exists",
+              });
+            }
+
+            const group = await ctx.db
+              .insert(chats)
+              .values({
+                name: "New Group",
+                members: {
+                  data: [
+                    { userId: user.id },
+                    ...memberIds.map((member) => ({ userId: member.id })),
+                  ],
+                },
+              })
+              .returning({ id: chats.id, name: chats.name });
+
+            const members = await ctx.db
+              .select({
+                id: users.id,
+                name: users.name,
+                image: users.image,
+              })
+              .from(users)
+              .where(
+                or(...input.members.map((member) => eq(users.id, member))),
+              );
+
+            return {
+              id: group.at(0)!.id,
+              name: group.at(0)!.name ?? "",
+              members: [
+                { id: user.id, name: user.name ?? "", image: user.image ?? "" },
+                ...members.map((mem) => {
+                  return {
+                    id: mem.id,
+                    name: mem.name ?? "",
+                    image: mem.image ?? "",
+                  };
+                }),
+              ],
+            };
+          }),
+        list: protectedProcedure.query(async ({ ctx }) => {
+          const user = ctx.user.get;
+          if (!user)
+            throw new TRPCError({
+              code: "UNAUTHORIZED",
+              message: "User not found",
+            });
+
+          const groups = (await ctx.db.execute(sql`
+            SELECT *
+            FROM chat
+            WHERE
+              jsonb_array_length(chat.members->'data') > 2
+              AND EXISTS (
+                SELECT TRUE
+                FROM jsonb_array_elements(chat.members->'data') AS mem
+                WHERE mem->>'userId' = ${user.id}
+              );
+            `)) as {
+            id: string;
+            name: string;
+            members: { data: { userId: string }[] };
+          }[];
+
+          const groupsWithMembers = await Promise.all(
+            groups.map(async (group) => {
+              const members = await ctx.db
+                .select({
+                  id: users.id,
+                  name: users.name,
+                  image: users.image,
+                })
+                .from(users)
+                .where(
+                  or(
+                    ...group.members.data.map((member) =>
+                      eq(users.id, member.userId),
+                    ),
+                  ),
+                );
+
+              return {
+                id: group.id,
+                name: group.name ?? "",
+                members: members.map((mem) => ({
+                  id: mem.id,
+                  name: mem.name ?? "",
+                  image: mem.image ?? "",
+                })),
+              };
+            }),
+          );
+
+          return groupsWithMembers;
+        }),
+      },
       messages: {
         list: protectedProcedure
           .input(
@@ -107,6 +263,29 @@ export const catalystRouter = createTRPCRouter({
                 code: "UNAUTHORIZED",
                 message: "User not found",
               });
+
+            const groups = await ctx.db
+              .select()
+              .from(chats)
+              .where(eq(chats.id, input.chatId));
+
+            if (groups.length === 0) {
+              throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Group not found",
+              });
+            }
+
+            if (
+              groups
+                .at(0)
+                ?.members.data.every((member) => member.userId != user.id)
+            ) {
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "You are not a member of this group",
+              });
+            }
 
             const limit = input.limit ?? 10;
             const cursor = input.cursor ? new Date(input.cursor) : new Date();
@@ -161,7 +340,7 @@ export const catalystRouter = createTRPCRouter({
             if (!channelMembers) return;
             const ids = (
               await Promise.all(
-                channelMembers.members.map(
+                channelMembers.members.data.map(
                   async (member) =>
                     await ctx.db
                       .select({ realtimeSecret: users.realtimeSecret })
@@ -278,14 +457,16 @@ export const catalystRouter = createTRPCRouter({
             const defaultChat = await ctx.db
               .insert(chats)
               .values({
-                members: [
-                  {
-                    userId: user.id,
-                  },
-                  {
-                    userId: input.id,
-                  },
-                ],
+                members: {
+                  data: [
+                    {
+                      userId: user.id,
+                    },
+                    {
+                      userId: input.id,
+                    },
+                  ],
+                },
               })
               .returning({ id: chats.id });
             await ctx.db

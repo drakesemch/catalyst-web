@@ -1,5 +1,10 @@
 import { expFriends } from "@/app/flags";
-import { Friends, IncomingFriendRequests, FriendRequest } from "./client";
+import {
+  Friends,
+  IncomingFriendRequests,
+  FriendRequest,
+  Groups,
+} from "./client";
 import { api } from "@/trpc/server";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +47,8 @@ export default async function SocialPage() {
         </Card>
         <FriendRequest />
       </div>
+      <h2 className="h2">Groups</h2>
+      <Groups />
     </main>
   );
 }
