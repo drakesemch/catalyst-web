@@ -263,7 +263,7 @@ function PlannerEditNote({ note }: { note: PlannerItem }) {
 
   const { mutate: createTodo, isPending: isEdiding } =
     api.canvas.todo.edit.useMutation({
-      onSuccess: (newData) => {
+      onSuccess: () => {
         utils.canvas.todo.upcoming.invalidate().catch(console.error);
       },
     });

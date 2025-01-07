@@ -344,7 +344,7 @@ export function HomePageCards() {
 export function NewTodo() {
   const utils = api.useUtils();
   const { mutate: createTodo, isPending } = api.canvas.todo.create.useMutation({
-    onSuccess: (newData) => {
+    onSuccess: () => {
       setTitle("");
       setDescription("");
       setDate(undefined);
