@@ -6,9 +6,10 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
+  pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals = ['canvas', ...config.externals];
+      config.externals = ["canvas", ...config.externals];
     }
 
     config.resolve.fallback = {
@@ -49,7 +50,9 @@ const config = {
   },
 };
 
-export default (await import("@vercel/toolbar/plugins/next")).default()(config);
+export default (await import("@next/mdx")).default()(
+  (await import("@vercel/toolbar/plugins/next")).default()(config),
+);
 
 // Injected content via Sentry wizard below
 

@@ -26,6 +26,27 @@ export default function AuthPage() {
           >
             <GoogleLogo /> Continue with Google
           </Button>
+          <p className="text-xs text-muted-foreground">
+            By signing in, you agree to Catalyst{"'"}s{" "}
+            <Button
+              href="/policies/terms"
+              target="_blank"
+              variant="link"
+              className="h-auto p-0 text-xs text-muted-foreground"
+            >
+              Terms of Service
+            </Button>{" "}
+            and{" "}
+            <Button
+              href="/policies/privacy"
+              target="_blank"
+              variant="link"
+              className="h-auto p-0 text-xs text-muted-foreground"
+            >
+              Privacy Policy
+            </Button>
+            .
+          </p>
         </div>
         <AnimatedGridPattern
           numSquares={30}

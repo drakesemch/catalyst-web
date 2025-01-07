@@ -58,6 +58,11 @@ export function Courses() {
         if (!data) return;
         setClassifications((classifications) => {
           classifications[data[0]] = data[1];
+          classifications = Object.fromEntries(
+            Object.entries(classifications).filter(
+              ([_, clas]) => clas != "Not Available" && clas != undefined,
+            ),
+          );
           localStorage.setItem(
             "classifications",
             JSON.stringify(classifications),

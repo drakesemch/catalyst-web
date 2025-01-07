@@ -131,11 +131,11 @@ export function GradesClient({
           >
             <h1 className="h3">Grades</h1>
 
-            <p className="flex gap-1 text-xs text-destructive">
+            {/* <p className="flex gap-1 text-xs text-destructive">
               <AlertCircle className="flex-shrink-0" /> Grade Calculator is in
               early beta, calculations are close to accurate, but please double
               check with Canvas to ensure that they are correct!
-            </p>
+            </p> */}
             <div className="mt-2 flex flex-col gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <PercentageChart
@@ -148,12 +148,12 @@ export function GradesClient({
                   <span className="text-lg font-bold text-foreground">
                     {calculatedWhatIfScore.toFixed(2)}%
                   </span>
-                  <span className="text-xs text-foreground">
+                  {/* <span className="text-xs text-foreground">
                     Canvas Reported Score:{" "}
                     {courseDetails?.enrollments?.at(0)
                       ?.computed_current_score ?? "N/A"}
                     %
-                  </span>
+                  </span> */}
                 </div>
               </div>
               <div className="flex flex-col">

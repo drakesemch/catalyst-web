@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, Loader } from "lucide-react";
 import { api } from "@/trpc/react";
 import { Combobox } from "@/components/ui/combobox";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ScheduleOnboardingPage() {
   const router = useRouter();
@@ -23,6 +24,45 @@ export default function ScheduleOnboardingPage() {
         getNextPageParam: (lastPage) => lastPage.nextCursor,
       },
     );
+
+  const courses = useMemo(() => pages?.flatMap((page) => page.data), [pages]);
+
+  const [classifications, setClassifications] = useState<
+    Record<number, string>
+  >(
+    JSON.parse(localStorage.getItem("classifications") ?? "{}") as Record<
+      number,
+      string
+    >,
+  );
+
+  const { mutate: genClassification } =
+    api.catalyst.user.canvas.courses.genClassification.useMutation({
+      onSuccess: (data) => {
+        if (!data) return;
+        setClassifications((classifications) => {
+          classifications[data[0]] = data[1];
+          classifications = Object.fromEntries(
+            Object.entries(classifications).filter(
+              ([_, clas]) => clas != "Not Available" && clas != undefined,
+            ),
+          );
+          localStorage.setItem(
+            "classifications",
+            JSON.stringify(classifications),
+          );
+          return classifications;
+        });
+      },
+    });
+
+  useEffect(() => {
+    courses?.forEach((course) => {
+      if (classifications[course.id] == undefined) {
+        genClassification({ courseId: course.id });
+      }
+    });
+  }, [classifications, courses, genClassification]);
 
   const { mutate, isPending } =
     api.catalyst.user.schedule.values.add.useMutation();
@@ -195,7 +235,8 @@ export default function ScheduleOnboardingPage() {
                                         render: (
                                           <div className="flex flex-col gap-2 overflow-hidden">
                                             <span className="font-bold">
-                                              {course.classification}
+                                              {classifications[course.id] ??
+                                                "No Classification"}
                                             </span>
                                             <span className="truncate text-xs text-muted-foreground">
                                               {course.original_name}
@@ -204,8 +245,9 @@ export default function ScheduleOnboardingPage() {
                                         ),
                                         selectionRender: (
                                           <div className="flex flex-col gap-2 truncate">
-                                            {course.classification} (
-                                            {course.original_name})
+                                            {classifications[course.id] ??
+                                              "No Classification"}{" "}
+                                            ({course.original_name})
                                           </div>
                                         ),
                                       })),

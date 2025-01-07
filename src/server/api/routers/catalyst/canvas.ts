@@ -518,7 +518,7 @@ export const canvasCatalystRouter = createTRPCRouter({
           const input = [
             ...courseClassificationDataset,
             {
-              text: "input: " + course.original_name,
+              text: "input: " + (course.original_name ?? course.name),
             },
             {
               text: "output: ",
@@ -542,7 +542,7 @@ export const canvasCatalystRouter = createTRPCRouter({
           const value =
             result?.response?.text() ??
             result?.response.candidates?.at(0)?.content.parts.at(0)?.text ??
-            "Not Available";
+            "Persistent";
 
           if (value != "Not Available") {
             try {

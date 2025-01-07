@@ -31,7 +31,7 @@ export default async function AppPage() {
         <p className="animate-fade-in text-lg text-muted-foreground opacity-0 animate-delay-1200">
           Your planned items for the next 14 days.
         </p>
-        <div className="flex animate-fade-in flex-col gap-4 opacity-0 animate-delay-1400">
+        <div className="flex animate-fade-in flex-col gap-4 pt-8 opacity-0 animate-delay-1400">
           <Todos />
           <div className="flex justify-center py-8 text-xs text-muted-foreground">
             Only showing the last 14 days.

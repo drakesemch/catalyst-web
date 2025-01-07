@@ -175,6 +175,11 @@ export function LandingFooter() {
             </Button>
           </li>
           <li>
+            <Button variant="link" href="/policies">
+              Policies
+            </Button>
+          </li>
+          <li>
             <Button variant="link" href="/help">
               Help
             </Button>

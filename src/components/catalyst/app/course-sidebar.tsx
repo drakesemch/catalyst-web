@@ -65,13 +65,11 @@ export async function CourseSidebar({ course }: { course: string }) {
         <div className="flex flex-1 flex-col items-start gap-1">
           <span className="font-bold">People</span>
           <span className="text-xs text-muted-foreground">
-            {
-              people.filter((person) =>
-                person.enrollments.some(
-                  (enrollment) => enrollment.type == "StudentEnrollment",
-                ),
-              ).length
-            }{" "}
+            {people?.filter?.((person) =>
+              person.enrollments.some(
+                (enrollment) => enrollment.type == "StudentEnrollment",
+              ),
+            ).length ?? 0}{" "}
             Students
           </span>
         </div>

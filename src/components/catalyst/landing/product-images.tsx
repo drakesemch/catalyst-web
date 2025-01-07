@@ -55,6 +55,12 @@ function CarouselPictures() {
       description: "Easily communicate with your teachers and classmates.",
       image: "/images/inbox.png",
     },
+    {
+      title: "Social",
+      description:
+        "A social system by Catalyst that allows to communicate with friends and create groups easily.",
+      image: "/images/social.png",
+    },
   ]);
 
   useEffect(() => {

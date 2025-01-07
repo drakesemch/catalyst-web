@@ -8,8 +8,6 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "@vercel/kv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { courseClassificationDataset } from "./catalyst/canvas";
-import { courseClassification } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 
 export interface Term {
   id: number;
@@ -813,6 +811,7 @@ export interface PlannerItem {
   submissions?: Submission[] | boolean;
   plannable_id: string;
   plannable_type: string;
+  plannable_date?: string;
   plannable: Plannable;
   html_url: string;
 }
@@ -847,6 +846,53 @@ export const canvasRouter = createTRPCRouter({
     }),
   },
   todo: {
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const url = new URL(
+          `/api/v1/planner_notes/${input.id}`,
+          ctx.user.canvas.url,
+        );
+        const query = await fetch(url, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        return (await query.json()) as PlannerItem;
+      }),
+    edit: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          title: z.string(),
+          description: z.string().optional(),
+          due_at: z.string().optional(),
+          course_id: z.number().optional(),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const url = new URL(
+          `/api/v1/planner_notes/${input.id}`,
+          ctx.user.canvas.url,
+        );
+        const query = await fetch(url, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: input.id,
+            title: input.title,
+            details: input.description,
+            todo_date: input.due_at,
+            course_id: input.course_id,
+          }),
+        });
+        const json = (await query.json()) as PlannerItem;
+        return json;
+      }),
     create: protectedProcedure
       .input(
         z.object({
@@ -871,9 +917,7 @@ export const canvasRouter = createTRPCRouter({
             course_id: input.course_id,
           }),
         });
-        // console.log(await query.text());
-        // return;
-        return query.json();
+        return (await query.json()) as PlannerItem;
       }),
     setCompleted: protectedProcedure
       .input(
@@ -881,6 +925,7 @@ export const canvasRouter = createTRPCRouter({
           create: z.boolean(),
           type: z.string(),
           id: z.number(),
+          plannableId: z.number().optional(),
           completed: z.boolean(),
         }),
       )
@@ -894,12 +939,13 @@ export const canvasRouter = createTRPCRouter({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
+              plannable_id: input.plannableId,
               plannable_type: input.type,
-              plannable_id: input.id,
               marked_complete: input.completed,
             }),
           });
-          return query.json();
+          const json = (await query.json()) as PlannerItem;
+          return json;
         } else {
           const url = new URL(
             `/api/v1/planner/overrides/${input.id}`,
@@ -912,10 +958,14 @@ export const canvasRouter = createTRPCRouter({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
+              id: input.id,
+              plannable_id: input.plannableId,
+              plannable_type: input.type,
               marked_complete: input.completed,
             }),
           });
-          return query.json();
+          const json = (await query.json()) as PlannerItem;
+          return json;
         }
       }),
     upcoming: protectedProcedure.query(async ({ ctx }) => {
@@ -933,7 +983,7 @@ export const canvasRouter = createTRPCRouter({
       const data = (await query.json()) as PlannerItem[];
       for (const item of data) {
         const courseURL = new URL(
-          `/api/v1/courses/${item.course_id}`,
+          `/api/v1/courses/${item.course_id ?? item.plannable.course_id}`,
           ctx.user.canvas.url,
         );
         const courseQuery = await fetch(courseURL, {
@@ -941,95 +991,8 @@ export const canvasRouter = createTRPCRouter({
             Authorization: `Bearer ${ctx.user.canvas.token}`,
           },
         });
-        const course = (await courseQuery.json()) as Course;
-        const classification = (await unstable_cache(async () => {
-          const classificationRedis = createClient({
-            url: env.CLASSIFICATION_REST_API_URL,
-            token: env.CLASSIFICATION_REST_API_TOKEN,
-          });
+        item.course = (await courseQuery.json()) as Course;
 
-          try {
-            const classification = await classificationRedis.get(
-              String(course.id),
-            );
-
-            if (classification) {
-              return classification;
-            }
-          } catch (err) {
-            console.error(err);
-          }
-
-          const classificationFromDB = await ctx.db
-            .select()
-            .from(courseClassification)
-            .where(eq(courseClassification.key, String(course.id)));
-
-          if (classificationFromDB.length > 0) {
-            try {
-              await classificationRedis.set(
-                String(course.id),
-                classificationFromDB[0]!.value,
-              );
-            } catch (err) {
-              console.error(err);
-            }
-            return classificationFromDB[0]!.value;
-          }
-
-          const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-
-          const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
-            systemInstruction: "return the output value",
-          });
-
-          const generationConfig = {
-            temperature: 1,
-            topP: 0.95,
-            topK: 64,
-            maxOutputTokens: 100,
-            stopSequences: ["input:", "\n"],
-            responseMimeType: "text/plain",
-          };
-
-          const input = [
-            ...courseClassificationDataset,
-            {
-              text: "input: " + course.original_name,
-            },
-            {
-              text: "output: ",
-            },
-          ];
-
-          const result = await model
-            .generateContent({
-              contents: [{ role: "user", parts: input }],
-              generationConfig,
-            })
-            .catch((err) => {
-              console.error(err);
-              return undefined;
-            });
-
-          const value = result?.response?.text() ?? "Not Available";
-
-          if (value != "Not Available") {
-            try {
-              await classificationRedis.set(String(course.id), value);
-              await ctx.db.insert(courseClassification).values({
-                key: String(course.id),
-                value,
-              });
-            } catch (err) {
-              console.error(err);
-            }
-          }
-
-          return value;
-        }, ["courses", "classifications", String(course.id)])()) as string;
-        item.course = { ...course, classification };
         if (item.plannable_type == "assignment") {
           const assignmentURL = new URL(
             `/api/v1/courses/${item.course_id}/assignments/${item.plannable.id}`,

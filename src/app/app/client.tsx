@@ -18,6 +18,7 @@ import {
   Calendar as CalendarIcon,
   CircleSlash,
   Loader,
+  Minus,
   Plus,
   Save,
   SquareArrowOutUpRight,
@@ -47,6 +48,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  InputOTP,
+  InputOTPSlot,
+  InputOTPGroup,
+} from "@/components/ui/input-otp";
+import { Combobox } from "@/components/ui/combobox";
 
 export function Todos() {
   const { data, isPending } = api.canvas.todo.upcoming.useQuery();
@@ -82,8 +89,12 @@ export function Todos() {
     <>
       {data
         ?.sort((a, b) => {
-          const dateA = new Date(a?.plannable?.todo_date ?? 0);
-          const dateB = new Date(b?.plannable?.todo_date ?? 0);
+          const dateA = new Date(
+            a?.plannable_date ?? a?.plannable?.todo_date ?? 0,
+          ).getTime();
+          const dateB = new Date(
+            a?.plannable_date ?? b?.plannable?.todo_date ?? 0,
+          ).getTime();
           return dateA > dateB ? -1 : 1;
         })
         .map((todo) => <TodoCard key={todo.plannable_id} todo={todo} />)}
@@ -331,11 +342,74 @@ export function HomePageCards() {
 }
 
 export function NewTodo() {
-  const { mutate: createTodo, isPending } =
-    api.canvas.todo.create.useMutation();
+  const utils = api.useUtils();
+  const { mutate: createTodo, isPending } = api.canvas.todo.create.useMutation({
+    onSuccess: (newData) => {
+      setTitle("");
+      setDescription("");
+      setDate(undefined);
+      setTime(undefined);
+      setCourseId(undefined);
+
+      utils.canvas.todo.upcoming.invalidate().catch(console.error);
+    },
+  });
 
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [date, setDate] = useState<Date | undefined>();
+  const [time, setTime] = useState<string | undefined>();
+  const [courseId, setCourseId] = useState<number | undefined>();
+
+  const [{ pages }] =
+    api.catalyst.user.canvas.courses.list.useSuspenseInfiniteQuery(
+      {
+        limit: 100,
+        enrollment_state: "active",
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      },
+    );
+
+  const courses = useMemo(() => pages?.flatMap((page) => page.data), [pages]);
+
+  const [classifications, setClassifications] = useState<
+    Record<number, string>
+  >(
+    JSON.parse(localStorage.getItem("classifications") ?? "{}") as Record<
+      number,
+      string
+    >,
+  );
+
+  const { mutate: genClassification } =
+    api.catalyst.user.canvas.courses.genClassification.useMutation({
+      onSuccess: (data) => {
+        if (!data) return;
+        setClassifications((classifications) => {
+          classifications[data[0]] = data[1];
+          classifications = Object.fromEntries(
+            Object.entries(classifications).filter(
+              ([_, clas]) => clas != "Not Available" && clas != undefined,
+            ),
+          );
+          localStorage.setItem(
+            "classifications",
+            JSON.stringify(classifications),
+          );
+          return classifications;
+        });
+      },
+    });
+
+  useEffect(() => {
+    courses?.forEach((course) => {
+      if (classifications[course.id] == undefined) {
+        genClassification({ courseId: course.id });
+      }
+    });
+  }, [classifications, courses, genClassification]);
 
   return (
     <Drawer>
@@ -360,22 +434,101 @@ export function NewTodo() {
             />
           </div>
           <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
-            <span className="font-bold">Due Date</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start sm:w-[30ch]"
-                >
-                  <CalendarIcon />
-                  {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0">
-                <Calendar mode="single" selected={date} onSelect={setDate} />
-              </PopoverContent>
-            </Popover>
+            <span className="font-bold">Description</span>
+            <Input
+              placeholder="Description"
+              className="w-full sm:w-[31ch]"
+              value={description}
+              onChange={(evt) => setDescription(evt.target.value)}
+            />
           </div>
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+            <span className="font-bold">Course</span>
+            <Combobox
+              className="ml-auto max-w-[20rem] flex-1"
+              placeholders={{
+                emptyValue: "Select a course",
+                search: "Search for a course",
+              }}
+              onSelect={(courseId) => {
+                setCourseId(Number(courseId));
+              }}
+              defaultValue={undefined}
+              groups={[
+                {
+                  id: "",
+                  header: "",
+                  values: courses
+                    .sort((a, b) =>
+                      (a.period?.periodOrder ?? Number.MAX_VALUE) >
+                      (b.period?.periodOrder ?? Number.MAX_VALUE)
+                        ? 1
+                        : -1,
+                    )
+                    .map((course) => ({
+                      id: String(course.id),
+                      render: (
+                        <div className="flex flex-col gap-2 overflow-hidden">
+                          <span className="font-bold">
+                            {classifications[course.id] ?? "No Classification"}
+                          </span>
+                          <span className="flex items-center gap-2 truncate text-xs text-muted-foreground">
+                            {course.period?.periodName ?? "No Period"}
+                            <Minus className="flex-shrink-0" />
+                            <span className="flex-1 truncate">
+                              {course.original_name}
+                            </span>
+                          </span>
+                        </div>
+                      ),
+                      selectionRender: (
+                        <div className="flex flex-col gap-2 truncate">
+                          {classifications[course.id] ?? "No Classification"} (
+                          {course.original_name})
+                        </div>
+                      ),
+                    })),
+                },
+              ]}
+            />
+          </div>
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+            <span className="font-bold">Due Date</span>
+            <div className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start sm:w-[30ch]"
+                  >
+                    <CalendarIcon />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Calendar mode="single" selected={date} onSelect={setDate} />
+                </PopoverContent>
+              </Popover>
+              <InputOTP
+                maxLength={4}
+                value={time}
+                onChange={(val) => setTime(val)}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                </InputOTPGroup>
+                <span>:</span>
+                <InputOTPGroup>
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+          </div>
+          <span className="text-right text-xs text-muted-foreground">
+            Times are local 24-hour time
+          </span>
         </div>
         <DrawerFooter className="flex flex-row items-center justify-end gap-2">
           <DrawerClose asChild>
@@ -386,8 +539,18 @@ export function NewTodo() {
           <Button
             onClick={() =>
               createTodo({
-                title,
-                due_at: date ? format(date, "yyyy-MM-dd") : undefined,
+                title: title,
+                description: description,
+                due_at: date
+                  ? new Date(
+                      date.getFullYear(),
+                      date.getMonth(),
+                      date.getDate(),
+                      parseInt(time?.slice(0, 2) ?? "0", 10),
+                      parseInt(time?.slice(2, 4) ?? "0", 10),
+                    ).toISOString()
+                  : undefined,
+                course_id: courseId,
               })
             }
             disabled={isPending}
