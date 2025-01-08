@@ -4,9 +4,12 @@ import { createHydrationHelpers } from "@trpc/react-query/rsc";
 import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import { cache } from "react";
 
+import { H } from "@highlight-run/next/server";
+
 import { createCaller, type AppRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";
 import { createQueryClient } from "./query-client";
+import { env } from "@/env";
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
@@ -30,3 +33,9 @@ export const { trpc: api, HydrateClient } = createHydrationHelpers<AppRouter>(
   caller,
   getQueryClient,
 );
+
+H.init({
+  projectID: "3ej74n3e",
+  serviceName: "trpc server",
+  environment: env.NODE_ENV,
+});

@@ -5,6 +5,9 @@ import { env } from "@/env";
 import { appRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";
 
+import { Handlers } from "@highlight-run/node";
+import type { IncomingHttpHeaders } from "http2";
+
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
  * handling a HTTP request (e.g. when you make requests from Client Components).
@@ -27,6 +30,15 @@ const handler = (req: NextRequest) =>
           `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`,
         );
       }
+      Handlers.trpcOnError(
+        { error, req: req as unknown as { headers: IncomingHttpHeaders } },
+        {
+          projectID: "3ej74n3e",
+          serviceName: "my-trpc-app",
+          serviceVersion: "git-sha",
+          environment: "production",
+        },
+      ).catch(console.error);
     },
   });
 

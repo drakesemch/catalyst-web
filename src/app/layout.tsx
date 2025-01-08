@@ -14,6 +14,7 @@ import { VercelToolbar } from "@vercel/toolbar/next";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { env } from "@/env";
+import { HighlightInit } from "@highlight-run/next/client";
 
 export const metadata: Metadata = {
   title: {
@@ -42,6 +43,17 @@ export default function RootLayout({
 
   return (
     <>
+      <HighlightInit
+        projectId={"3ej74n3e"}
+        serviceName="my-nextjs-frontend"
+        tracingOrigins
+        environment={env.NODE_ENV}
+        networkRecording={{
+          enabled: true,
+          recordHeadersAndBody: true,
+          urlBlocklist: [],
+        }}
+      />
       <html
         lang="en"
         className={`${GeistSans.variable}`}
