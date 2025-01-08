@@ -78,7 +78,7 @@ export default async function SchoolPage(props: {
               className="h-8 rounded-full px-4 py-1 text-xs text-muted-foreground"
               href={`/app/schools/${schoolId}/modify/schedule`}
             >
-              <Pencil /> Modify Schedule
+              <Pencil /> Modify Schedules
             </Button>
           )}
         </div>

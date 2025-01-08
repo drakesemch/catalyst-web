@@ -1,0 +1,123 @@
+# Managing Schools
+
+## Configuration
+
+To create a school, we need some generic information, like the name, district, and address, and some more specific school related information, such as Canvas URL, periods and schedules.
+
+### Generic Information
+
+<table className="table mt-4">
+  <tr>
+    <th>Field</th>
+    <th>Example</th>
+    <th>Description and Formatting</th>
+  </tr>
+  <tr>
+    <td>School Name</td>
+    <td>East High School</td>
+    <td>Full name (no abbreviations), including the school type (e.x. High School)</td>
+  </tr>
+  <tr>
+    <td>School District</td>
+    <td>Salt Lake City School District</td>
+    <td>Full name (no abbreviations) suffixed by School District</td>
+  </tr>
+  <tr>
+    <td>School Address</td>
+    <td>840 S 1300 E</td>
+    <td>Only include the street address, and street</td>
+  </tr>
+  <tr>
+    <td>City</td>
+    <td>Salt Lake City</td>
+    <td>Supply the city name</td>
+  </tr>
+  <tr>
+    <td>State</td>
+    <td>UT</td>
+    <td>Select from the dropdown list</td>
+  </tr>
+  <tr>
+    <td>Canvas URL</td>
+    <td>https://canvas.instructure.com/</td>
+    <td>A URL formatted with the scheme (https://) the subdomain (canvas) the domain (instructure.com)</td>
+  </tr>
+</table>
+
+### Periods
+
+Each period has a name and a type, a name (for example Period 1 or Lunch (Odd)) and a type (e.x. course, single selection, and filler). If you have a selection type, you will also need to input options.
+
+Here is an example of how to configure periods:
+ 1. Period 1 - Course
+ 2. Period 2 - Course
+ 3. Period 3 - Course
+ 4. Period 4 - Course
+ 5. Lunch (Even) - Single Selection
+    1. Lunch 1
+    2. Lunch 2
+    3. Lunch 3
+ 6. Advisory - Course
+ 7. AST - Course
+ 8. Period 5 - Course
+ 9. Lunch (Odd) - Single Selection
+    1. Lunch 1
+    2. Lunch 2
+    3. Lunch 3
+10. Period 6 - Course
+11. Period 7 - Course
+12. Assembly - Filler
+
+Notice how I have the periods ordered in a way that closely resembles a schedule. Lunch (Even) follows Period 4 and Lunch (Odd) follows Period 5. This is helpful to ensure that the periods are displayed correctly in the course list. Although Advisory and AST will change based on the schedule, I have them in an order that will still make sense to students. At this school, they may have a schedule where an assembly takes place after the rest of the classes, placed at the end of the list, with filler, as no classes take place, but is still important to display in the user's schedule.
+
+### Schedules
+
+Schedules are a collection of periods that are used to create a student's schedule. Each schedule has a name and a list of periods. Here is an example of how to configure schedules:
+
+ 1. Odd Block
+    1. Period 1
+    2. Period 3
+    3. AST
+    4. Period 5
+    5. Lunch 1 (Lunch (Odd))
+    6. Lunch 2 (Lunch (Odd))
+    7. Lunch 3 (Lunch (Odd))
+    8. Period 7
+ 2. Even Block
+    1. Period 2
+    2. Period 4
+    3. Lunch 1 (Lunch (Even))
+    4. Lunch 2 (Lunch (Even))
+    5. Lunch 3 (Lunch (Even))
+    6. Advisory
+    7. AST
+    8. Period 6
+ 3. All Block
+     1. Period 1
+     2. Period 2
+     3. Period 3
+     4. Period 4
+     5. Period 5
+     6. Lunch 1 (Lunch (Odd))
+     7. Lunch 2 (Lunch (Odd))
+     8. Lunch 3 (Lunch (Odd))
+     9. Period 6
+    10. Period 7
+  4. Assembly
+      1. Period 1
+      2. Period 2
+      3. Period 3
+      4. Period 4
+      5. Period 5
+      6. Lunch 1 (Lunch (Odd))
+      7. Lunch 2 (Lunch (Odd))
+      8. Lunch 3 (Lunch (Odd))
+      9. Period 6
+     10. Period 7
+     11. Assembly
+
+Althought not shown, the lunch periods overlap with their previous period, take for example, Period 5, Lunch 1 would start at the beginning of Period 5, and continue into part of period 5 before heading back to class, lunch 2 would start in the middle of a period, and lunch 3 would start near the end of the period, and end at the beginning of period 6. All you need to enter is the period start and end times, and the scheduling system will work out how the timer. Also note that these periods are sorted in a chronological order, so that the schedule will display correctly for the user.
+
+### Schedule on Dates
+
+Catalyst has a system that allows you to set specific schedules to specific days, this will display the schedule for a specific date for your school. Editing dates and schedules after the onboarding process, can be found in the profile tab, and then school. There you will find a chip labeled "Add Schedule to Dates" to add these schedules, and "Modify Schedules" to add or change the schedules after onboarding.

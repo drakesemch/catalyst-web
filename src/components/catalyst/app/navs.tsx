@@ -510,6 +510,7 @@ async function SettingCards() {
       <Button
         variant="outline"
         className="flex h-auto w-full flex-1 items-center gap-3 md:hidden"
+        href="/app/social"
       >
         <UsersRound />
         <div className="flex flex-1 flex-col items-start gap-1">

@@ -41,34 +41,36 @@ export default function RootLayout({
   const shouldInjectToolbar = env.NODE_ENV === "development";
 
   return (
-    <html
-      lang="en"
-      className={`${GeistSans.variable}`}
-      suppressHydrationWarning={true}
-    >
-      <body>
-        <Analytics />
-        <SpeedInsights />
-        <TRPCReactProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <TooltipProvider>
-              <CmdKProvider>
-                {children}
-                <Toaster
-                  className="fixed right-2 top-2 z-0 md:right-[calc(max(calc((100%-120ch)/2),4rem))] md:top-[calc(4.5rem+.5rem+1px)] [&>li]:w-[calc(100vw-2rem)] md:[&>li]:w-[25rem]"
-                  position="top-right"
-                />
-              </CmdKProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </TRPCReactProvider>
-        {shouldInjectToolbar && <VercelToolbar />}
-      </body>
-    </html>
+    <>
+      <html
+        lang="en"
+        className={`${GeistSans.variable}`}
+        suppressHydrationWarning={true}
+      >
+        <body>
+          <Analytics />
+          <SpeedInsights />
+          <TRPCReactProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <TooltipProvider>
+                <CmdKProvider>
+                  {children}
+                  <Toaster
+                    className="fixed right-2 top-2 z-0 md:right-[calc(max(calc((100%-120ch)/2),4rem))] md:top-[calc(4.5rem+.5rem+1px)] [&>li]:w-[calc(100vw-2rem)] md:[&>li]:w-[25rem]"
+                    position="top-right"
+                  />
+                </CmdKProvider>
+              </TooltipProvider>
+            </ThemeProvider>
+          </TRPCReactProvider>
+          {shouldInjectToolbar && <VercelToolbar />}
+        </body>
+      </html>
+    </>
   );
 }
