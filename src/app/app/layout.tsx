@@ -3,7 +3,7 @@ import { AppNav } from "@/components/catalyst/app/navs";
 import { hasFinishedOnboarding } from "@/lib/onboarding";
 import { HydrateClient, api } from "@/trpc/server";
 import { redirect } from "next/navigation";
-import { CanvasWarningPopup } from "./clientLayout";
+import { CanvasWarningPopup, ReportButton } from "./clientLayout";
 import { RealtimeProvider } from "@/components/catalyst/app/realtime-provider";
 
 export default async function AppLayout({
@@ -26,6 +26,7 @@ export default async function AppLayout({
         {children}
         <div className="mt-20 w-full md:mt-0" />
         {needsAttention && <CanvasWarningPopup />}
+        <ReportButton />
       </RealtimeProvider>
     </HydrateClient>
   );

@@ -15,6 +15,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { env } from "@/env";
 import { HighlightInit } from "@highlight-run/next/client";
+import { HighlightProvider } from "@/components/catalyst/highlight-provider";
 
 export const metadata: Metadata = {
   title: {
@@ -72,6 +73,7 @@ export default function RootLayout({
               <TooltipProvider>
                 <CmdKProvider>
                   {children}
+                  <HighlightProvider />
                   <Toaster
                     className="fixed right-2 top-2 z-0 md:right-[calc(max(calc((100%-120ch)/2),4rem))] md:top-[calc(4.5rem+.5rem+1px)] [&>li]:w-[calc(100vw-2rem)] md:[&>li]:w-[25rem]"
                     position="top-right"

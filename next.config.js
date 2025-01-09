@@ -4,6 +4,8 @@
  */
 await import("./src/env.js");
 
+import { withHighlightConfig } from '@highlight-run/next/config';
+
 /** @type {import("next").NextConfig} */
 const config = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
@@ -51,5 +53,5 @@ const config = {
 };
 
 export default (await import("@next/mdx")).default()(
-  (await import("@vercel/toolbar/plugins/next")).default()(config),
+  (await import("@vercel/toolbar/plugins/next")).default()(withHighlightConfig(config)),
 );

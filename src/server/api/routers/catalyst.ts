@@ -9,6 +9,7 @@ import { z } from "zod";
 import {
   chatMessages,
   chats,
+  feedback,
   notifications,
   periodTimes,
   periodType,
@@ -31,6 +32,33 @@ import { Stripe } from "stripe";
 import * as realtime from "@/lib/realtime-server";
 
 export const catalystRouter = createTRPCRouter({
+  feedback: {
+    provide: protectedProcedure
+      .input(z.object({
+        category: z.string(),
+        importance: z.string(),
+        title: z.string(),
+        description: z.string(),
+        pathname: z.string(),
+        date: z.string(),
+      })).mutation(async ({ input, ctx }) => {
+        const user = ctx.user.get;
+        if (!user)
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "User not found",
+          });
+        await ctx.db.insert(feedback).values({
+          category: input.category,
+          importance: input.importance,
+          title: input.title,
+          description: input.description,
+          pathname: input.pathname,
+          userId: user.id,
+          date: input.date,
+        });
+      }),
+  },
   pricing: {
     pro: publicProcedure.query(async () => {
       const stripe = new Stripe(env.STRIPE_API);

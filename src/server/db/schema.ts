@@ -430,3 +430,20 @@ export const chatMessages = createTable(
     userIdIdx: index("chat_message_user_id_idx").on(chatMessage.userId),
   }),
 );
+
+export const feedback = createTable(
+  "feedback",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: varchar("user_id", { length: 255 }).notNull(),
+    category: varchar("category", { length: 255 }).notNull(),
+    importance: varchar("importance", { length: 255 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    description: varchar("description", { length: 255 }).notNull(),
+    pathname: varchar("pathname", { length: 255 }).notNull(),
+    date: timestamp("date", { mode: "string" }).notNull(),
+  },
+);
