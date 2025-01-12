@@ -673,6 +673,51 @@ export const canvasCatalystRouter = createTRPCRouter({
           ),
         };
       }),
+      sideDetails: protectedProcedure.input(z.object({
+        courseId: z.number(),
+      })).query(async ({ input, ctx }) => {
+        const url = new URL(`/api/v1/courses/${input.courseId}`, ctx.user.canvas.url);
+        url.searchParams.set("include[]", "total_scores");
+        url.searchParams.set("include[]", "people");
+        const query = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${ctx.user.canvas.token}`,
+          },
+        });
+        if (!query.ok) return null;
+        const course = (await query.json()) as Course;
+
+        // const assignmentURL = new URL(
+        //   `/api/v1/courses/${course.id}/students/submissions`,
+        //   ctx.user.canvas.url,
+        // );
+        // assignmentURL.searchParams.set("per_page", "100");
+        // assignmentURL.searchParams.append("include[]", "assignment");
+
+        // const assignmentsQuery = await fetch(assignmentURL, {
+        //   headers: {
+        //     Authorization: `Bearer ${ctx.user.canvas.token}`,
+        //   },
+        // });
+
+        // const submissionData = (await assignmentsQuery.json()) as Submission[];
+
+        // const missingAssignments = submissionData.filter(
+        //   (assignment) =>
+        //     (!assignment.excused &&
+        //       assignment.score == 0 &&
+        //       assignment.assignment?.points_possible != 0) ||
+        //     assignment.missing,
+        // ).length;
+
+        return {
+          ...course,
+          original_name: course.original_name ?? course.name,
+          // data: {
+          //   missingAssignments,
+          // },
+        };
+      }),
     list: protectedProcedure
       .input(
         z

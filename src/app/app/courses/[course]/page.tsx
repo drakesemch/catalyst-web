@@ -1,10 +1,10 @@
 import { CourseSidebar } from "@/components/catalyst/app/course-sidebar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { prettyBody } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { Album, ChevronRight, Info } from "lucide-react";
 import { CourseClassification } from "./client";
+import { env } from "@/env";
 
 export default async function CourseHomePage(props: {
   params: Promise<{ course: string }>;
@@ -13,12 +13,28 @@ export default async function CourseHomePage(props: {
 
   const { course } = params;
 
-  const courseDetails = await api.catalyst.user.canvas.courses.get({
+  const courseDetails = await api.catalyst.user.canvas.courses.sideDetails({
     courseId: Number(course),
   });
   const page = await api.canvas.courses.get.frontPage({
     courseId: Number(course),
   });
+
+  function prettyBody(str?: string) {
+    if (!str) return "";
+    str = str.replace(/<script.*?<\/script>/g, "");
+    return replaceCanvasURL(str);
+  }
+  
+  function replaceCanvasURL(str: string) {
+    const baseURL =
+      env.NODE_ENV === "development"
+        ? "http://localhost:3000/app/"
+        : "https://catalyst.bluefla.me/app/";
+    const pattern = /https:\/\/[a-zA-Z0-9.-]+\.instructure\.com\/(?:api\/v1\/)?/g;
+    return str.split(pattern).join(baseURL);
+  }  
+
   return (
     <div className="mx-auto flex w-full flex-col justify-center gap-2 lg:flex-row">
       <aside className="relative flex h-[calc((100vh-4.5rem-1px))] w-auto flex-shrink-0 flex-col gap-2 border-r p-4 lg:sticky lg:top-[calc(4.5rem)] lg:h-[calc((100vh-4.5rem-1px))] lg:w-[35ch]">
@@ -63,6 +79,7 @@ export default async function CourseHomePage(props: {
       </aside>
       <main
         dangerouslySetInnerHTML={{ __html: prettyBody(page.body) }}
+        // dangerouslySetInnerHTML={{ __html: page.body }}
         className="render-fancy render-white-content mx-auto max-w-[min(100ch,100%)] overflow-auto p-4"
       />
     </div>

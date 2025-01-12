@@ -7,7 +7,7 @@ export function CourseClassification({ id }: { id: number }) {
   const [classifications, setClassifications] = useState<
     Record<number, string>
   >(
-    JSON.parse(localStorage.getItem("classifications") ?? "{}") as Record<
+    JSON.parse(typeof window != "undefined" ? localStorage.getItem("classifications") ?? "{}" : "{}") as Record<
       number,
       string
     >,

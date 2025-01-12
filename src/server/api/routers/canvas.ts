@@ -1241,22 +1241,29 @@ export const canvasRouter = createTRPCRouter({
           }),
       },
       frontPage: protectedProcedure
-        .input(z.object({ courseId: z.number() }))
+        .input(z.object({ courseId: z.number(), useCache: z.boolean().optional() }))
         .query(async ({ input, ctx }) => {
-          const url = new URL(
-            `/api/v1/courses/${input.courseId}/front_page`,
-            ctx.user.canvas.url,
-          );
-          const query = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${ctx.user.canvas.token}`,
-            },
-          });
-          try {
-            return (await query.json()) as Page;
-          } catch (err) {
-            console.error(err);
-            return {} as Page;
+          const gatherData = async () => {
+            const url = new URL(
+              `/api/v1/courses/${input.courseId}/front_page`,
+              ctx.user.canvas.url,
+            );
+            const query = await fetch(url, {
+              headers: {
+                Authorization: `Bearer ${ctx.user.canvas.token}`,
+              },
+            });
+            try {
+              return (await query.json()) as Page;
+            } catch (err) {
+              console.error(err);
+              return {} as Page;
+            }
+          }
+          if (input.useCache ?? true) {
+            return await (unstable_cache(gatherData, ["courses", "frontPage", String(input.courseId)]))();
+          } else {
+            return await gatherData();
           }
         }),
       pages: {
